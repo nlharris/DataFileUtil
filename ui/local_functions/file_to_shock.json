@@ -1,0 +1,16 @@
+{
+    "name" : "Save file into Shock",
+    "short_description" : "Upload local file into Shock storage",
+    "long_description" : "Function uploads local file into Shock storage as a Shock node.",
+    "tags" : {
+        "categories" : ["shock"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}

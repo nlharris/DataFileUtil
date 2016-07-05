@@ -1,0 +1,16 @@
+{
+    "name" : "Load file from Shock",
+    "short_description" : "Download file from Shock storage",
+    "long_description" : "Function downloads Shock node from Shock storage into local file.",
+    "tags" : {
+        "categories" : ["shock"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}
