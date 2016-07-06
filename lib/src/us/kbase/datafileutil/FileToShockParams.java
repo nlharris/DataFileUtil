@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import us.kbase.common.service.UObject;
 
 
 /**
@@ -27,7 +28,7 @@ public class FileToShockParams {
     @JsonProperty("file_path")
     private java.lang.String filePath;
     @JsonProperty("attributes")
-    private Map<String, String> attributes;
+    private Map<String, UObject> attributes;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -46,16 +47,16 @@ public class FileToShockParams {
     }
 
     @JsonProperty("attributes")
-    public Map<String, String> getAttributes() {
+    public Map<String, UObject> getAttributes() {
         return attributes;
     }
 
     @JsonProperty("attributes")
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
     }
 
-    public FileToShockParams withAttributes(Map<String, String> attributes) {
+    public FileToShockParams withAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
         return this;
     }

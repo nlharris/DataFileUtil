@@ -55,7 +55,7 @@ class DataFileUtil(object):
         """
         :param params: instance of type "FileToShockParams" -> structure:
            parameter "file_path" of String, parameter "attributes" of mapping
-           from String to String
+           from String to unspecified object
         :returns: instance of type "FileToShockOutput" -> structure:
            parameter "shock_id" of String
         """

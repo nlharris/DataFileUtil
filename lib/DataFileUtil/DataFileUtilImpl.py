@@ -28,7 +28,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "89a2412658ef7f49c793cbc14dd53c1340241e99"
+    GIT_COMMIT_HASH = "2d9120b7b9d3f0d2c2f3d00afc027acbad30d1ec"
     
     #BEGIN_CLASS_HEADER
     def log(self, message):
@@ -90,9 +90,7 @@ services.
         if not resp_obj['data']['file']['size']:
             raise ShockException('Node {} has no file'.format(shock_id))
         node_file_name = resp_obj['data']['file']['name']
-        attributes = None
-        if 'attributes' in resp_obj:
-            attributes = resp_obj['attributes']
+        attributes = resp_obj['data']['attributes']
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
         self.log('downloading shock node ' + shock_id + ' into file: ' +
@@ -121,7 +119,7 @@ services.
         """
         :param params: instance of type "FileToShockParams" -> structure:
            parameter "file_path" of String, parameter "attributes" of mapping
-           from String to String
+           from String to unspecified object
         :returns: instance of type "FileToShockOutput" -> structure:
            parameter "shock_id" of String
         """
@@ -134,12 +132,14 @@ services.
         header = {'Authorization': "Oauth {0}".format(token)}
         if 'file_path' not in params:
             raise Exception("No file given for upload to SHOCK!")
+        attribs = params.get('attributes')
         file_path = params['file_path']
         self.log('uploading file ' + str(file_path) + ' into shock node')
-        if 'attributes' in params:
-            raise Exception("attributes argument is not supported yet")
         with open(os.path.abspath(file_path), 'rb') as data_file:
             files = {'upload': data_file}
+            if attribs:
+                files['attributes'] = ('attributes',
+                                       json.dumps(attribs).encode('UTF-8'))
             response = requests.post(
                 self.shock_url + '/node', headers=header, files=files,
                 stream=True, allow_redirects=True)

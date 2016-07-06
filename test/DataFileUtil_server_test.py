@@ -69,8 +69,33 @@ class DataFileUtilTest(unittest.TestCase):
                         allow_redirects=True)
         print('Deleted shock node ' + node_id)
 
-    def test_file_to_shock_and_back(self):
+    def test_file_to_shock_and_back_with_attribs(self):
         input_ = "Test!!!"
+        tmp_dir = self.__class__.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path,
+             'attributes': {'foo': [{'bar': 'baz'}]}})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name)
+        self.assertEqual(attribs, {'foo': [{'bar': 'baz'}]})
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+    def test_file_to_shock_and_back(self):
+        input_ = "Test2!!!"
         tmp_dir = self.__class__.cfg['scratch']
         input_file_name = 'input.txt'
         file_path = os.path.join(tmp_dir, input_file_name)
@@ -85,7 +110,9 @@ class DataFileUtilTest(unittest.TestCase):
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
         self.assertEqual(file_name, input_file_name)
+        self.assertIsNone(attribs)
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)

@@ -34,7 +34,7 @@ module DataFileUtil {
 
     typedef structure {
         string file_path;
-        mapping<string, string> attributes;
+        mapping<string, UnspecifiedObject> attributes;
     } FileToShockParams;
 
     typedef structure {

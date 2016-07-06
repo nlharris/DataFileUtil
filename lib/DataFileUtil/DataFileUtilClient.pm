@@ -219,7 +219,7 @@ $params is a DataFileUtil.FileToShockParams
 $return is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
-	attributes has a value which is a reference to a hash where the key is a string and the value is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 
@@ -233,7 +233,7 @@ $params is a DataFileUtil.FileToShockParams
 $return is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
-	attributes has a value which is a reference to a hash where the key is a string and the value is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 
@@ -448,7 +448,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 <pre>
 a reference to a hash where the following keys are defined:
 file_path has a value which is a string
-attributes has a value which is a reference to a hash where the key is a string and the value is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
 
@@ -458,7 +458,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 
 a reference to a hash where the following keys are defined:
 file_path has a value which is a string
-attributes has a value which is a reference to a hash where the key is a string and the value is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
 =end text
