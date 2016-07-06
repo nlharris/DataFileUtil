@@ -112,6 +112,7 @@ class DataFileUtilTest(unittest.TestCase):
              },
             'Node {} has no file'.format(res['data']['id']),
             exception=ShockException)
+        self.delete_shock_node(res['data']['id'])
 
     def test_download_err_no_node_provided(self):
         # test forcing a ShockException on download.
