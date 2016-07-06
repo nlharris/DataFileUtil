@@ -2,6 +2,11 @@
 import os
 import requests
 import json
+
+
+class ShockException(Exception):
+    pass
+
 #END_HEADER
 
 
@@ -76,8 +81,8 @@ class DataFileUtil:
         file_path = params['file_path']
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
-        self.log('downloading shock node ' + shock_id + ' into file: ' + 
-            str(file_path))
+        self.log('downloading shock node ' + shock_id + ' into file: ' +
+                 str(file_path))
         with open(file_path, 'w') as fhandle:
             r = requests.get(node_url + '?download', stream=True,
                              headers=headers)
@@ -86,7 +91,7 @@ class DataFileUtil:
                 if not chunk:
                     break
                 fhandle.write(chunk)
-        returnVal = {'node_file_name': node_file_name, 
+        returnVal = {'node_file_name': node_file_name,
                      'attributes': attributes}
         self.log('downloading done')
         #END shock_to_file
@@ -141,7 +146,12 @@ class DataFileUtil:
 
     def status(self, ctx):
         #BEGIN_STATUS
-        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
-                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
+        returnVal = {'state': 'OK',
+                     'message': '',
+                     'version': self.VERSION,
+                     'git_url': self.GIT_URL,
+                     'git_commit_hash': self.GIT_COMMIT_HASH
+                     }
+        del ctx
         #END_STATUS
         return [returnVal]
