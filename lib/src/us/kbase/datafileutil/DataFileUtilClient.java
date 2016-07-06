@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
@@ -16,7 +15,8 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: DataFileUtil</p>
  * <pre>
- * A KBase module: DataFileUtil
+ * Contains utilities for retrieving and saving data from and to KBase data
+ * services.
  * </pre>
  */
 public class DataFileUtilClient {
@@ -151,6 +151,7 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: shock_to_file</p>
      * <pre>
+     * Download a file from Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.ShockToFileParams ShockToFileParams}
      * @return   instance of type {@link us.kbase.datafileutil.ShockToFileOutput ShockToFileOutput}
@@ -179,13 +180,6 @@ public class DataFileUtilClient {
         args.add(params);
         TypeReference<List<FileToShockOutput>> retType = new TypeReference<List<FileToShockOutput>>() {};
         List<FileToShockOutput> res = caller.jsonrpcCall("DataFileUtil.file_to_shock", args, retType, true, true, jsonRpcContext, this.serviceVersion);
-        return res.get(0);
-    }
-
-    public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
-        List<Object> args = new ArrayList<Object>();
-        TypeReference<List<Map<String, Object>>> retType = new TypeReference<List<Map<String, Object>>>() {};
-        List<Map<String, Object>> res = caller.jsonrpcCall("DataFileUtil.status", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 }

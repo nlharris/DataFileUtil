@@ -26,7 +26,8 @@ DataFileUtil::DataFileUtilClient
 =head1 DESCRIPTION
 
 
-A KBase module: DataFileUtil
+Contains utilities for retrieving and saving data from and to KBase data
+services.
 
 
 =cut
@@ -127,7 +128,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
-	attributes has a value which is a reference to a hash where the key is a string and the value is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
 
@@ -142,14 +143,14 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
-	attributes has a value which is a reference to a hash where the key is a string and the value is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
 =end text
 
 =item Description
 
-
+Download a file from Shock.
 
 =back
 
@@ -294,36 +295,6 @@ FileToShockOutput is a reference to a hash where the following keys are defined:
 }
  
   
-sub status
-{
-    my($self, @args) = @_;
-    if ((my $n = @args) != 0) {
-        Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-                                   "Invalid argument count for function status (received $n, expecting 0)");
-    }
-    my $url = $self->{url};
-    my $result = $self->{client}->call($url, $self->{headers}, {
-        method => "DataFileUtil.status",
-        params => \@args,
-    });
-    if ($result) {
-        if ($result->is_error) {
-            Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
-                           code => $result->content->{error}->{code},
-                           method_name => 'status',
-                           data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
-                          );
-        } else {
-            return wantarray ? @{$result->result} : $result->result->[0];
-        }
-    } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method status",
-                        status_line => $self->{client}->status_line,
-                        method_name => 'status',
-                       );
-    }
-}
-   
 
 sub version {
     my ($self) = @_;
@@ -388,6 +359,16 @@ sub _validate_version {
 
 
 
+=item Description
+
+Input for the shock_to_file function.
+
+Required parameters:
+shock_id - the ID of the Shock node.
+file_path - the location to save the file output. If this is a
+    directory, the file will be named as per the filename in Shock.
+
+
 =item Definition
 
 =begin html
@@ -420,6 +401,14 @@ file_path has a value which is a string
 
 
 
+=item Description
+
+Output from the shock_to_file function.
+
+   node_file_name - the filename of the file stored in Shock.
+   attributes - the file attributes, if any, stored in Shock.
+
+
 =item Definition
 
 =begin html
@@ -427,7 +416,7 @@ file_path has a value which is a string
 <pre>
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
-attributes has a value which is a reference to a hash where the key is a string and the value is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
 
@@ -437,7 +426,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
-attributes has a value which is a reference to a hash where the key is a string and the value is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
 =end text

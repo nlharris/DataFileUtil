@@ -34,11 +34,18 @@ class DataFileUtil(object):
 
     def shock_to_file(self, params, context=None):
         """
-        :param params: instance of type "ShockToFileParams" -> structure:
-           parameter "shock_id" of String, parameter "file_path" of String
-        :returns: instance of type "ShockToFileOutput" -> structure:
-           parameter "node_file_name" of String, parameter "attributes" of
-           mapping from String to String
+        Download a file from Shock.
+        :param params: instance of type "ShockToFileParams" (Input for the
+           shock_to_file function. Required parameters: shock_id - the ID of
+           the Shock node. file_path - the location to save the file output.
+           If this is a directory, the file will be named as per the filename
+           in Shock.) -> structure: parameter "shock_id" of String, parameter
+           "file_path" of String
+        :returns: instance of type "ShockToFileOutput" (Output from the
+           shock_to_file function. node_file_name - the filename of the file
+           stored in Shock. attributes - the file attributes, if any, stored
+           in Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "attributes" of mapping from String to unspecified object
         """
         return self._client.call_method(
             'DataFileUtil.shock_to_file',
@@ -55,7 +62,3 @@ class DataFileUtil(object):
         return self._client.call_method(
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
-
-    def status(self, context=None):
-        return self._client.call_method('DataFileUtil.status',
-            [], self._service_ver, context)

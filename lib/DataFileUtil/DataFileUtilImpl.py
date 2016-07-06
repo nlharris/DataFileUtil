@@ -16,7 +16,8 @@ class DataFileUtil:
     DataFileUtil
 
     Module Description:
-    A KBase module: DataFileUtil
+    Contains utilities for retrieving and saving data from and to KBase data
+services.
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -26,8 +27,8 @@ class DataFileUtil:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = ""
+    GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
+    GIT_COMMIT_HASH = "89a2412658ef7f49c793cbc14dd53c1340241e99"
     
     #BEGIN_CLASS_HEADER
     def log(self, message):
@@ -56,11 +57,18 @@ class DataFileUtil:
 
     def shock_to_file(self, ctx, params):
         """
-        :param params: instance of type "ShockToFileParams" -> structure:
-           parameter "shock_id" of String, parameter "file_path" of String
-        :returns: instance of type "ShockToFileOutput" -> structure:
-           parameter "node_file_name" of String, parameter "attributes" of
-           mapping from String to String
+        Download a file from Shock.
+        :param params: instance of type "ShockToFileParams" (Input for the
+           shock_to_file function. Required parameters: shock_id - the ID of
+           the Shock node. file_path - the location to save the file output.
+           If this is a directory, the file will be named as per the filename
+           in Shock.) -> structure: parameter "shock_id" of String, parameter
+           "file_path" of String
+        :returns: instance of type "ShockToFileOutput" (Output from the
+           shock_to_file function. node_file_name - the filename of the file
+           stored in Shock. attributes - the file attributes, if any, stored
+           in Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "attributes" of mapping from String to unspecified object
         """
         # ctx is the context object
         # return variables are: returnVal

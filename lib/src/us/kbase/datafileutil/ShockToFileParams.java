@@ -13,7 +13,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: ShockToFileParams</p>
- * 
+ * <pre>
+ * Input for the shock_to_file function.
+ * Required parameters:
+ * shock_id - the ID of the Shock node.
+ * file_path - the location to save the file output. If this is a
+ *     directory, the file will be named as per the filename in Shock.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

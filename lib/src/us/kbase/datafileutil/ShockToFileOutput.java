@@ -9,11 +9,16 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import us.kbase.common.service.UObject;
 
 
 /**
  * <p>Original spec-file type: ShockToFileOutput</p>
- * 
+ * <pre>
+ * Output from the shock_to_file function.
+ *    node_file_name - the filename of the file stored in Shock.
+ *    attributes - the file attributes, if any, stored in Shock.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -27,7 +32,7 @@ public class ShockToFileOutput {
     @JsonProperty("node_file_name")
     private java.lang.String nodeFileName;
     @JsonProperty("attributes")
-    private Map<String, String> attributes;
+    private Map<String, UObject> attributes;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("node_file_name")
@@ -46,16 +51,16 @@ public class ShockToFileOutput {
     }
 
     @JsonProperty("attributes")
-    public Map<String, String> getAttributes() {
+    public Map<String, UObject> getAttributes() {
         return attributes;
     }
 
     @JsonProperty("attributes")
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
     }
 
-    public ShockToFileOutput withAttributes(Map<String, String> attributes) {
+    public ShockToFileOutput withAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
         return this;
     }
