@@ -2,6 +2,11 @@
 import os
 import requests
 import json
+
+
+class ShockException(Exception):
+    pass
+
 #END_HEADER
 
 
@@ -62,7 +67,12 @@ class DataFileUtil:
         #BEGIN shock_to_file
         token = ctx['token']
         headers = {'Authorization': 'OAuth ' + token}
-        shock_id = params['shock_id']
+        shock_id = params.get('shock_id')
+        if not shock_id:
+            raise ValueError('Must provide shock ID')
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('Must provide file path')
         node_url = self.shock_url + '/node/' + shock_id
         r = requests.get(node_url, headers=headers)
         errtxt = ('Error downloading file from shock ' +
@@ -73,11 +83,10 @@ class DataFileUtil:
         attributes = None
         if 'attributes' in resp_obj:
             attributes = resp_obj['attributes']
-        file_path = params['file_path']
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
-        self.log('downloading shock node ' + shock_id + ' into file: ' + 
-            str(file_path))
+        self.log('downloading shock node ' + shock_id + ' into file: ' +
+                 str(file_path))
         with open(file_path, 'w') as fhandle:
             r = requests.get(node_url + '?download', stream=True,
                              headers=headers)
@@ -86,7 +95,7 @@ class DataFileUtil:
                 if not chunk:
                     break
                 fhandle.write(chunk)
-        returnVal = {'node_file_name': node_file_name, 
+        returnVal = {'node_file_name': node_file_name,
                      'attributes': attributes}
         self.log('downloading done')
         #END shock_to_file
@@ -141,7 +150,12 @@ class DataFileUtil:
 
     def status(self, ctx):
         #BEGIN_STATUS
-        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
-                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
+        returnVal = {'state': 'OK',
+                     'message': '',
+                     'version': self.VERSION,
+                     'git_url': self.GIT_URL,
+                     'git_commit_hash': self.GIT_COMMIT_HASH
+                     }
+        del ctx
         #END_STATUS
         return [returnVal]
