@@ -28,7 +28,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "43465cb6a48ea1eba85f2d9180f4ba5aaf628d0c"
+    GIT_COMMIT_HASH = "a3f5097c150ea522e700f743096520e006cc8cc0"
     
     #BEGIN_CLASS_HEADER
     def log(self, message):
@@ -62,8 +62,13 @@ services.
            shock_to_file function. Required parameters: shock_id - the ID of
            the Shock node. file_path - the location to save the file output.
            If this is a directory, the file will be named as per the filename
-           in Shock.) -> structure: parameter "shock_id" of String, parameter
-           "file_path" of String
+           in Shock. Optional parameters: unpack - if the file is compressed
+           and / or a file bundle, it will be decompressed and unbundled into
+           the directory containing the original output file. unpack supports
+           gzip, bzip2, tar, and zip files. Default false. Currently
+           unsupported.) -> structure: parameter "shock_id" of String,
+           parameter "file_path" of String, parameter "unpack" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -117,11 +122,21 @@ services.
 
     def file_to_shock(self, ctx, params):
         """
-        :param params: instance of type "FileToShockParams" -> structure:
-           parameter "file_path" of String, parameter "attributes" of mapping
-           from String to unspecified object
-        :returns: instance of type "FileToShockOutput" -> structure:
-           parameter "shock_id" of String
+        Load a file to Shock.
+        :param params: instance of type "FileToShockParams" (Input for the
+           file_to_shock function. Required parameters: file_path - the
+           location of the file to load to Shock. Optional parameters:
+           attributes - user-specified attributes to save to the Shock node
+           along with the file. make_handle - make a Handle Service handle
+           for the shock node. Default false.) -> structure: parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object, parameter "make_handle" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+        :returns: instance of type "FileToShockOutput" (Output of the
+           file_to_shock function. shock_id - the ID of the new Shock node.
+           handle_id - the handle ID for the new handle, if created. Null
+           otherwise.) -> structure: parameter "shock_id" of String,
+           parameter "handle_id" of String
         """
         # ctx is the context object
         # return variables are: returnVal

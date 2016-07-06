@@ -126,6 +126,8 @@ $return is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
+	unpack has a value which is a DataFileUtil.boolean
+boolean is an int
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -141,6 +143,8 @@ $return is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
+	unpack has a value which is a DataFileUtil.boolean
+boolean is an int
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -220,8 +224,11 @@ $return is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 
 </pre>
 
@@ -234,15 +241,18 @@ $return is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 
 
 =end text
 
 =item Description
 
-
+Load a file to Shock.
 
 =back
 
@@ -383,6 +393,38 @@ sub _validate_version {
 
 
 
+=head2 boolean
+
+=over 4
+
+
+
+=item Description
+
+A boolean - 0 for false, 1 for true.
+@range (0, 1)
+
+
+=item Definition
+
+=begin html
+
+<pre>
+an int
+</pre>
+
+=end html
+
+=begin text
+
+an int
+
+=end text
+
+=back
+
+
+
 =head2 ShockToFileParams
 
 =over 4
@@ -398,6 +440,12 @@ shock_id - the ID of the Shock node.
 file_path - the location to save the file output. If this is a
     directory, the file will be named as per the filename in Shock.
 
+Optional parameters:
+unpack - if the file is compressed and / or a file bundle, it will be
+    decompressed and unbundled into the directory containing the
+    original output file. unpack supports gzip, bzip2, tar, and zip
+    files. Default false. Currently unsupported.
+
 
 =item Definition
 
@@ -407,6 +455,7 @@ file_path - the location to save the file output. If this is a
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 file_path has a value which is a string
+unpack has a value which is a DataFileUtil.boolean
 
 </pre>
 
@@ -417,6 +466,7 @@ file_path has a value which is a string
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 file_path has a value which is a string
+unpack has a value which is a DataFileUtil.boolean
 
 
 =end text
@@ -471,6 +521,20 @@ attributes has a value which is a reference to a hash where the key is a string 
 
 
 
+=item Description
+
+Input for the file_to_shock function.
+
+Required parameters:
+file_path - the location of the file to load to Shock.
+
+Optional parameters:
+attributes - user-specified attributes to save to the Shock node along
+    with the file.
+make_handle - make a Handle Service handle for the shock node. Default
+    false.
+
+
 =item Definition
 
 =begin html
@@ -479,6 +543,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+make_handle has a value which is a DataFileUtil.boolean
 
 </pre>
 
@@ -489,6 +554,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+make_handle has a value which is a DataFileUtil.boolean
 
 
 =end text
@@ -503,6 +569,15 @@ attributes has a value which is a reference to a hash where the key is a string 
 
 
 
+=item Description
+
+Output of the file_to_shock function.
+
+    shock_id - the ID of the new Shock node.
+    handle_id - the handle ID for the new handle, if created. Null
+       otherwise.
+
+
 =item Definition
 
 =begin html
@@ -510,6 +585,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle_id has a value which is a string
 
 </pre>
 
@@ -519,6 +595,7 @@ shock_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle_id has a value which is a string
 
 
 =end text

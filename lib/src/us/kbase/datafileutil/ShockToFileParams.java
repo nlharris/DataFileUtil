@@ -19,6 +19,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * shock_id - the ID of the Shock node.
  * file_path - the location to save the file output. If this is a
  *     directory, the file will be named as per the filename in Shock.
+ * Optional parameters:
+ * unpack - if the file is compressed and / or a file bundle, it will be
+ *     decompressed and unbundled into the directory containing the
+ *     original output file. unpack supports gzip, bzip2, tar, and zip
+ *     files. Default false. Currently unsupported.
  * </pre>
  * 
  */
@@ -26,7 +31,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "shock_id",
-    "file_path"
+    "file_path",
+    "unpack"
 })
 public class ShockToFileParams {
 
@@ -34,6 +40,8 @@ public class ShockToFileParams {
     private String shockId;
     @JsonProperty("file_path")
     private String filePath;
+    @JsonProperty("unpack")
+    private Long unpack;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("shock_id")
@@ -66,6 +74,21 @@ public class ShockToFileParams {
         return this;
     }
 
+    @JsonProperty("unpack")
+    public Long getUnpack() {
+        return unpack;
+    }
+
+    @JsonProperty("unpack")
+    public void setUnpack(Long unpack) {
+        this.unpack = unpack;
+    }
+
+    public ShockToFileParams withUnpack(Long unpack) {
+        this.unpack = unpack;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -78,7 +101,7 @@ public class ShockToFileParams {
 
     @Override
     public String toString() {
-        return ((((((("ShockToFileParams"+" [shockId=")+ shockId)+", filePath=")+ filePath)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("ShockToFileParams"+" [shockId=")+ shockId)+", filePath=")+ filePath)+", unpack=")+ unpack)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

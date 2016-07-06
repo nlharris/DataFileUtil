@@ -170,6 +170,7 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: file_to_shock</p>
      * <pre>
+     * Load a file to Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.FileToShockParams FileToShockParams}
      * @return   instance of type {@link us.kbase.datafileutil.FileToShockOutput FileToShockOutput}

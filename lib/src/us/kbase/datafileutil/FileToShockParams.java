@@ -14,14 +14,24 @@ import us.kbase.common.service.UObject;
 
 /**
  * <p>Original spec-file type: FileToShockParams</p>
- * 
+ * <pre>
+ * Input for the file_to_shock function.
+ * Required parameters:
+ * file_path - the location of the file to load to Shock.
+ * Optional parameters:
+ * attributes - user-specified attributes to save to the Shock node along
+ *     with the file.
+ * make_handle - make a Handle Service handle for the shock node. Default
+ *     false.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "file_path",
-    "attributes"
+    "attributes",
+    "make_handle"
 })
 public class FileToShockParams {
 
@@ -29,6 +39,8 @@ public class FileToShockParams {
     private java.lang.String filePath;
     @JsonProperty("attributes")
     private Map<String, UObject> attributes;
+    @JsonProperty("make_handle")
+    private Long makeHandle;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -61,6 +73,21 @@ public class FileToShockParams {
         return this;
     }
 
+    @JsonProperty("make_handle")
+    public Long getMakeHandle() {
+        return makeHandle;
+    }
+
+    @JsonProperty("make_handle")
+    public void setMakeHandle(Long makeHandle) {
+        this.makeHandle = makeHandle;
+    }
+
+    public FileToShockParams withMakeHandle(Long makeHandle) {
+        this.makeHandle = makeHandle;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -73,7 +100,7 @@ public class FileToShockParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
