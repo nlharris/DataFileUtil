@@ -79,6 +79,8 @@ class DataFileUtil:
                   'node {}: ').format(shock_id)
         self.check_shock_response(r, errtxt)
         resp_obj = r.json()
+        if not resp_obj['data']['file']['size']:
+            raise ShockException('Node {} has no file'.format(shock_id))
         node_file_name = resp_obj['data']['file']['name']
         attributes = None
         if 'attributes' in resp_obj:

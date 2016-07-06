@@ -101,6 +101,18 @@ class DataFileUtilTest(unittest.TestCase):
             '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: Node not found',
             exception=ShockException)
 
+    def test_download_err_node_has_no_file(self):
+        # test attempting download on a node without a file.
+        res = requests.post(
+            self.shockURL + '/node/',
+            headers={'Authorization': 'OAuth ' + self.token}).json()
+        self.fail_download(
+            {'shock_id': res['data']['id'],
+             'file_path': 'foo'
+             },
+            'Node {} has no file'.format(res['data']['id']),
+            exception=ShockException)
+
     def test_download_err_no_node_provided(self):
         # test forcing a ShockException on download.
         self.fail_download(
