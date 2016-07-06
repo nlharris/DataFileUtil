@@ -62,3 +62,7 @@ class DataFileUtil(object):
         return self._client.call_method(
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
+
+    def status(self, context=None):
+        return self._client.call_method('DataFileUtil.status',
+            [], self._service_ver, context)

@@ -28,7 +28,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "2d9120b7b9d3f0d2c2f3d00afc027acbad30d1ec"
+    GIT_COMMIT_HASH = "43465cb6a48ea1eba85f2d9180f4ba5aaf628d0c"
     
     #BEGIN_CLASS_HEADER
     def log(self, message):
