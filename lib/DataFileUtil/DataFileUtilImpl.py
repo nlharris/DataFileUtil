@@ -67,7 +67,12 @@ class DataFileUtil:
         #BEGIN shock_to_file
         token = ctx['token']
         headers = {'Authorization': 'OAuth ' + token}
-        shock_id = params['shock_id']
+        shock_id = params.get('shock_id')
+        if not shock_id:
+            raise ValueError('Must provide shock ID')
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('Must provide file path')
         node_url = self.shock_url + '/node/' + shock_id
         r = requests.get(node_url, headers=headers)
         errtxt = ('Error downloading file from shock ' +
@@ -78,7 +83,6 @@ class DataFileUtil:
         attributes = None
         if 'attributes' in resp_obj:
             attributes = resp_obj['attributes']
-        file_path = params['file_path']
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
         self.log('downloading shock node ' + shock_id + ' into file: ' +

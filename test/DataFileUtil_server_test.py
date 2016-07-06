@@ -91,15 +91,33 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
 
-    def test_download_err(self):
+    def test_download_err_node_not_found(self):
         # test forcing a ShockException on download.
-        try:
-            self.getImpl().shock_to_file(
-                self.ctx,
-                {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23',
-                 'file_path': 'foo'
-                 })
-        except ShockException as se:
-            self.assertEqual(
-                se.message, 'Error downloading file from shock node ' +
-                '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: Node not found')
+        self.fail_download(
+            {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23',
+             'file_path': 'foo'
+             },
+            'Error downloading file from shock node ' +
+            '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: Node not found',
+            exception=ShockException)
+
+    def test_download_err_no_node_provided(self):
+        # test forcing a ShockException on download.
+        self.fail_download(
+            {'shock_id': '',
+             'file_path': 'foo'
+             },
+            'Must provide shock ID')
+
+    def test_download_err_no_file_provided(self):
+        # test forcing a ShockException on download.
+        self.fail_download(
+            {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f2',
+             'file_path': ''
+             },
+            'Must provide file path')
+
+    def fail_download(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.getImpl().shock_to_file(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
