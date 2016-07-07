@@ -13,6 +13,7 @@ except:
 from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
 from DataFileUtil.DataFileUtilImpl import DataFileUtil, ShockException
 from DataFileUtil.DataFileUtilServer import MethodContext
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
 
 
 class DataFileUtilTest(unittest.TestCase):
@@ -39,6 +40,8 @@ class DataFileUtilTest(unittest.TestCase):
         cls.wsURL = cls.cfg['workspace-url']
         cls.shockURL = cls.cfg['shock-url']
         cls.wsClient = workspaceService(cls.wsURL, token=cls.token)
+        cls.hs = HandleService(url=cls.cfg['handle-service-url'],
+                               token=cls.token)
         cls.serviceImpl = DataFileUtil(cls.cfg)
 
     @classmethod
@@ -71,7 +74,7 @@ class DataFileUtilTest(unittest.TestCase):
 
     def test_file_to_shock_and_back_with_attribs(self):
         input_ = "Test!!!"
-        tmp_dir = self.__class__.cfg['scratch']
+        tmp_dir = self.cfg['scratch']
         input_file_name = 'input.txt'
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
@@ -96,7 +99,7 @@ class DataFileUtilTest(unittest.TestCase):
 
     def test_file_to_shock_and_back(self):
         input_ = "Test2!!!"
-        tmp_dir = self.__class__.cfg['scratch']
+        tmp_dir = self.cfg['scratch']
         input_file_name = 'input.txt'
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
@@ -117,6 +120,26 @@ class DataFileUtilTest(unittest.TestCase):
             output = fh2.read()
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
+
+    def test_make_handle(self):
+        input_ = "Test3!!!"
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'make_handle': 1})[0]
+        shock_id = ret1['shock_id']
+        hid = ret1['handle_id']
+        handle = self.hs.hids_to_handles([hid])[0]
+        self.assertEqual(handle['id'], shock_id)
+        self.assertEqual(handle['hid'], hid)
+        self.assertEqual(handle['url'], self.shockURL)
+        self.assertEqual(handle['type'], 'shock')
+        self.delete_shock_node(shock_id)
+        self.hs.delete_handles([hid])
 
     def test_download_err_node_not_found(self):
         # test forcing a ShockException on download.

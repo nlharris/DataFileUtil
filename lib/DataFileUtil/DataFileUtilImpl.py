@@ -2,6 +2,7 @@
 import os
 import requests
 import json
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
 
 
 class ShockException(Exception):
@@ -51,6 +52,7 @@ services.
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.shock_url = config['shock-url']
+        self.handle_url = config['handle-service-url']
         #END_CONSTRUCTOR
         pass
     
@@ -159,10 +161,17 @@ services.
                 self.shock_url + '/node', headers=header, files=files,
                 stream=True, allow_redirects=True)
         self.check_shock_response(
-            response, ('Error trying to upload contig FASTA file {} to Shock: '
+            response, ('Error trying to upload file {} to Shock: '
                        ).format(file_path))
         shock_id = response.json()['data']['id']
-        returnVal = {'shock_id': shock_id}
+        returnVal = {'shock_id': shock_id, 'handle_id': None}
+        if params.get('make_handle'):
+            hs = HandleService(self.handle_url, token=token)
+            hid = hs.persist_handle({'id': shock_id,
+                                     'type': 'shock',
+                                     'url': self.shock_url
+                                     })
+            returnVal['handle_id'] = hid
         self.log('uploading done into shock node: ' + shock_id)
         #END file_to_shock
 
