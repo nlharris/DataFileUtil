@@ -103,7 +103,7 @@ services.
         self.log('downloading shock node ' + shock_id + ' into file: ' +
                  str(file_path))
         with open(file_path, 'w') as fhandle:
-            r = requests.get(node_url + '?download', stream=True,
+            r = requests.get(node_url + '?download_raw', stream=True,
                              headers=headers)
             self.check_shock_response(r, errtxt)
             for chunk in r.iter_content(1024):
