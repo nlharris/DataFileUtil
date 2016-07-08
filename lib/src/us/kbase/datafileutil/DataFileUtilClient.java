@@ -16,7 +16,8 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: DataFileUtil</p>
  * <pre>
- * A KBase module: DataFileUtil
+ * Contains utilities for retrieving and saving data from and to KBase data
+ * services.
  * </pre>
  */
 public class DataFileUtilClient {
@@ -151,6 +152,7 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: shock_to_file</p>
      * <pre>
+     * Download a file from Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.ShockToFileParams ShockToFileParams}
      * @return   instance of type {@link us.kbase.datafileutil.ShockToFileOutput ShockToFileOutput}
@@ -168,6 +170,7 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: file_to_shock</p>
      * <pre>
+     * Load a file to Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.FileToShockParams FileToShockParams}
      * @return   instance of type {@link us.kbase.datafileutil.FileToShockOutput FileToShockOutput}

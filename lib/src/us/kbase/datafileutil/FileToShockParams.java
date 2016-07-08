@@ -9,25 +9,38 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import us.kbase.common.service.UObject;
 
 
 /**
  * <p>Original spec-file type: FileToShockParams</p>
- * 
+ * <pre>
+ * Input for the file_to_shock function.
+ * Required parameters:
+ * file_path - the location of the file to load to Shock.
+ * Optional parameters:
+ * attributes - user-specified attributes to save to the Shock node along
+ *     with the file.
+ * make_handle - make a Handle Service handle for the shock node. Default
+ *     false.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "file_path",
-    "attributes"
+    "attributes",
+    "make_handle"
 })
 public class FileToShockParams {
 
     @JsonProperty("file_path")
     private java.lang.String filePath;
     @JsonProperty("attributes")
-    private Map<String, String> attributes;
+    private Map<String, UObject> attributes;
+    @JsonProperty("make_handle")
+    private Long makeHandle;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -46,17 +59,32 @@ public class FileToShockParams {
     }
 
     @JsonProperty("attributes")
-    public Map<String, String> getAttributes() {
+    public Map<String, UObject> getAttributes() {
         return attributes;
     }
 
     @JsonProperty("attributes")
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
     }
 
-    public FileToShockParams withAttributes(Map<String, String> attributes) {
+    public FileToShockParams withAttributes(Map<String, UObject> attributes) {
         this.attributes = attributes;
+        return this;
+    }
+
+    @JsonProperty("make_handle")
+    public Long getMakeHandle() {
+        return makeHandle;
+    }
+
+    @JsonProperty("make_handle")
+    public void setMakeHandle(Long makeHandle) {
+        this.makeHandle = makeHandle;
+    }
+
+    public FileToShockParams withMakeHandle(Long makeHandle) {
+        this.makeHandle = makeHandle;
         return this;
     }
 
@@ -72,7 +100,7 @@ public class FileToShockParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
