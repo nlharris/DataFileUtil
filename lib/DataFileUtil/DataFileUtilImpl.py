@@ -40,6 +40,7 @@ services.
     #BEGIN_CLASS_HEADER
 
     GZIP = '.gz'
+    TGZ = '.tgz'
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
@@ -48,7 +49,8 @@ services.
     # it'd be nice if you could just open the file and gzip on the fly but I
     # don't see a way to do that
     def gzip(self, oldfile):
-        if oldfile.lower().endswith(self.GZIP):
+        lo = oldfile.lower()
+        if lo.endswith(self.GZIP) or lo.endswith(self.TGZ):
             raise ValueError('File {} is already gzipped'.format(oldfile))
         newfile = oldfile + self.GZIP
         self.log('gzipping {} to {}'.format(oldfile, newfile))

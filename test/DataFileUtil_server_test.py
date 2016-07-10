@@ -171,6 +171,9 @@ class DataFileUtilTest(unittest.TestCase):
         self.fail_upload(
             {'file_path': 'input.gz', 'gzip': 1},
             'File input.gz is already gzipped')
+        self.fail_upload(
+            {'file_path': 'input.tgz', 'gzip': 1},
+            'File input.tgz is already gzipped')
 
     def test_upload_err_no_file_provided(self):
         self.fail_upload(
