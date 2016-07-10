@@ -99,4 +99,7 @@ module DataFileUtil {
     */
     funcdef copy_shock_node(CopyShockNodeParams params)
         returns(CopyShockNodeOutput out) authentication required;
+        
+    /* Get the versions of the Workspace service and Shock service. */
+    funcdef versions() returns(string wsver, string shockver);
 };

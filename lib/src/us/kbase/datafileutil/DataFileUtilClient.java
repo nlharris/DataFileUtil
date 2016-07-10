@@ -11,6 +11,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.Tuple2;
 import us.kbase.common.service.UnauthorizedException;
 
 /**
@@ -202,6 +203,22 @@ public class DataFileUtilClient {
         TypeReference<List<CopyShockNodeOutput>> retType = new TypeReference<List<CopyShockNodeOutput>>() {};
         List<CopyShockNodeOutput> res = caller.jsonrpcCall("DataFileUtil.copy_shock_node", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: versions</p>
+     * <pre>
+     * Get the versions of the Workspace service and Shock service.
+     * </pre>
+     * @return   multiple set: (1) parameter "wsver" of String, (2) parameter "shockver" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public Tuple2<String, String> versions(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        TypeReference<Tuple2<String, String>> retType = new TypeReference<Tuple2<String, String>>() {};
+        Tuple2<String, String> res = caller.jsonrpcCall("DataFileUtil.versions", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        return res;
     }
 
     public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {

@@ -97,6 +97,16 @@ class DataFileUtil(object):
             'DataFileUtil.copy_shock_node',
             [params], self._service_ver, context)
 
+    def versions(self, context=None):
+        """
+        Get the versions of the Workspace service and Shock service.
+        :returns: multiple set - (1) parameter "wsver" of String, (2)
+           parameter "shockver" of String
+        """
+        return self._client.call_method(
+            'DataFileUtil.versions',
+            [], self._service_ver, context)
+
     def status(self, context=None):
         return self._client.call_method('DataFileUtil.status',
             [], self._service_ver, context)

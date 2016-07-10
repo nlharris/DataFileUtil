@@ -89,14 +89,6 @@ sub new
 	    $self->{token} = $token->token;
 	    $self->{client}->{token} = $token->token;
 	}
-        else
-        {
-	    #
-	    # All methods in this module require authentication. In this case, if we
-	    # don't have a token, we can't continue.
-	    #
-	    die "Authentication failed: " . $token->error_message;
-	}
     }
 
     my $ua = $self->{client}->ua;	 
@@ -397,6 +389,77 @@ version 0.9.13+.
     }
 }
  
+
+
+=head2 versions
+
+  $wsver, $shockver = $obj->versions()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$wsver is a string
+$shockver is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$wsver is a string
+$shockver is a string
+
+
+=end text
+
+=item Description
+
+Get the versions of the Workspace service and Shock service.
+
+=back
+
+=cut
+
+ sub versions
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 0)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function versions (received $n, expecting 0)");
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.versions",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'versions',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method versions",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'versions',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -440,16 +503,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'copy_shock_node',
+                method_name => 'versions',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method copy_shock_node",
+            error => "Error invoking method versions",
             status_line => $self->{client}->status_line,
-            method_name => 'copy_shock_node',
+            method_name => 'versions',
         );
     }
 }

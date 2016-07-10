@@ -10,7 +10,8 @@ MAINTAINER KBase Developer
 RUN sudo apt-get install python-dev libffi-dev libssl-dev \
     && pip install pyopenssl ndg-httpsclient pyasn1 \
     && pip install requests --upgrade \
-    && pip install 'requests[security]' --upgrade
+    && pip install 'requests[security]' --upgrade \
+    && pip install semver
 # -----------------------------------------
 
 COPY ./ /kb/module

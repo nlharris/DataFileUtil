@@ -7,6 +7,7 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 import time
 import gzip
 import shutil
+from Workspace.WorkspaceClient import Workspace
 
 
 class ShockException(Exception):
@@ -33,7 +34,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "f2f142cc8c94e25fa46249a45ae22f57b4b0b11e"
+    GIT_COMMIT_HASH = "5786466b30e79134d2077c3c81316c9654ee7e77"
     
     #BEGIN_CLASS_HEADER
 
@@ -72,8 +73,10 @@ services.
         #BEGIN_CONSTRUCTOR
         self.shock_url = config['shock-url']
         self.handle_url = config['handle-service-url']
+        self.ws_url = config['workspace-url']
         #END_CONSTRUCTOR
         pass
+    
 
     def shock_to_file(self, ctx, params):
         """
@@ -248,6 +251,32 @@ services.
                              'out is not type dict as required.')
         # return the results
         return [out]
+
+    def versions(self, ctx):
+        """
+        Get the versions of the Workspace service and Shock service.
+        :returns: multiple set - (1) parameter "wsver" of String, (2)
+           parameter "shockver" of String
+        """
+        # ctx is the context object
+        # return variables are: wsver, shockver
+        #BEGIN versions
+        del ctx
+        wsver = Workspace(self.ws_url).ver()
+        resp = requests.get(self.shock_url, allow_redirects=True)
+        self.check_shock_response(resp, 'Error contacting Shock: ')
+        shockver = resp.json()['version']
+        #END versions
+
+        # At some point might do deeper type checking...
+        if not isinstance(wsver, basestring):
+            raise ValueError('Method versions return value ' +
+                             'wsver is not type basestring as required.')
+        if not isinstance(shockver, basestring):
+            raise ValueError('Method versions return value ' +
+                             'shockver is not type basestring as required.')
+        # return the results
+        return [wsver, shockver]
 
     def status(self, ctx):
         #BEGIN_STATUS

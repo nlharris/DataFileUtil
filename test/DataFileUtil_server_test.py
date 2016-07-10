@@ -5,6 +5,7 @@ import requests
 
 from os import environ
 import gzip
+import semver
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -254,6 +255,11 @@ class DataFileUtilTest(unittest.TestCase):
     def test_copy_err_no_node_provided(self):
         self.fail_copy(
             {'shock_id': ''}, 'Must provide shock ID')
+
+    def test_versions(self):
+        wsver, shockver = self.getImpl().versions(self.ctx)
+        self.assertTrue(semver.match(wsver, '>=0.4.0'))
+        self.assertTrue(semver.match(shockver, '>=0.9.0'))
 
     def fail_copy(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
