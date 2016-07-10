@@ -116,7 +116,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if not file_path:
             raise ValueError('Must provide file path')
         node_url = self.shock_url + '/node/' + shock_id
-        r = requests.get(node_url, headers=headers)
+        r = requests.get(node_url, headers=headers, allow_redirects=True)
         errtxt = ('Error downloading file from shock ' +
                   'node {}: ').format(shock_id)
         self.check_shock_response(r, errtxt)
@@ -249,7 +249,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if semver.match(self.versions(ctx)[1], '<0.9.13'):
             del header['Content-Type']
             r = requests.get(self.shock_url + '/node/' + source_id,
-                             headers=header)
+                             headers=header, allow_redirects=True)
             errtxt = ('Error downloading attributes from shock ' +
                       'node {}: ').format(shock_id)
             self.check_shock_response(r, errtxt)
