@@ -167,13 +167,53 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
 
-    def test_upload_err_already_gzipped(self):
-        self.fail_upload(
-            {'file_path': 'input.gz', 'gzip': 1},
-            'File input.gz is already gzipped')
-        self.fail_upload(
-            {'file_path': 'input.tgz', 'gzip': 1},
-            'File input.tgz is already gzipped')
+    def test_gzip_already_gzipped(self):
+        input_ = 'testgzip2'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt.gz'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name)
+        self.assertIsNone(attribs)
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+    def test_gzip_already_targzipped(self):
+        input_ = 'testgzip3'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt.tgz'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name)
+        self.assertIsNone(attribs)
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
 
     def test_upload_err_no_file_provided(self):
         self.fail_upload(

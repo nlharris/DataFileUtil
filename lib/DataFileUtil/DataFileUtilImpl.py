@@ -51,7 +51,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     def gzip(self, oldfile):
         lo = oldfile.lower()
         if lo.endswith(self.GZIP) or lo.endswith(self.TGZ):
-            raise ValueError('File {} is already gzipped'.format(oldfile))
+            self.log('File {} is already gzipped, skipping'.format(oldfile))
+            return oldfile
         newfile = oldfile + self.GZIP
         self.log('gzipping {} to {}'.format(oldfile, newfile))
         with open(oldfile, 'rb') as s, gzip.open(newfile, 'wb') as t:
