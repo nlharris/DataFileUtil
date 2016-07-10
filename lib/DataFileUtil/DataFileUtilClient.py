@@ -78,6 +78,20 @@ class DataFileUtil(object):
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
 
+    def copy_shock_node(self, params, context=None):
+        """
+        Copy a Shock node.
+        :param params: instance of type "CopyShockNodeParams" (Input for the
+           copy_shock_node function. shock_id - the id of the node to copy.)
+           -> structure: parameter "shock_id" of String
+        :returns: instance of type "CopyShockNodeOutput" (Output of the
+           copy_shock_node function. shock_id - the id of the new Shock
+           node.) -> structure: parameter "shock_id" of String
+        """
+        return self._client.call_method(
+            'DataFileUtil.copy_shock_node',
+            [params], self._service_ver, context)
+
     def status(self, context=None):
         return self._client.call_method('DataFileUtil.status',
             [], self._service_ver, context)

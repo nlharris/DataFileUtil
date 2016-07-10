@@ -40,8 +40,8 @@ module DataFileUtil {
     } ShockToFileOutput;
 
     /* Download a file from Shock. */
-    funcdef shock_to_file(ShockToFileParams params) returns (ShockToFileOutput)
-        authentication required;
+    funcdef shock_to_file(ShockToFileParams params)
+        returns (ShockToFileOutput out) authentication required;
 
     /* Input for the file_to_shock function.
        
@@ -72,6 +72,28 @@ module DataFileUtil {
     } FileToShockOutput;
 
     /* Load a file to Shock. */
-    funcdef file_to_shock(FileToShockParams params) returns (FileToShockOutput)
-        authentication required;
+    funcdef file_to_shock(FileToShockParams params)
+        returns (FileToShockOutput out) authentication required;
+        
+    /* Input for the copy_shock_node function.
+
+       shock_id - the id of the node to copy.
+    */
+    typedef structure {
+        string shock_id;
+    } CopyShockNodeParams;
+    
+    /* Output of the copy_shock_node function.
+      
+       shock_id - the id of the new Shock node.
+    */
+    typedef structure {
+        string shock_id;
+    } CopyShockNodeOutput;
+    
+    /* Copy a Shock node. Note that attributes are only copied in Shock
+       version 0.9.13+.
+    */
+    funcdef copy_shock_node(CopyShockNodeParams params)
+        returns(CopyShockNodeOutput out) authentication required;
 };

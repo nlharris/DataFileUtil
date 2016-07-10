@@ -180,6 +180,55 @@ class DataFileUtilTest(unittest.TestCase):
              },
             'Must provide file path')
 
+    def test_copy_node(self):
+        input_ = 'copytest'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path,
+             'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
+        shock_id = ret1['shock_id']
+        retcopy = self.getImpl().copy_shock_node(self.ctx,
+                                                 {'shock_id': shock_id})[0]
+        new_id = retcopy['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': new_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']  # @UnusedVariable
+        self.assertEqual(file_name, input_file_name)
+        # attributes only works in Shock 0.9.13+
+        # self.assertEqual(attribs, {'foopy': [{'bar': 'baz'}]})
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+        self.delete_shock_node(new_id)
+
+    def test_copy_err_node_not_found(self):
+        # test forcing a ShockException on download.
+        self.fail_copy(
+            {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23'},
+            'Error copying Shock node ' +
+            '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: ' +
+            'err@node_CreateNodeUpload: not found',
+            exception=ShockException)
+
+    def test_copy_err_no_node_provided(self):
+        # test forcing a ShockException on download.
+        self.fail_copy(
+            {'shock_id': ''}, 'Must provide shock ID')
+
+    def fail_copy(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.getImpl().copy_shock_node(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
     def fail_download(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
             self.getImpl().shock_to_file(self.ctx, params)

@@ -155,7 +155,7 @@ public class DataFileUtilClient {
      * Download a file from Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.ShockToFileParams ShockToFileParams}
-     * @return   instance of type {@link us.kbase.datafileutil.ShockToFileOutput ShockToFileOutput}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.ShockToFileOutput ShockToFileOutput}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -173,7 +173,7 @@ public class DataFileUtilClient {
      * Load a file to Shock.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.FileToShockParams FileToShockParams}
-     * @return   instance of type {@link us.kbase.datafileutil.FileToShockOutput FileToShockOutput}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.FileToShockOutput FileToShockOutput}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -182,6 +182,24 @@ public class DataFileUtilClient {
         args.add(params);
         TypeReference<List<FileToShockOutput>> retType = new TypeReference<List<FileToShockOutput>>() {};
         List<FileToShockOutput> res = caller.jsonrpcCall("DataFileUtil.file_to_shock", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: copy_shock_node</p>
+     * <pre>
+     * Copy a Shock node.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.CopyShockNodeParams CopyShockNodeParams}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.CopyShockNodeOutput CopyShockNodeOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public CopyShockNodeOutput copyShockNode(CopyShockNodeParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<CopyShockNodeOutput>> retType = new TypeReference<List<CopyShockNodeOutput>>() {};
+        List<CopyShockNodeOutput> res = caller.jsonrpcCall("DataFileUtil.copy_shock_node", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

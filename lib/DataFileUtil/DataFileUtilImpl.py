@@ -3,6 +3,7 @@ import os
 import requests
 import json
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
 class ShockException(Exception):
@@ -29,7 +30,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "a3f5097c150ea522e700f743096520e006cc8cc0"
+    GIT_COMMIT_HASH = "f6c619941ab57f403ad5e08f16e34840d4fc06c7"
     
     #BEGIN_CLASS_HEADER
     def log(self, message):
@@ -78,9 +79,11 @@ services.
            parameter "attributes" of mapping from String to unspecified object
         """
         # ctx is the context object
-        # return variables are: returnVal
+        # return variables are: out
         #BEGIN shock_to_file
         token = ctx['token']
+        if not token:
+            raise Exception('Authentication token required.')
         headers = {'Authorization': 'OAuth ' + token}
         shock_id = params.get('shock_id')
         if not shock_id:
@@ -104,23 +107,23 @@ services.
                  str(file_path))
         with open(file_path, 'w') as fhandle:
             r = requests.get(node_url + '?download_raw', stream=True,
-                             headers=headers)
+                             headers=headers, allow_redirects=True)
             self.check_shock_response(r, errtxt)
             for chunk in r.iter_content(1024):
                 if not chunk:
                     break
                 fhandle.write(chunk)
-        returnVal = {'node_file_name': node_file_name,
-                     'attributes': attributes}
+        out = {'node_file_name': node_file_name,
+               'attributes': attributes}
         self.log('downloading done')
         #END shock_to_file
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, dict):
+        if not isinstance(out, dict):
             raise ValueError('Method shock_to_file return value ' +
-                             'returnVal is not type dict as required.')
+                             'out is not type dict as required.')
         # return the results
-        return [returnVal]
+        return [out]
 
     def file_to_shock(self, ctx, params):
         """
@@ -141,16 +144,16 @@ services.
            parameter "handle_id" of String
         """
         # ctx is the context object
-        # return variables are: returnVal
+        # return variables are: out
         #BEGIN file_to_shock
         token = ctx['token']
-        if token is None:
-            raise Exception("Authentication token required!")
-        header = {'Authorization': "Oauth {0}".format(token)}
-        if 'file_path' not in params:
-            raise Exception("No file given for upload to SHOCK!")
+        if not token:
+            raise Exception('Authentication token required.')
+        header = {'Authorization': 'Oauth ' + token}
+        file_path = params.get('file_path')
+        if not file_path:
+            raise Exception('No file given for upload to Shock.')
         attribs = params.get('attributes')
-        file_path = params['file_path']
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
             files = {'upload': data_file}
@@ -164,23 +167,63 @@ services.
             response, ('Error trying to upload file {} to Shock: '
                        ).format(file_path))
         shock_id = response.json()['data']['id']
-        returnVal = {'shock_id': shock_id, 'handle_id': None}
+        out = {'shock_id': shock_id, 'handle_id': None}
         if params.get('make_handle'):
             hs = HandleService(self.handle_url, token=token)
             hid = hs.persist_handle({'id': shock_id,
                                      'type': 'shock',
                                      'url': self.shock_url
                                      })
-            returnVal['handle_id'] = hid
+            out['handle_id'] = hid
         self.log('uploading done into shock node: ' + shock_id)
         #END file_to_shock
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, dict):
+        if not isinstance(out, dict):
             raise ValueError('Method file_to_shock return value ' +
-                             'returnVal is not type dict as required.')
+                             'out is not type dict as required.')
         # return the results
-        return [returnVal]
+        return [out]
+
+    def copy_shock_node(self, ctx, params):
+        """
+        Copy a Shock node.
+        :param params: instance of type "CopyShockNodeParams" (Input for the
+           copy_shock_node function. shock_id - the id of the node to copy.)
+           -> structure: parameter "shock_id" of String
+        :returns: instance of type "CopyShockNodeOutput" (Output of the
+           copy_shock_node function. shock_id - the id of the new Shock
+           node.) -> structure: parameter "shock_id" of String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN copy_shock_node
+        token = ctx['token']
+        if token is None:
+            raise Exception('Authentication token required!')
+        header = {'Authorization': 'Oauth {}'.format(token)}
+        source_id = params.get('shock_id')
+        if not source_id:
+            raise ValueError('Must provide shock ID')
+        mpdata = MultipartEncoder(fields={'copy_data': source_id})
+        header['Content-Type'] = mpdata.content_type
+        response = requests.post(
+            # copy_attributes only works in 0.9.13+
+            self.shock_url + '/node?copy_indexes=1&copy_attributes=1',
+            headers=header, data=mpdata, allow_redirects=True)
+        self.check_shock_response(
+            response, ('Error copying Shock node {}: '
+                       ).format(source_id))
+        shock_id = response.json()['data']['id']
+        out = {'shock_id': shock_id}
+        #END copy_shock_node
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, dict):
+            raise ValueError('Method copy_shock_node return value ' +
+                             'out is not type dict as required.')
+        # return the results
+        return [out]
 
     def status(self, ctx):
         #BEGIN_STATUS

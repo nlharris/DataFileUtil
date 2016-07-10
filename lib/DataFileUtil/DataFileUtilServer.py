@@ -335,6 +335,10 @@ class Application(object):
                              name='DataFileUtil.file_to_shock',
                              types=[dict])
         self.method_authentication['DataFileUtil.file_to_shock'] = 'required'
+        self.rpc_service.add(impl_DataFileUtil.copy_shock_node,
+                             name='DataFileUtil.copy_shock_node',
+                             types=[dict])
+        self.method_authentication['DataFileUtil.copy_shock_node'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.status,
                              name='DataFileUtil.status',
                              types=[dict])
