@@ -26,8 +26,8 @@ DataFileUtil::DataFileUtilClient
 =head1 DESCRIPTION
 
 
-Contains utilities for retrieving and saving data from and to KBase data
-services.
+Contains utilities for saving and retrieving data to and from KBase data
+services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
 
 
 =cut
@@ -336,8 +336,7 @@ CopyShockNodeOutput is a reference to a hash where the following keys are define
 
 =item Description
 
-Copy a Shock node. Note that attributes are only copied in Shock
-version 0.9.13+.
+Copy a Shock node.
 
 =back
 

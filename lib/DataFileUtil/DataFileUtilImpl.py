@@ -23,8 +23,8 @@ class DataFileUtil:
     DataFileUtil
 
     Module Description:
-    Contains utilities for retrieving and saving data from and to KBase data
-services.
+    Contains utilities for saving and retrieving data to and from KBase data
+services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -35,7 +35,7 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "5786466b30e79134d2077c3c81316c9654ee7e77"
+    GIT_COMMIT_HASH = "1c9e679d712b822176201762607b44633bc783c9"
     
     #BEGIN_CLASS_HEADER
 
@@ -216,8 +216,7 @@ services.
 
     def copy_shock_node(self, ctx, params):
         """
-        Copy a Shock node. Note that attributes are only copied in Shock
-        version 0.9.13+.
+        Copy a Shock node.
         :param params: instance of type "CopyShockNodeParams" (Input for the
            copy_shock_node function. shock_id - the id of the node to copy.)
            -> structure: parameter "shock_id" of String

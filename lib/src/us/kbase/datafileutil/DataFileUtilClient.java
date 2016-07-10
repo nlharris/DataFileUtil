@@ -17,8 +17,8 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: DataFileUtil</p>
  * <pre>
- * Contains utilities for retrieving and saving data from and to KBase data
- * services.
+ * Contains utilities for saving and retrieving data to and from KBase data
+ * services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
  * </pre>
  */
 public class DataFileUtilClient {
@@ -189,8 +189,7 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: copy_shock_node</p>
      * <pre>
-     * Copy a Shock node. Note that attributes are only copied in Shock
-     * version 0.9.13+.
+     * Copy a Shock node.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.CopyShockNodeParams CopyShockNodeParams}
      * @return   parameter "out" of type {@link us.kbase.datafileutil.CopyShockNodeOutput CopyShockNodeOutput}

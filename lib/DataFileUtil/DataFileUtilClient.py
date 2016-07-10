@@ -84,8 +84,7 @@ class DataFileUtil(object):
 
     def copy_shock_node(self, params, context=None):
         """
-        Copy a Shock node. Note that attributes are only copied in Shock
-        version 0.9.13+.
+        Copy a Shock node.
         :param params: instance of type "CopyShockNodeParams" (Input for the
            copy_shock_node function. shock_id - the id of the node to copy.)
            -> structure: parameter "shock_id" of String
