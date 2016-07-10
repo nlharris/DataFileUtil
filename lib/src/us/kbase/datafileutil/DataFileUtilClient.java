@@ -188,7 +188,8 @@ public class DataFileUtilClient {
     /**
      * <p>Original spec-file function name: copy_shock_node</p>
      * <pre>
-     * Copy a Shock node.
+     * Copy a Shock node. Note that attributes are only copied in Shock
+     * version 0.9.13+.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.CopyShockNodeParams CopyShockNodeParams}
      * @return   parameter "out" of type {@link us.kbase.datafileutil.CopyShockNodeOutput CopyShockNodeOutput}

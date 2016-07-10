@@ -4,6 +4,9 @@ import requests
 import json
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+import time
+import gzip
+import shutil
 
 
 class ShockException(Exception):
@@ -30,11 +33,26 @@ services.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "f6c619941ab57f403ad5e08f16e34840d4fc06c7"
+    GIT_COMMIT_HASH = "f2f142cc8c94e25fa46249a45ae22f57b4b0b11e"
     
     #BEGIN_CLASS_HEADER
-    def log(self, message):
-        print(message)
+
+    GZIP = '.gz'
+
+    def log(self, message, prefix_newline=False):
+        print(('\n' if prefix_newline else '') +
+              str(time.time()) + ': ' + str(message))
+
+    # it'd be nice if you could just open the file and gzip on the fly but I
+    # don't see a way to do that
+    def gzip(self, oldfile):
+        if oldfile.lower().endswith(self.GZIP):
+            raise ValueError('File {} is already gzipped'.format(oldfile))
+        newfile = oldfile + self.GZIP
+        self.log('gzipping {} to {}'.format(oldfile, newfile))
+        with open(oldfile, 'rb') as s, gzip.open(newfile, 'wb') as t:
+            shutil.copyfileobj(s, t)
+        return newfile
 
     def check_shock_response(self, response, errtxt):
         if not response.ok:
@@ -56,7 +74,6 @@ services.
         self.handle_url = config['handle-service-url']
         #END_CONSTRUCTOR
         pass
-    
 
     def shock_to_file(self, ctx, params):
         """
@@ -83,7 +100,7 @@ services.
         #BEGIN shock_to_file
         token = ctx['token']
         if not token:
-            raise Exception('Authentication token required.')
+            raise ValueError('Authentication token required.')
         headers = {'Authorization': 'OAuth ' + token}
         shock_id = params.get('shock_id')
         if not shock_id:
@@ -133,10 +150,14 @@ services.
            location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false.) -> structure: parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object, parameter "make_handle" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           for the shock node. Default false. gzip - gzip the file before
+           loading it to Shock. This will create a file_path.gz file prior to
+           upload. Default false.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
+           @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle_id - the handle ID for the new handle, if created. Null
@@ -148,11 +169,13 @@ services.
         #BEGIN file_to_shock
         token = ctx['token']
         if not token:
-            raise Exception('Authentication token required.')
+            raise ValueError('Authentication token required.')
         header = {'Authorization': 'Oauth ' + token}
         file_path = params.get('file_path')
         if not file_path:
-            raise Exception('No file given for upload to Shock.')
+            raise ValueError('No file provided for upload to Shock.')
+        if params.get('gzip'):
+            file_path = self.gzip(file_path)
         attribs = params.get('attributes')
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
@@ -187,7 +210,8 @@ services.
 
     def copy_shock_node(self, ctx, params):
         """
-        Copy a Shock node.
+        Copy a Shock node. Note that attributes are only copied in Shock
+        version 0.9.13+.
         :param params: instance of type "CopyShockNodeParams" (Input for the
            copy_shock_node function. shock_id - the id of the node to copy.)
            -> structure: parameter "shock_id" of String
@@ -200,7 +224,7 @@ services.
         #BEGIN copy_shock_node
         token = ctx['token']
         if token is None:
-            raise Exception('Authentication token required!')
+            raise ValueError('Authentication token required!')
         header = {'Authorization': 'Oauth {}'.format(token)}
         source_id = params.get('shock_id')
         if not source_id:

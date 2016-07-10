@@ -64,10 +64,14 @@ class DataFileUtil(object):
            location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false.) -> structure: parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object, parameter "make_handle" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           for the shock node. Default false. gzip - gzip the file before
+           loading it to Shock. This will create a file_path.gz file prior to
+           upload. Default false.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
+           @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle_id - the handle ID for the new handle, if created. Null
@@ -80,7 +84,8 @@ class DataFileUtil(object):
 
     def copy_shock_node(self, params, context=None):
         """
-        Copy a Shock node.
+        Copy a Shock node. Note that attributes are only copied in Shock
+        version 0.9.13+.
         :param params: instance of type "CopyShockNodeParams" (Input for the
            copy_shock_node function. shock_id - the id of the node to copy.)
            -> structure: parameter "shock_id" of String

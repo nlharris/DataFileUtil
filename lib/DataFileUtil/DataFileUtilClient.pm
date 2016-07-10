@@ -225,6 +225,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -242,6 +243,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -342,7 +344,8 @@ CopyShockNodeOutput is a reference to a hash where the following keys are define
 
 =item Description
 
-Copy a Shock node.
+Copy a Shock node. Note that attributes are only copied in Shock
+version 0.9.13+.
 
 =back
 
@@ -623,6 +626,8 @@ attributes - user-specified attributes to save to the Shock node along
     with the file.
 make_handle - make a Handle Service handle for the shock node. Default
     false.
+gzip - gzip the file before loading it to Shock. This will create a
+    file_path.gz file prior to upload. Default false.
 
 
 =item Definition
@@ -634,6 +639,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
+gzip has a value which is a DataFileUtil.boolean
 
 </pre>
 
@@ -645,6 +651,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
+gzip has a value which is a DataFileUtil.boolean
 
 
 =end text

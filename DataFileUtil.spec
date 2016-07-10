@@ -53,11 +53,14 @@ module DataFileUtil {
            with the file.
        make_handle - make a Handle Service handle for the shock node. Default
            false.
+       gzip - gzip the file before loading it to Shock. This will create a
+           file_path.gz file prior to upload. Default false.
     */
     typedef structure {
         string file_path;
         mapping<string, UnspecifiedObject> attributes;
         boolean make_handle;
+        boolean gzip;
     } FileToShockParams;
 
     /* Output of the file_to_shock function.

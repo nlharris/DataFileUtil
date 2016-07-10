@@ -23,6 +23,8 @@ import us.kbase.common.service.UObject;
  *     with the file.
  * make_handle - make a Handle Service handle for the shock node. Default
  *     false.
+ * gzip - gzip the file before loading it to Shock. This will create a
+ *     file_path.gz file prior to upload. Default false.
  * </pre>
  * 
  */
@@ -31,7 +33,8 @@ import us.kbase.common.service.UObject;
 @JsonPropertyOrder({
     "file_path",
     "attributes",
-    "make_handle"
+    "make_handle",
+    "gzip"
 })
 public class FileToShockParams {
 
@@ -41,6 +44,8 @@ public class FileToShockParams {
     private Map<String, UObject> attributes;
     @JsonProperty("make_handle")
     private Long makeHandle;
+    @JsonProperty("gzip")
+    private Long gzip;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -88,6 +93,21 @@ public class FileToShockParams {
         return this;
     }
 
+    @JsonProperty("gzip")
+    public Long getGzip() {
+        return gzip;
+    }
+
+    @JsonProperty("gzip")
+    public void setGzip(Long gzip) {
+        this.gzip = gzip;
+    }
+
+    public FileToShockParams withGzip(Long gzip) {
+        this.gzip = gzip;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -100,7 +120,7 @@ public class FileToShockParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", gzip=")+ gzip)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

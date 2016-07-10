@@ -4,6 +4,7 @@ import time
 import requests
 
 from os import environ
+import gzip
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -141,6 +142,40 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(shock_id)
         self.hs.delete_handles([hid])
 
+    def test_gzip(self):
+        input_ = 'testgzip'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name + '.gz')
+        self.assertIsNone(attribs)
+        with gzip.open(file_path2, 'rb') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+    def test_upload_err_already_gzipped(self):
+        self.fail_upload(
+            {'file_path': 'input.gz', 'gzip': 1},
+            'File input.gz is already gzipped')
+
+    def test_upload_err_no_file_provided(self):
+        self.fail_upload(
+            {'file_path': ''},
+            'No file provided for upload to Shock.')
+
     def test_download_err_node_not_found(self):
         # test forcing a ShockException on download.
         self.fail_download(
@@ -165,7 +200,6 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(res['data']['id'])
 
     def test_download_err_no_node_provided(self):
-        # test forcing a ShockException on download.
         self.fail_download(
             {'shock_id': '',
              'file_path': 'foo'
@@ -173,7 +207,6 @@ class DataFileUtilTest(unittest.TestCase):
             'Must provide shock ID')
 
     def test_download_err_no_file_provided(self):
-        # test forcing a ShockException on download.
         self.fail_download(
             {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f2',
              'file_path': ''
@@ -211,7 +244,6 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(new_id)
 
     def test_copy_err_node_not_found(self):
-        # test forcing a ShockException on download.
         self.fail_copy(
             {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23'},
             'Error copying Shock node ' +
@@ -220,7 +252,6 @@ class DataFileUtilTest(unittest.TestCase):
             exception=ShockException)
 
     def test_copy_err_no_node_provided(self):
-        # test forcing a ShockException on download.
         self.fail_copy(
             {'shock_id': ''}, 'Must provide shock ID')
 
@@ -232,4 +263,9 @@ class DataFileUtilTest(unittest.TestCase):
     def fail_download(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
             self.getImpl().shock_to_file(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def fail_upload(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.getImpl().file_to_shock(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
