@@ -8,6 +8,7 @@ import time
 import gzip
 import shutil
 from Workspace.WorkspaceClient import Workspace
+import semver
 
 
 class ShockException(Exception):
@@ -242,6 +243,24 @@ services.
             response, ('Error copying Shock node {}: '
                        ).format(source_id))
         shock_id = response.json()['data']['id']
+        # remove when min required version is 0.9.13
+        if semver.match(self.versions(ctx)[1], '<0.9.13'):
+            del header['Content-Type']
+            r = requests.get(self.shock_url + '/node/' + source_id,
+                             headers=header)
+            errtxt = ('Error downloading attributes from shock ' +
+                      'node {}: ').format(shock_id)
+            self.check_shock_response(r, errtxt)
+            attribs = r.json()['data']['attributes']
+            if attribs:
+                files = {'attributes': ('attributes',
+                                        json.dumps(attribs).encode('UTF-8'))}
+                response = requests.put(
+                    self.shock_url + '/node/' + shock_id, headers=header,
+                    files=files, allow_redirects=True)
+                self.check_shock_response(
+                    response, ('Error setting attributes on Shock node {}: '
+                               ).format(shock_id))
         out = {'shock_id': shock_id}
         #END copy_shock_node
 

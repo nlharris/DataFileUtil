@@ -233,16 +233,15 @@ class DataFileUtilTest(unittest.TestCase):
         ret2 = self.getImpl().shock_to_file(
             self.ctx,
             {'shock_id': new_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
+        self.delete_shock_node(new_id)
         file_name = ret2['node_file_name']
         attribs = ret2['attributes']  # @UnusedVariable
         self.assertEqual(file_name, input_file_name)
-        # attributes only works in Shock 0.9.13+
-        # self.assertEqual(attribs, {'foopy': [{'bar': 'baz'}]})
+        self.assertEqual(attribs, {'foopy': [{'bar': 'baz'}]})
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)
-        self.delete_shock_node(shock_id)
-        self.delete_shock_node(new_id)
 
     def test_copy_err_node_not_found(self):
         self.fail_copy(

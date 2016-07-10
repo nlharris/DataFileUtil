@@ -1,6 +1,6 @@
 /*
-Contains utilities for retrieving and saving data from and to KBase data
-services.
+Contains utilities for saving and retrieving data to and from KBase data
+services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
 */
 
 module DataFileUtil {
@@ -94,9 +94,7 @@ module DataFileUtil {
         string shock_id;
     } CopyShockNodeOutput;
     
-    /* Copy a Shock node. Note that attributes are only copied in Shock
-       version 0.9.13+.
-    */
+    /* Copy a Shock node. */
     funcdef copy_shock_node(CopyShockNodeParams params)
         returns(CopyShockNodeOutput out) authentication required;
         
