@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * url - the url of the shock server
  * type - the type of the handle. This should always be ‘shock’.
  * file_name - the name of the file
- * remote_sha1 - the sha1 digest of the file.
+ * remote_md5 - the md5 digest of the file.
  * </pre>
  * 
  */
@@ -33,8 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "id",
     "url",
     "type",
-    "remote_md5",
-    "remote_sha1"
+    "remote_md5"
 })
 public class Handle {
 
@@ -50,8 +49,6 @@ public class Handle {
     private String type;
     @JsonProperty("remote_md5")
     private String remoteMd5;
-    @JsonProperty("remote_sha1")
-    private String remoteSha1;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("hid")
@@ -144,21 +141,6 @@ public class Handle {
         return this;
     }
 
-    @JsonProperty("remote_sha1")
-    public String getRemoteSha1() {
-        return remoteSha1;
-    }
-
-    @JsonProperty("remote_sha1")
-    public void setRemoteSha1(String remoteSha1) {
-        this.remoteSha1 = remoteSha1;
-    }
-
-    public Handle withRemoteSha1(String remoteSha1) {
-        this.remoteSha1 = remoteSha1;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -171,7 +153,7 @@ public class Handle {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("Handle"+" [hid=")+ hid)+", fileName=")+ fileName)+", id=")+ id)+", url=")+ url)+", type=")+ type)+", remoteMd5=")+ remoteMd5)+", remoteSha1=")+ remoteSha1)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("Handle"+" [hid=")+ hid)+", fileName=")+ fileName)+", id=")+ id)+", url=")+ url)+", type=")+ type)+", remoteMd5=")+ remoteMd5)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

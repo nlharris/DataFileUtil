@@ -40,7 +40,7 @@ public class FileToShockOutput {
      * url - the url of the shock server
      * type - the type of the handle. This should always be ‘shock’.
      * file_name - the name of the file
-     * remote_sha1 - the sha1 digest of the file.
+     * remote_md5 - the md5 digest of the file.
      * </pre>
      * 
      */
@@ -73,7 +73,7 @@ public class FileToShockOutput {
      * url - the url of the shock server
      * type - the type of the handle. This should always be ‘shock’.
      * file_name - the name of the file
-     * remote_sha1 - the sha1 digest of the file.
+     * remote_md5 - the md5 digest of the file.
      * </pre>
      * 
      */
@@ -92,7 +92,7 @@ public class FileToShockOutput {
      * url - the url of the shock server
      * type - the type of the handle. This should always be ‘shock’.
      * file_name - the name of the file
-     * remote_sha1 - the sha1 digest of the file.
+     * remote_md5 - the md5 digest of the file.
      * </pre>
      * 
      */

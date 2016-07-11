@@ -35,7 +35,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "d5372a5da0df9fc50cc3dd3d59f59c1713b9515c"
+    GIT_COMMIT_HASH = "746801fc3f4c6c31697cc8508f7d14be3d31aa46"
     
     #BEGIN_CLASS_HEADER
 
@@ -173,11 +173,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
            server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_sha1 - the sha1
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
            digest of the file.) -> structure: parameter "hid" of String,
            parameter "file_name" of String, parameter "id" of String,
            parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String, parameter "remote_sha1" of String
+           "remote_md5" of String
         """
         # ctx is the context object
         # return variables are: out

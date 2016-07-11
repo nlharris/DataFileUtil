@@ -229,7 +229,6 @@ Handle is a reference to a hash where the following keys are defined:
 	url has a value which is a string
 	type has a value which is a string
 	remote_md5 has a value which is a string
-	remote_sha1 has a value which is a string
 
 </pre>
 
@@ -255,7 +254,6 @@ Handle is a reference to a hash where the following keys are defined:
 	url has a value which is a string
 	type has a value which is a string
 	remote_md5 has a value which is a string
-	remote_sha1 has a value which is a string
 
 
 =end text
@@ -611,7 +609,7 @@ id - the id for the shock node
 url - the url of the shock server
 type - the type of the handle. This should always be ‘shock’.
 file_name - the name of the file
-remote_sha1 - the sha1 digest of the file.
+remote_md5 - the md5 digest of the file.
 
 
 =item Definition
@@ -626,7 +624,6 @@ id has a value which is a string
 url has a value which is a string
 type has a value which is a string
 remote_md5 has a value which is a string
-remote_sha1 has a value which is a string
 
 </pre>
 
@@ -641,7 +638,6 @@ id has a value which is a string
 url has a value which is a string
 type has a value which is a string
 remote_md5 has a value which is a string
-remote_sha1 has a value which is a string
 
 
 =end text
