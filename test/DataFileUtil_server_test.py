@@ -100,28 +100,69 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(shock_id)
 
     def test_file_to_shock_and_back(self):
-        input_ = "Test2!!!"
-        tmp_dir = self.cfg['scratch']
-        input_file_name = 'input.txt'
-        file_path = os.path.join(tmp_dir, input_file_name)
-        with open(file_path, 'w') as fh1:
-            fh1.write(input_)
+        file_path = self.write_file('input.txt', 'Test2!!!')
         ret1 = self.getImpl().file_to_shock(
             self.ctx,
             {'file_path': file_path})[0]
         shock_id = ret1['shock_id']
-        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        file_path2 = os.path.join(self.cfg['scratch'], 'output.txt')
         ret2 = self.getImpl().shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
         attribs = ret2['attributes']
-        self.assertEqual(file_name, input_file_name)
+        self.assertEqual(file_name, 'input.txt')
         self.assertIsNone(attribs)
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
-        self.assertEqual(output, input_)
+        self.assertEqual(output, 'Test2!!!')
         self.delete_shock_node(shock_id)
+
+    def test_files_to_shock_and_back(self):
+        infile1 = self.write_file('input1.txt', 'filestoshock1')
+        infile2 = self.write_file('input2.txt', 'filestoshock2')
+        ret1 = self.getImpl().files_to_shock(
+            self.ctx,
+            [{'file_path': infile1},
+             {'file_path': infile2}
+             ]
+        )[0]
+        shock_id1 = ret1[0]['shock_id']
+        shock_id2 = ret1[1]['shock_id']
+        outfile1 = os.path.join(self.cfg['scratch'], 'output1.txt')
+        outfile2 = os.path.join(self.cfg['scratch'], 'output2.txt')
+        ret2 = self.getImpl().shock_to_files(
+            self.ctx,
+            [{'shock_id': shock_id1, 'file_path': outfile1},
+             {'shock_id': shock_id2, 'file_path': outfile2}
+             ]
+        )[0]
+
+        self.delete_shock_node(shock_id1)
+        self.delete_shock_node(shock_id2)
+
+        file_name1 = ret2[0]['node_file_name']
+        attribs1 = ret2[0]['attributes']
+        self.assertEqual(file_name1, 'input1.txt')
+        self.assertIsNone(attribs1)
+        with open(outfile1, 'r') as fh:
+            output = fh.read()
+        self.assertEqual(output, 'filestoshock1')
+
+        file_name2 = ret2[1]['node_file_name']
+        attribs2 = ret2[1]['attributes']
+        self.assertEqual(file_name2, 'input2.txt')
+        self.assertIsNone(attribs2)
+        with open(outfile2, 'r') as fh:
+            output = fh.read()
+        self.assertEqual(output, 'filestoshock2')
+
+    def write_file(self, filename, content):
+        tmp_dir = self.cfg['scratch']
+        file_path = os.path.join(tmp_dir, filename)
+        with open(file_path, 'w') as fh1:
+            fh1.write(content)
+        return file_path
 
     def test_upload_make_handle(self):
         input_ = "Test3!!!"

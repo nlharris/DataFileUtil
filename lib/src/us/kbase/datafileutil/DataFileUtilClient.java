@@ -169,6 +169,24 @@ public class DataFileUtilClient {
     }
 
     /**
+     * <p>Original spec-file function name: shock_to_files</p>
+     * <pre>
+     * Download multiple files from Shock.
+     * </pre>
+     * @param   params   instance of list of type {@link us.kbase.datafileutil.ShockToFileParams ShockToFileParams}
+     * @return   parameter "out" of list of type {@link us.kbase.datafileutil.ShockToFileOutput ShockToFileOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<ShockToFileOutput> shockToFiles(List<ShockToFileParams> params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<ShockToFileOutput>>> retType = new TypeReference<List<List<ShockToFileOutput>>>() {};
+        List<List<ShockToFileOutput>> res = caller.jsonrpcCall("DataFileUtil.shock_to_files", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: file_to_shock</p>
      * <pre>
      * Load a file to Shock.
@@ -183,6 +201,24 @@ public class DataFileUtilClient {
         args.add(params);
         TypeReference<List<FileToShockOutput>> retType = new TypeReference<List<FileToShockOutput>>() {};
         List<FileToShockOutput> res = caller.jsonrpcCall("DataFileUtil.file_to_shock", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: files_to_shock</p>
+     * <pre>
+     * Load multiple files to Shock.
+     * </pre>
+     * @param   params   instance of list of type {@link us.kbase.datafileutil.FileToShockParams FileToShockParams}
+     * @return   parameter "out" of list of type {@link us.kbase.datafileutil.FileToShockOutput FileToShockOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FileToShockOutput> filesToShock(List<FileToShockParams> params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<FileToShockOutput>>> retType = new TypeReference<List<List<FileToShockOutput>>>() {};
+        List<List<FileToShockOutput>> res = caller.jsonrpcCall("DataFileUtil.files_to_shock", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
