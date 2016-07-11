@@ -12,11 +12,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: FileToShockOutput</p>
+ * <p>Original spec-file type: CopyShockNodeOutput</p>
  * <pre>
- * Output of the file_to_shock function.
- *     shock_id - the ID of the new Shock node.
- *     handle - the new handle, if created. Null otherwise.
+ * Output of the copy_shock_node function.
+ *  shock_id - the id of the new Shock node.
+ *  handle - the new handle, if created. Null otherwise.
  * </pre>
  * 
  */
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "shock_id",
     "handle"
 })
-public class FileToShockOutput {
+public class CopyShockNodeOutput {
 
     @JsonProperty("shock_id")
     private String shockId;
@@ -58,7 +58,7 @@ public class FileToShockOutput {
         this.shockId = shockId;
     }
 
-    public FileToShockOutput withShockId(String shockId) {
+    public CopyShockNodeOutput withShockId(String shockId) {
         this.shockId = shockId;
         return this;
     }
@@ -101,7 +101,7 @@ public class FileToShockOutput {
         this.handle = handle;
     }
 
-    public FileToShockOutput withHandle(Handle handle) {
+    public CopyShockNodeOutput withHandle(Handle handle) {
         this.handle = handle;
         return this;
     }
@@ -118,7 +118,7 @@ public class FileToShockOutput {
 
     @Override
     public String toString() {
-        return ((((((("FileToShockOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("CopyShockNodeOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -64,19 +64,69 @@ class DataFileUtil(object):
            location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false.) -> structure: parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object, parameter "make_handle" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           for the shock node. Default false. gzip - gzip the file before
+           loading it to Shock. This will create a file_path.gz file prior to
+           upload. Default false.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
+           @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle_id - the handle ID for the new handle, if created. Null
-           otherwise.) -> structure: parameter "shock_id" of String,
-           parameter "handle_id" of String
+           handle - the new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String
         """
         return self._client.call_method(
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
+
+    def copy_shock_node(self, params, context=None):
+        """
+        Copy a Shock node.
+        :param params: instance of type "CopyShockNodeParams" (Input for the
+           copy_shock_node function. Required parameters: shock_id - the id
+           of the node to copy. Optional parameters: make_handle - make a
+           Handle Service handle for the shock node. Default false.) ->
+           structure: parameter "shock_id" of String, parameter "make_handle"
+           of type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
+           1))
+        :returns: instance of type "CopyShockNodeOutput" (Output of the
+           copy_shock_node function. shock_id - the id of the new Shock node.
+           handle - the new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String
+        """
+        return self._client.call_method(
+            'DataFileUtil.copy_shock_node',
+            [params], self._service_ver, context)
+
+    def versions(self, context=None):
+        """
+        Get the versions of the Workspace service and Shock service.
+        :returns: multiple set - (1) parameter "wsver" of String, (2)
+           parameter "shockver" of String
+        """
+        return self._client.call_method(
+            'DataFileUtil.versions',
+            [], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('DataFileUtil.status',

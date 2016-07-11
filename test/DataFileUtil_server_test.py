@@ -4,6 +4,8 @@ import time
 import requests
 
 from os import environ
+import gzip
+import semver
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -121,7 +123,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
 
-    def test_make_handle(self):
+    def test_upload_make_handle(self):
         input_ = "Test3!!!"
         tmp_dir = self.cfg['scratch']
         input_file_name = 'input.txt'
@@ -132,14 +134,100 @@ class DataFileUtilTest(unittest.TestCase):
             self.ctx,
             {'file_path': file_path, 'make_handle': 1})[0]
         shock_id = ret1['shock_id']
-        hid = ret1['handle_id']
+        self.delete_shock_node(shock_id)
+        rethandle = ret1['handle']
+        hid = rethandle['hid']
         handle = self.hs.hids_to_handles([hid])[0]
+        self.hs.delete_handles([hid])
+        self.check_handle(rethandle, hid, shock_id,
+                          '88d0594a4ee2b25527540fe76233a405', 'input.txt')
+        self.check_handle(handle, hid, shock_id,
+                          '88d0594a4ee2b25527540fe76233a405', 'input.txt')
+
+    def check_handle(self, handle, hid, shock_id, md5, filename):
         self.assertEqual(handle['id'], shock_id)
         self.assertEqual(handle['hid'], hid)
         self.assertEqual(handle['url'], self.shockURL)
         self.assertEqual(handle['type'], 'shock')
+        self.assertEqual(handle['remote_md5'], md5)
+        self.assertEqual(handle['file_name'], filename)
+
+    def test_gzip(self):
+        input_ = 'testgzip'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name + '.gz')
+        self.assertIsNone(attribs)
+        with gzip.open(file_path2, 'rb') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
-        self.hs.delete_handles([hid])
+
+    def test_gzip_already_gzipped(self):
+        input_ = 'testgzip2'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt.gz'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name)
+        self.assertIsNone(attribs)
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+    def test_gzip_already_targzipped(self):
+        input_ = 'testgzip3'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt.tgz'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path, 'gzip': 1})[0]
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']
+        self.assertEqual(file_name, input_file_name)
+        self.assertIsNone(attribs)
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+    def test_upload_err_no_file_provided(self):
+        self.fail_upload(
+            {'file_path': ''},
+            'No file provided for upload to Shock.')
 
     def test_download_err_node_not_found(self):
         # test forcing a ShockException on download.
@@ -165,7 +253,6 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(res['data']['id'])
 
     def test_download_err_no_node_provided(self):
-        # test forcing a ShockException on download.
         self.fail_download(
             {'shock_id': '',
              'file_path': 'foo'
@@ -173,14 +260,95 @@ class DataFileUtilTest(unittest.TestCase):
             'Must provide shock ID')
 
     def test_download_err_no_file_provided(self):
-        # test forcing a ShockException on download.
         self.fail_download(
             {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f2',
              'file_path': ''
              },
             'Must provide file path')
 
+    def test_copy_node(self):
+        input_ = 'copytest'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path,
+             'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
+        shock_id = ret1['shock_id']
+        retcopy = self.getImpl().copy_shock_node(self.ctx,
+                                                 {'shock_id': shock_id})[0]
+        new_id = retcopy['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.getImpl().shock_to_file(
+            self.ctx,
+            {'shock_id': new_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
+        self.delete_shock_node(new_id)
+        file_name = ret2['node_file_name']
+        attribs = ret2['attributes']  # @UnusedVariable
+        self.assertEqual(file_name, input_file_name)
+        self.assertEqual(attribs, {'foopy': [{'bar': 'baz'}]})
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+
+    def test_copy_make_handle(self):
+        input_ = 'copytesthandle'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path,
+             'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
+        shock_id = ret1['shock_id']
+        retcopy = self.getImpl().copy_shock_node(self.ctx,
+                                                 {'shock_id': shock_id,
+                                                  'make_handle': 1})[0]
+        new_id = retcopy['shock_id']
+        self.delete_shock_node(shock_id)
+        self.delete_shock_node(new_id)
+        hid = retcopy['handle']['hid']
+        handle = self.hs.hids_to_handles([hid])[0]
+        self.hs.delete_handles([hid])
+        self.check_handle(retcopy['handle'], hid, new_id,
+                          '748ff3bbb8d31783c852513422eedb87', 'input.txt')
+        self.check_handle(handle, hid, new_id,
+                          '748ff3bbb8d31783c852513422eedb87', 'input.txt')
+
+    def test_copy_err_node_not_found(self):
+        self.fail_copy(
+            {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23'},
+            'Error copying Shock node ' +
+            '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: ' +
+            'err@node_CreateNodeUpload: not found',
+            exception=ShockException)
+
+    def test_copy_err_no_node_provided(self):
+        self.fail_copy(
+            {'shock_id': ''}, 'Must provide shock ID')
+
+    def test_versions(self):
+        wsver, shockver = self.getImpl().versions(self.ctx)
+        self.assertTrue(semver.match(wsver, '>=0.4.0'))
+        self.assertTrue(semver.match(shockver, '>=0.9.0'))
+
+    def fail_copy(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.getImpl().copy_shock_node(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
     def fail_download(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
             self.getImpl().shock_to_file(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def fail_upload(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.getImpl().file_to_shock(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))

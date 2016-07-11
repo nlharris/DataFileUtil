@@ -26,8 +26,8 @@ DataFileUtil::DataFileUtilClient
 =head1 DESCRIPTION
 
 
-Contains utilities for retrieving and saving data from and to KBase data
-services.
+Contains utilities for saving and retrieving data to and from KBase data
+services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
 
 
 =cut
@@ -89,14 +89,6 @@ sub new
 	    $self->{token} = $token->token;
 	    $self->{client}->{token} = $token->token;
 	}
-        else
-        {
-	    #
-	    # All methods in this module require authentication. In this case, if we
-	    # don't have a token, we can't continue.
-	    #
-	    die "Authentication failed: " . $token->error_message;
-	}
     }
 
     my $ua = $self->{client}->ua;	 
@@ -112,7 +104,7 @@ sub new
 
 =head2 shock_to_file
 
-  $return = $obj->shock_to_file($params)
+  $out = $obj->shock_to_file($params)
 
 =over 4
 
@@ -122,7 +114,7 @@ sub new
 
 <pre>
 $params is a DataFileUtil.ShockToFileParams
-$return is a DataFileUtil.ShockToFileOutput
+$out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
@@ -139,7 +131,7 @@ ShockToFileOutput is a reference to a hash where the following keys are defined:
 =begin text
 
 $params is a DataFileUtil.ShockToFileParams
-$return is a DataFileUtil.ShockToFileOutput
+$out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
@@ -210,7 +202,7 @@ Download a file from Shock.
 
 =head2 file_to_shock
 
-  $return = $obj->file_to_shock($params)
+  $out = $obj->file_to_shock($params)
 
 =over 4
 
@@ -220,15 +212,23 @@ Download a file from Shock.
 
 <pre>
 $params is a DataFileUtil.FileToShockParams
-$return is a DataFileUtil.FileToShockOutput
+$out is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
 
 </pre>
 
@@ -237,15 +237,23 @@ FileToShockOutput is a reference to a hash where the following keys are defined:
 =begin text
 
 $params is a DataFileUtil.FileToShockParams
-$return is a DataFileUtil.FileToShockOutput
+$out is a DataFileUtil.FileToShockOutput
 FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
 
 
 =end text
@@ -304,6 +312,187 @@ Load a file to Shock.
     }
 }
  
+
+
+=head2 copy_shock_node
+
+  $out = $obj->copy_shock_node($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.CopyShockNodeParams
+$out is a DataFileUtil.CopyShockNodeOutput
+CopyShockNodeParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
+CopyShockNodeOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.CopyShockNodeParams
+$out is a DataFileUtil.CopyShockNodeOutput
+CopyShockNodeParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
+CopyShockNodeOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+
+=end text
+
+=item Description
+
+Copy a Shock node.
+
+=back
+
+=cut
+
+ sub copy_shock_node
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function copy_shock_node (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to copy_shock_node:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'copy_shock_node');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.copy_shock_node",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'copy_shock_node',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method copy_shock_node",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'copy_shock_node',
+				       );
+    }
+}
+ 
+
+
+=head2 versions
+
+  $wsver, $shockver = $obj->versions()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$wsver is a string
+$shockver is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$wsver is a string
+$shockver is a string
+
+
+=end text
+
+=item Description
+
+Get the versions of the Workspace service and Shock service.
+
+=back
+
+=cut
+
+ sub versions
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 0)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function versions (received $n, expecting 0)");
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.versions",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'versions',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method versions",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'versions',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -347,16 +536,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'file_to_shock',
+                method_name => 'versions',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method file_to_shock",
+            error => "Error invoking method versions",
             status_line => $self->{client}->status_line,
-            method_name => 'file_to_shock',
+            method_name => 'versions',
         );
     }
 }
@@ -418,6 +607,58 @@ an int
 =begin text
 
 an int
+
+=end text
+
+=back
+
+
+
+=head2 Handle
+
+=over 4
+
+
+
+=item Description
+
+A handle for a file stored in Shock.
+hid - the id of the handle in the Handle Service that references this
+   shock node
+id - the id for the shock node
+url - the url of the shock server
+type - the type of the handle. This should always be ‘shock’.
+file_name - the name of the file
+remote_md5 - the md5 digest of the file.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+hid has a value which is a string
+file_name has a value which is a string
+id has a value which is a string
+url has a value which is a string
+type has a value which is a string
+remote_md5 has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+hid has a value which is a string
+file_name has a value which is a string
+id has a value which is a string
+url has a value which is a string
+type has a value which is a string
+remote_md5 has a value which is a string
+
 
 =end text
 
@@ -533,6 +774,8 @@ attributes - user-specified attributes to save to the Shock node along
     with the file.
 make_handle - make a Handle Service handle for the shock node. Default
     false.
+gzip - gzip the file before loading it to Shock. This will create a
+    file_path.gz file prior to upload. Default false.
 
 
 =item Definition
@@ -544,6 +787,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
+gzip has a value which is a DataFileUtil.boolean
 
 </pre>
 
@@ -555,6 +799,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
+gzip has a value which is a DataFileUtil.boolean
 
 
 =end text
@@ -574,8 +819,7 @@ make_handle has a value which is a DataFileUtil.boolean
 Output of the file_to_shock function.
 
     shock_id - the ID of the new Shock node.
-    handle_id - the handle ID for the new handle, if created. Null
-       otherwise.
+    handle - the new handle, if created. Null otherwise.
 
 
 =item Definition
@@ -585,7 +829,7 @@ Output of the file_to_shock function.
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 </pre>
 
@@ -595,7 +839,91 @@ handle_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
+
+
+=end text
+
+=back
+
+
+
+=head2 CopyShockNodeParams
+
+=over 4
+
+
+
+=item Description
+
+Input for the copy_shock_node function.
+
+       Required parameters:
+       shock_id - the id of the node to copy.
+       
+       Optional parameters:
+       make_handle - make a Handle Service handle for the shock node. Default
+           false.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 CopyShockNodeOutput
+
+=over 4
+
+
+
+=item Description
+
+Output of the copy_shock_node function.
+
+ shock_id - the id of the new Shock node.
+ handle - the new handle, if created. Null otherwise.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 
 =end text
