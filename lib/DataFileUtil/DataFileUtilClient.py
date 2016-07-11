@@ -74,9 +74,17 @@ class DataFileUtil(object):
            @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle_id - the handle ID for the new handle, if created. Null
-           otherwise.) -> structure: parameter "shock_id" of String,
-           parameter "handle_id" of String
+           handle - The new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_sha1 - the sha1
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String, parameter "remote_sha1" of String
         """
         return self._client.call_method(
             'DataFileUtil.file_to_shock',

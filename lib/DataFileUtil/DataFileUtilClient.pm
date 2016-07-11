@@ -221,7 +221,15 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+	remote_sha1 has a value which is a string
 
 </pre>
 
@@ -239,7 +247,15 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+	remote_sha1 has a value which is a string
 
 
 =end text
@@ -580,6 +596,60 @@ an int
 
 
 
+=head2 Handle
+
+=over 4
+
+
+
+=item Description
+
+A handle for a file stored in Shock.
+hid - the id of the handle in the Handle Service that references this
+   shock node
+id - the id for the shock node
+url - the url of the shock server
+type - the type of the handle. This should always be ‘shock’.
+file_name - the name of the file
+remote_sha1 - the sha1 digest of the file.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+hid has a value which is a string
+file_name has a value which is a string
+id has a value which is a string
+url has a value which is a string
+type has a value which is a string
+remote_md5 has a value which is a string
+remote_sha1 has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+hid has a value which is a string
+file_name has a value which is a string
+id has a value which is a string
+url has a value which is a string
+type has a value which is a string
+remote_md5 has a value which is a string
+remote_sha1 has a value which is a string
+
+
+=end text
+
+=back
+
+
+
 =head2 ShockToFileParams
 
 =over 4
@@ -733,8 +803,7 @@ gzip has a value which is a DataFileUtil.boolean
 Output of the file_to_shock function.
 
     shock_id - the ID of the new Shock node.
-    handle_id - the handle ID for the new handle, if created. Null
-       otherwise.
+    handle - The new handle, if created. Null otherwise.
 
 
 =item Definition
@@ -744,7 +813,7 @@ Output of the file_to_shock function.
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 </pre>
 
@@ -754,7 +823,7 @@ handle_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 
 =end text

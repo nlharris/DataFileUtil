@@ -16,8 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * Output of the file_to_shock function.
  *     shock_id - the ID of the new Shock node.
- *     handle_id - the handle ID for the new handle, if created. Null
- *        otherwise.
+ *     handle - The new handle, if created. Null otherwise.
  * </pre>
  * 
  */
@@ -25,14 +24,28 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "shock_id",
-    "handle_id"
+    "handle"
 })
 public class FileToShockOutput {
 
     @JsonProperty("shock_id")
     private String shockId;
-    @JsonProperty("handle_id")
-    private String handleId;
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_sha1 - the sha1 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    private Handle handle;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("shock_id")
@@ -50,18 +63,46 @@ public class FileToShockOutput {
         return this;
     }
 
-    @JsonProperty("handle_id")
-    public String getHandleId() {
-        return handleId;
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_sha1 - the sha1 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    public Handle getHandle() {
+        return handle;
     }
 
-    @JsonProperty("handle_id")
-    public void setHandleId(String handleId) {
-        this.handleId = handleId;
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_sha1 - the sha1 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    public void setHandle(Handle handle) {
+        this.handle = handle;
     }
 
-    public FileToShockOutput withHandleId(String handleId) {
-        this.handleId = handleId;
+    public FileToShockOutput withHandle(Handle handle) {
+        this.handle = handle;
         return this;
     }
 
@@ -77,7 +118,7 @@ public class FileToShockOutput {
 
     @Override
     public String toString() {
-        return ((((((("FileToShockOutput"+" [shockId=")+ shockId)+", handleId=")+ handleId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("FileToShockOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

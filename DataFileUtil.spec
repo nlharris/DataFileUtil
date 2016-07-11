@@ -10,6 +10,24 @@ module DataFileUtil {
     */
     typedef int boolean;
 
+    /* A handle for a file stored in Shock.
+      hid - the id of the handle in the Handle Service that references this
+         shock node
+      id - the id for the shock node
+      url - the url of the shock server
+      type - the type of the handle. This should always be ‘shock’.
+      file_name - the name of the file
+      remote_md5 - the md5 digest of the file.
+    */
+    typedef structure {
+      string hid;
+      string file_name;
+      string id;
+      string url;
+      string type;
+      string remote_md5;
+    } Handle;
+
     /* Input for the shock_to_file function.
        
        Required parameters:
@@ -66,12 +84,11 @@ module DataFileUtil {
     /* Output of the file_to_shock function.
     
         shock_id - the ID of the new Shock node.
-        handle_id - the handle ID for the new handle, if created. Null
-           otherwise.
+        handle - The new handle, if created. Null otherwise.
     */
     typedef structure {
         string shock_id;
-        string handle_id;
+        Handle handle;
     } FileToShockOutput;
 
     /* Load a file to Shock. */

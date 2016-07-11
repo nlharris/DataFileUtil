@@ -123,7 +123,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
 
-    def test_make_handle(self):
+    def test_upload_make_handle(self):
         input_ = "Test3!!!"
         tmp_dir = self.cfg['scratch']
         input_file_name = 'input.txt'
@@ -134,14 +134,24 @@ class DataFileUtilTest(unittest.TestCase):
             self.ctx,
             {'file_path': file_path, 'make_handle': 1})[0]
         shock_id = ret1['shock_id']
-        hid = ret1['handle_id']
+        self.delete_shock_node(shock_id)
+        rethandle = ret1['handle']
+        hid = rethandle['hid']
         handle = self.hs.hids_to_handles([hid])[0]
+        self.hs.delete_handles([hid])
+        self.assertEqual(rethandle['id'], shock_id)
+        self.assertEqual(rethandle['url'], self.shockURL)
+        self.assertEqual(rethandle['type'], 'shock')
+        self.assertEqual(rethandle['remote_md5'],
+                         '88d0594a4ee2b25527540fe76233a405')
+        self.assertEqual(rethandle['file_name'], 'input.txt')
         self.assertEqual(handle['id'], shock_id)
         self.assertEqual(handle['hid'], hid)
         self.assertEqual(handle['url'], self.shockURL)
         self.assertEqual(handle['type'], 'shock')
-        self.delete_shock_node(shock_id)
-        self.hs.delete_handles([hid])
+        self.assertEqual(handle['remote_md5'],
+                         '88d0594a4ee2b25527540fe76233a405')
+        self.assertEqual(handle['file_name'], 'input.txt')
 
     def test_gzip(self):
         input_ = 'testgzip'

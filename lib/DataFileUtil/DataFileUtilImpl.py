@@ -35,7 +35,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "1c9e679d712b822176201762607b44633bc783c9"
+    GIT_COMMIT_HASH = "d5372a5da0df9fc50cc3dd3d59f59c1713b9515c"
     
     #BEGIN_CLASS_HEADER
 
@@ -167,9 +167,17 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle_id - the handle ID for the new handle, if created. Null
-           otherwise.) -> structure: parameter "shock_id" of String,
-           parameter "handle_id" of String
+           handle - The new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_sha1 - the sha1
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String, parameter "remote_sha1" of String
         """
         # ctx is the context object
         # return variables are: out
@@ -196,15 +204,20 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.check_shock_response(
             response, ('Error trying to upload file {} to Shock: '
                        ).format(file_path))
-        shock_id = response.json()['data']['id']
+        shock_data = response.json()['data']
+        shock_id = shock_data['id']
         out = {'shock_id': shock_id, 'handle_id': None}
         if params.get('make_handle'):
             hs = HandleService(self.handle_url, token=token)
-            hid = hs.persist_handle({'id': shock_id,
-                                     'type': 'shock',
-                                     'url': self.shock_url
-                                     })
-            out['handle_id'] = hid
+            handle = {'id': shock_id,
+                      'type': 'shock',
+                      'url': self.shock_url,
+                      'file_name': shock_data['file']['name'],
+                      'remote_md5': shock_data['file']['checksum']['md5']
+                      }
+            hid = hs.persist_handle(handle)
+            handle['hid'] = hid
+            out['handle'] = handle
         self.log('uploading done into shock node: ' + shock_id)
         #END file_to_shock
 
