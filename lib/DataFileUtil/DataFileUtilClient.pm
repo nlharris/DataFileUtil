@@ -200,6 +200,104 @@ Download a file from Shock.
  
 
 
+=head2 shock_to_file_mass
+
+  $out = $obj->shock_to_file_mass($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a reference to a list where each element is a DataFileUtil.ShockToFileParams
+$out is a reference to a list where each element is a DataFileUtil.ShockToFileOutput
+ShockToFileParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	file_path has a value which is a string
+	unpack has a value which is a DataFileUtil.boolean
+boolean is an int
+ShockToFileOutput is a reference to a hash where the following keys are defined:
+	node_file_name has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a reference to a list where each element is a DataFileUtil.ShockToFileParams
+$out is a reference to a list where each element is a DataFileUtil.ShockToFileOutput
+ShockToFileParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	file_path has a value which is a string
+	unpack has a value which is a DataFileUtil.boolean
+boolean is an int
+ShockToFileOutput is a reference to a hash where the following keys are defined:
+	node_file_name has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+
+
+=end text
+
+=item Description
+
+Download multiple files from Shock.
+
+=back
+
+=cut
+
+ sub shock_to_file_mass
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function shock_to_file_mass (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'ARRAY') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to shock_to_file_mass:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'shock_to_file_mass');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.shock_to_file_mass",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'shock_to_file_mass',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method shock_to_file_mass",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'shock_to_file_mass',
+				       );
+    }
+}
+ 
+
+
 =head2 file_to_shock
 
   $out = $obj->file_to_shock($params)
@@ -308,6 +406,120 @@ Load a file to Shock.
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method file_to_shock",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'file_to_shock',
+				       );
+    }
+}
+ 
+
+
+=head2 file_to_shock_mass
+
+  $out = $obj->file_to_shock_mass($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a reference to a list where each element is a DataFileUtil.FileToShockParams
+$out is a reference to a list where each element is a DataFileUtil.FileToShockOutput
+FileToShockParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
+boolean is an int
+FileToShockOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a reference to a list where each element is a DataFileUtil.FileToShockParams
+$out is a reference to a list where each element is a DataFileUtil.FileToShockOutput
+FileToShockParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	make_handle has a value which is a DataFileUtil.boolean
+	gzip has a value which is a DataFileUtil.boolean
+boolean is an int
+FileToShockOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+
+=end text
+
+=item Description
+
+Load multiple files to Shock.
+
+=back
+
+=cut
+
+ sub file_to_shock_mass
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function file_to_shock_mass (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'ARRAY') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to file_to_shock_mass:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'file_to_shock_mass');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.file_to_shock_mass",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'file_to_shock_mass',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method file_to_shock_mass",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'file_to_shock_mass',
 				       );
     }
 }

@@ -35,7 +35,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "6b228d8073553175ccd2b860d9903be6365d7fe0"
+    GIT_COMMIT_HASH = "fcd7a840a3db20200e4a6adb17827480bb503974"
     
     #BEGIN_CLASS_HEADER
 
@@ -92,7 +92,6 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.ws_url = config['workspace-url']
         #END_CONSTRUCTOR
         pass
-    
 
     def shock_to_file(self, ctx, params):
         """
@@ -158,6 +157,47 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if not isinstance(out, dict):
             raise ValueError('Method shock_to_file return value ' +
                              'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def shock_to_file_mass(self, ctx, params):
+        """
+        Download multiple files from Shock.
+        :param params: instance of list of type "ShockToFileParams" (Input
+           for the shock_to_file function. Required parameters: shock_id -
+           the ID of the Shock node. file_path - the location to save the
+           file output. If this is a directory, the file will be named as per
+           the filename in Shock. Optional parameters: unpack - if the file
+           is compressed and / or a file bundle, it will be decompressed and
+           unbundled into the directory containing the original output file.
+           unpack supports gzip, bzip2, tar, and zip files. Default false.
+           Currently unsupported.) -> structure: parameter "shock_id" of
+           String, parameter "file_path" of String, parameter "unpack" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+        :returns: instance of list of type "ShockToFileOutput" (Output from
+           the shock_to_file function. node_file_name - the filename of the
+           file stored in Shock. attributes - the file attributes, if any,
+           stored in Shock.) -> structure: parameter "node_file_name" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN shock_to_file_mass
+        if type(params) != list:
+            raise ValueError('expected list input')
+        out = []
+        # in the future, could make this rather silly implementation smarter
+        # although probably bottlenecked by disk & network so parallelization
+        # may not help
+        for p in params:
+            out.append(self.shock_to_file(ctx, p)[0])
+        #END shock_to_file_mass
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, list):
+            raise ValueError('Method shock_to_file_mass return value ' +
+                             'out is not type list as required.')
         # return the results
         return [out]
 
@@ -228,6 +268,56 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if not isinstance(out, dict):
             raise ValueError('Method file_to_shock return value ' +
                              'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def file_to_shock_mass(self, ctx, params):
+        """
+        Load multiple files to Shock.
+        :param params: instance of list of type "FileToShockParams" (Input
+           for the file_to_shock function. Required parameters: file_path -
+           the location of the file to load to Shock. Optional parameters:
+           attributes - user-specified attributes to save to the Shock node
+           along with the file. make_handle - make a Handle Service handle
+           for the shock node. Default false. gzip - gzip the file before
+           loading it to Shock. This will create a file_path.gz file prior to
+           upload. Default false.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
+           @range (0, 1))
+        :returns: instance of list of type "FileToShockOutput" (Output of the
+           file_to_shock function. shock_id - the ID of the new Shock node.
+           handle - the new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN file_to_shock_mass
+        if type(params) != list:
+            raise ValueError('expected list input')
+        out = []
+        # in the future, could make this rather silly implementation smarter
+        # although probably bottlenecked by disk & network so parallelization
+        # may not help
+        for p in params:
+            out.append(self.file_to_shock(ctx, p)[0])
+        #END file_to_shock_mass
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, list):
+            raise ValueError('Method file_to_shock_mass return value ' +
+                             'out is not type list as required.')
         # return the results
         return [out]
 
