@@ -139,19 +139,18 @@ class DataFileUtilTest(unittest.TestCase):
         hid = rethandle['hid']
         handle = self.hs.hids_to_handles([hid])[0]
         self.hs.delete_handles([hid])
-        self.assertEqual(rethandle['id'], shock_id)
-        self.assertEqual(rethandle['url'], self.shockURL)
-        self.assertEqual(rethandle['type'], 'shock')
-        self.assertEqual(rethandle['remote_md5'],
-                         '88d0594a4ee2b25527540fe76233a405')
-        self.assertEqual(rethandle['file_name'], 'input.txt')
+        self.check_handle(rethandle, hid, shock_id,
+                          '88d0594a4ee2b25527540fe76233a405', 'input.txt')
+        self.check_handle(handle, hid, shock_id,
+                          '88d0594a4ee2b25527540fe76233a405', 'input.txt')
+
+    def check_handle(self, handle, hid, shock_id, md5, filename):
         self.assertEqual(handle['id'], shock_id)
         self.assertEqual(handle['hid'], hid)
         self.assertEqual(handle['url'], self.shockURL)
         self.assertEqual(handle['type'], 'shock')
-        self.assertEqual(handle['remote_md5'],
-                         '88d0594a4ee2b25527540fe76233a405')
-        self.assertEqual(handle['file_name'], 'input.txt')
+        self.assertEqual(handle['remote_md5'], md5)
+        self.assertEqual(handle['file_name'], filename)
 
     def test_gzip(self):
         input_ = 'testgzip'
@@ -295,6 +294,32 @@ class DataFileUtilTest(unittest.TestCase):
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)
+
+    def test_copy_make_handle(self):
+        input_ = 'copytesthandle'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.getImpl().file_to_shock(
+            self.ctx,
+            {'file_path': file_path,
+             'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
+        shock_id = ret1['shock_id']
+        retcopy = self.getImpl().copy_shock_node(self.ctx,
+                                                 {'shock_id': shock_id,
+                                                  'make_handle': 1})[0]
+        new_id = retcopy['shock_id']
+        self.delete_shock_node(shock_id)
+        self.delete_shock_node(new_id)
+        hid = retcopy['handle']['hid']
+        handle = self.hs.hids_to_handles([hid])[0]
+        self.hs.delete_handles([hid])
+        self.check_handle(retcopy['handle'], hid, new_id,
+                          '748ff3bbb8d31783c852513422eedb87', 'input.txt')
+        self.check_handle(handle, hid, new_id,
+                          '748ff3bbb8d31783c852513422eedb87', 'input.txt')
 
     def test_copy_err_node_not_found(self):
         self.fail_copy(

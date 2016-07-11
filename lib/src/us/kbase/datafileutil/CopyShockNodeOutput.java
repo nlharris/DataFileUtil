@@ -16,18 +16,36 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * Output of the copy_shock_node function.
  *  shock_id - the id of the new Shock node.
+ *  handle - the new handle, if created. Null otherwise.
  * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "shock_id"
+    "shock_id",
+    "handle"
 })
 public class CopyShockNodeOutput {
 
     @JsonProperty("shock_id")
     private String shockId;
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_md5 - the md5 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    private Handle handle;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("shock_id")
@@ -45,6 +63,49 @@ public class CopyShockNodeOutput {
         return this;
     }
 
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_md5 - the md5 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    public Handle getHandle() {
+        return handle;
+    }
+
+    /**
+     * <p>Original spec-file type: Handle</p>
+     * <pre>
+     * A handle for a file stored in Shock.
+     * hid - the id of the handle in the Handle Service that references this
+     *    shock node
+     * id - the id for the shock node
+     * url - the url of the shock server
+     * type - the type of the handle. This should always be ‘shock’.
+     * file_name - the name of the file
+     * remote_md5 - the md5 digest of the file.
+     * </pre>
+     * 
+     */
+    @JsonProperty("handle")
+    public void setHandle(Handle handle) {
+        this.handle = handle;
+    }
+
+    public CopyShockNodeOutput withHandle(Handle handle) {
+        this.handle = handle;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -57,7 +118,7 @@ public class CopyShockNodeOutput {
 
     @Override
     public String toString() {
-        return ((((("CopyShockNodeOutput"+" [shockId=")+ shockId)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("CopyShockNodeOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

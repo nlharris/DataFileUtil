@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * Output of the file_to_shock function.
  *     shock_id - the ID of the new Shock node.
- *     handle - The new handle, if created. Null otherwise.
+ *     handle - the new handle, if created. Null otherwise.
  * </pre>
  * 
  */

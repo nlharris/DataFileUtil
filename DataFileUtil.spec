@@ -84,7 +84,7 @@ module DataFileUtil {
     /* Output of the file_to_shock function.
     
         shock_id - the ID of the new Shock node.
-        handle - The new handle, if created. Null otherwise.
+        handle - the new handle, if created. Null otherwise.
     */
     typedef structure {
         string shock_id;
@@ -97,18 +97,26 @@ module DataFileUtil {
         
     /* Input for the copy_shock_node function.
 
+       Required parameters:
        shock_id - the id of the node to copy.
+       
+       Optional parameters:
+       make_handle - make a Handle Service handle for the shock node. Default
+           false.
     */
     typedef structure {
         string shock_id;
+        boolean make_handle;
     } CopyShockNodeParams;
     
     /* Output of the copy_shock_node function.
       
        shock_id - the id of the new Shock node.
+       handle - the new handle, if created. Null otherwise.
     */
     typedef structure {
         string shock_id;
+        Handle handle;
     } CopyShockNodeOutput;
     
     /* Copy a Shock node. */

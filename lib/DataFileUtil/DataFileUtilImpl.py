@@ -35,7 +35,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "746801fc3f4c6c31697cc8508f7d14be3d31aa46"
+    GIT_COMMIT_HASH = "6b228d8073553175ccd2b860d9903be6365d7fe0"
     
     #BEGIN_CLASS_HEADER
 
@@ -141,7 +141,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             file_path = os.path.join(file_path, node_file_name)
         self.log('downloading shock node ' + shock_id + ' into file: ' +
                  str(file_path))
-        with open(file_path, 'w') as fhandle:
+        with open(file_path, 'wb') as fhandle:
             r = requests.get(node_url + '?download_raw', stream=True,
                              headers=headers, allow_redirects=True)
             self.check_shock_response(r, errtxt)
@@ -179,7 +179,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - The new handle, if created. Null otherwise.) ->
+           handle - the new handle, if created. Null otherwise.) ->
            structure: parameter "shock_id" of String, parameter "handle" of
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
@@ -218,7 +218,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                        ).format(file_path))
         shock_data = response.json()['data']
         shock_id = shock_data['id']
-        out = {'shock_id': shock_id, 'handle_id': None}
+        out = {'shock_id': shock_id, 'handle': None}
         if params.get('make_handle'):
             out['handle'] = self.make_handle(shock_data, token)
         self.log('uploading done into shock node: ' + shock_id)
@@ -235,11 +235,25 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         Copy a Shock node.
         :param params: instance of type "CopyShockNodeParams" (Input for the
-           copy_shock_node function. shock_id - the id of the node to copy.)
-           -> structure: parameter "shock_id" of String
+           copy_shock_node function. Required parameters: shock_id - the id
+           of the node to copy. Optional parameters: make_handle - make a
+           Handle Service handle for the shock node. Default false.) ->
+           structure: parameter "shock_id" of String, parameter "make_handle"
+           of type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
+           1))
         :returns: instance of type "CopyShockNodeOutput" (Output of the
-           copy_shock_node function. shock_id - the id of the new Shock
-           node.) -> structure: parameter "shock_id" of String
+           copy_shock_node function. shock_id - the id of the new Shock node.
+           handle - the new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String
         """
         # ctx is the context object
         # return variables are: out
@@ -260,7 +274,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.check_shock_response(
             response, ('Error copying Shock node {}: '
                        ).format(source_id))
-        shock_id = response.json()['data']['id']
+        shock_data = response.json()['data']
+        shock_id = shock_data['id']
         # remove when min required version is 0.9.13
         if semver.match(self.versions(ctx)[1], '<0.9.13'):
             del header['Content-Type']
@@ -279,7 +294,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                 self.check_shock_response(
                     response, ('Error setting attributes on Shock node {}: '
                                ).format(shock_id))
-        out = {'shock_id': shock_id}
+        out = {'shock_id': shock_id, 'handle': None}
+        if params.get('make_handle'):
+            out['handle'] = self.make_handle(shock_data, token)
         #END copy_shock_node
 
         # At some point might do deeper type checking...

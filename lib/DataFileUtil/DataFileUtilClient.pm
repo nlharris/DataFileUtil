@@ -329,8 +329,18 @@ $params is a DataFileUtil.CopyShockNodeParams
 $out is a DataFileUtil.CopyShockNodeOutput
 CopyShockNodeParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
 CopyShockNodeOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
 
 </pre>
 
@@ -342,8 +352,18 @@ $params is a DataFileUtil.CopyShockNodeParams
 $out is a DataFileUtil.CopyShockNodeOutput
 CopyShockNodeParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
 CopyShockNodeOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
 
 
 =end text
@@ -799,7 +819,7 @@ gzip has a value which is a DataFileUtil.boolean
 Output of the file_to_shock function.
 
     shock_id - the ID of the new Shock node.
-    handle - The new handle, if created. Null otherwise.
+    handle - the new handle, if created. Null otherwise.
 
 
 =item Definition
@@ -838,7 +858,12 @@ handle has a value which is a DataFileUtil.Handle
 
 Input for the copy_shock_node function.
 
+       Required parameters:
        shock_id - the id of the node to copy.
+       
+       Optional parameters:
+       make_handle - make a Handle Service handle for the shock node. Default
+           false.
 
 
 =item Definition
@@ -848,6 +873,7 @@ Input for the copy_shock_node function.
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
 
 </pre>
 
@@ -857,6 +883,7 @@ shock_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
 
 
 =end text
@@ -876,6 +903,7 @@ shock_id has a value which is a string
 Output of the copy_shock_node function.
 
  shock_id - the id of the new Shock node.
+ handle - the new handle, if created. Null otherwise.
 
 
 =item Definition
@@ -885,6 +913,7 @@ Output of the copy_shock_node function.
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 </pre>
 
@@ -894,6 +923,7 @@ shock_id has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
 
 
 =end text

@@ -74,7 +74,7 @@ class DataFileUtil(object):
            @range (0, 1))
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - The new handle, if created. Null otherwise.) ->
+           handle - the new handle, if created. Null otherwise.) ->
            structure: parameter "shock_id" of String, parameter "handle" of
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
@@ -94,11 +94,25 @@ class DataFileUtil(object):
         """
         Copy a Shock node.
         :param params: instance of type "CopyShockNodeParams" (Input for the
-           copy_shock_node function. shock_id - the id of the node to copy.)
-           -> structure: parameter "shock_id" of String
+           copy_shock_node function. Required parameters: shock_id - the id
+           of the node to copy. Optional parameters: make_handle - make a
+           Handle Service handle for the shock node. Default false.) ->
+           structure: parameter "shock_id" of String, parameter "make_handle"
+           of type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
+           1))
         :returns: instance of type "CopyShockNodeOutput" (Output of the
-           copy_shock_node function. shock_id - the id of the new Shock
-           node.) -> structure: parameter "shock_id" of String
+           copy_shock_node function. shock_id - the id of the new Shock node.
+           handle - the new handle, if created. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be
+           ‘shock’. file_name - the name of the file remote_md5 - the md5
+           digest of the file.) -> structure: parameter "hid" of String,
+           parameter "file_name" of String, parameter "id" of String,
+           parameter "url" of String, parameter "type" of String, parameter
+           "remote_md5" of String
         """
         return self._client.call_method(
             'DataFileUtil.copy_shock_node',
