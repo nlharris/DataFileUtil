@@ -56,7 +56,7 @@ class DataFileUtil(object):
             'DataFileUtil.shock_to_file',
             [params], self._service_ver, context)
 
-    def shock_to_files(self, params, context=None):
+    def shock_to_file_mass(self, params, context=None):
         """
         Download multiple files from Shock.
         :param params: instance of list of type "ShockToFileParams" (Input
@@ -78,7 +78,7 @@ class DataFileUtil(object):
            unspecified object
         """
         return self._client.call_method(
-            'DataFileUtil.shock_to_files',
+            'DataFileUtil.shock_to_file_mass',
             [params], self._service_ver, context)
 
     def file_to_shock(self, params, context=None):
@@ -115,7 +115,7 @@ class DataFileUtil(object):
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
 
-    def files_to_shock(self, params, context=None):
+    def file_to_shock_mass(self, params, context=None):
         """
         Load multiple files to Shock.
         :param params: instance of list of type "FileToShockParams" (Input
@@ -146,7 +146,7 @@ class DataFileUtil(object):
            "remote_md5" of String
         """
         return self._client.call_method(
-            'DataFileUtil.files_to_shock',
+            'DataFileUtil.file_to_shock_mass',
             [params], self._service_ver, context)
 
     def copy_shock_node(self, params, context=None):

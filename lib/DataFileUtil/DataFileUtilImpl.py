@@ -35,7 +35,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "a47de0273593b2f9999f3506af179effab832220"
+    GIT_COMMIT_HASH = "fcd7a840a3db20200e4a6adb17827480bb503974"
     
     #BEGIN_CLASS_HEADER
 
@@ -160,7 +160,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # return the results
         return [out]
 
-    def shock_to_files(self, ctx, params):
+    def shock_to_file_mass(self, ctx, params):
         """
         Download multiple files from Shock.
         :param params: instance of list of type "ShockToFileParams" (Input
@@ -183,7 +183,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         # ctx is the context object
         # return variables are: out
-        #BEGIN shock_to_files
+        #BEGIN shock_to_file_mass
         if type(params) != list:
             raise ValueError('expected list input')
         out = []
@@ -192,11 +192,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # may not help
         for p in params:
             out.append(self.shock_to_file(ctx, p)[0])
-        #END shock_to_files
+        #END shock_to_file_mass
 
         # At some point might do deeper type checking...
         if not isinstance(out, list):
-            raise ValueError('Method shock_to_files return value ' +
+            raise ValueError('Method shock_to_file_mass return value ' +
                              'out is not type list as required.')
         # return the results
         return [out]
@@ -271,7 +271,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # return the results
         return [out]
 
-    def files_to_shock(self, ctx, params):
+    def file_to_shock_mass(self, ctx, params):
         """
         Load multiple files to Shock.
         :param params: instance of list of type "FileToShockParams" (Input
@@ -303,7 +303,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         # ctx is the context object
         # return variables are: out
-        #BEGIN files_to_shock
+        #BEGIN file_to_shock_mass
         if type(params) != list:
             raise ValueError('expected list input')
         out = []
@@ -312,11 +312,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # may not help
         for p in params:
             out.append(self.file_to_shock(ctx, p)[0])
-        #END files_to_shock
+        #END file_to_shock_mass
 
         # At some point might do deeper type checking...
         if not isinstance(out, list):
-            raise ValueError('Method files_to_shock return value ' +
+            raise ValueError('Method file_to_shock_mass return value ' +
                              'out is not type list as required.')
         # return the results
         return [out]

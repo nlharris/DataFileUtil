@@ -118,10 +118,10 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, 'Test2!!!')
         self.delete_shock_node(shock_id)
 
-    def test_files_to_shock_and_back(self):
+    def test_file_to_shock_mass_and_back(self):
         infile1 = self.write_file('input1.txt', 'filestoshock1')
         infile2 = self.write_file('input2.txt', 'filestoshock2')
-        ret1 = self.getImpl().files_to_shock(
+        ret1 = self.getImpl().file_to_shock_mass(
             self.ctx,
             [{'file_path': infile1},
              {'file_path': infile2}
@@ -131,7 +131,7 @@ class DataFileUtilTest(unittest.TestCase):
         shock_id2 = ret1[1]['shock_id']
         outfile1 = os.path.join(self.cfg['scratch'], 'output1.txt')
         outfile2 = os.path.join(self.cfg['scratch'], 'output2.txt')
-        ret2 = self.getImpl().shock_to_files(
+        ret2 = self.getImpl().shock_to_file_mass(
             self.ctx,
             [{'shock_id': shock_id1, 'file_path': outfile1},
              {'shock_id': shock_id2, 'file_path': outfile2}

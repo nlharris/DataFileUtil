@@ -200,9 +200,9 @@ Download a file from Shock.
  
 
 
-=head2 shock_to_files
+=head2 shock_to_file_mass
 
-  $out = $obj->shock_to_files($params)
+  $out = $obj->shock_to_file_mass($params)
 
 =over 4
 
@@ -250,7 +250,7 @@ Download multiple files from Shock.
 
 =cut
 
- sub shock_to_files
+ sub shock_to_file_mass
 {
     my($self, @args) = @_;
 
@@ -259,7 +259,7 @@ Download multiple files from Shock.
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function shock_to_files (received $n, expecting 1)");
+							       "Invalid argument count for function shock_to_file_mass (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -267,31 +267,31 @@ Download multiple files from Shock.
 	my @_bad_arguments;
         (ref($params) eq 'ARRAY') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to shock_to_files:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to shock_to_file_mass:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'shock_to_files');
+								   method_name => 'shock_to_file_mass');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "DataFileUtil.shock_to_files",
+	    method => "DataFileUtil.shock_to_file_mass",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'shock_to_files',
+					       method_name => 'shock_to_file_mass',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method shock_to_files",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method shock_to_file_mass",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'shock_to_files',
+					    method_name => 'shock_to_file_mass',
 				       );
     }
 }
@@ -412,9 +412,9 @@ Load a file to Shock.
  
 
 
-=head2 files_to_shock
+=head2 file_to_shock_mass
 
-  $out = $obj->files_to_shock($params)
+  $out = $obj->file_to_shock_mass($params)
 
 =over 4
 
@@ -478,7 +478,7 @@ Load multiple files to Shock.
 
 =cut
 
- sub files_to_shock
+ sub file_to_shock_mass
 {
     my($self, @args) = @_;
 
@@ -487,7 +487,7 @@ Load multiple files to Shock.
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function files_to_shock (received $n, expecting 1)");
+							       "Invalid argument count for function file_to_shock_mass (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -495,31 +495,31 @@ Load multiple files to Shock.
 	my @_bad_arguments;
         (ref($params) eq 'ARRAY') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to files_to_shock:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to file_to_shock_mass:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'files_to_shock');
+								   method_name => 'file_to_shock_mass');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "DataFileUtil.files_to_shock",
+	    method => "DataFileUtil.file_to_shock_mass",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'files_to_shock',
+					       method_name => 'file_to_shock_mass',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method files_to_shock",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method file_to_shock_mass",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'files_to_shock',
+					    method_name => 'file_to_shock_mass',
 				       );
     }
 }

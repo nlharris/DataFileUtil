@@ -62,7 +62,7 @@ module DataFileUtil {
         returns (ShockToFileOutput out) authentication required;
 
     /* Download multiple files from Shock. */
-    funcdef shock_to_files(list<ShockToFileParams> params)
+    funcdef shock_to_file_mass(list<ShockToFileParams> params)
         returns(list<ShockToFileOutput> out) authentication required;
 
     /* Input for the file_to_shock function.
@@ -100,7 +100,7 @@ module DataFileUtil {
         returns (FileToShockOutput out) authentication required;
     
     /* Load multiple files to Shock. */
-    funcdef files_to_shock(list<FileToShockParams> params)
+    funcdef file_to_shock_mass(list<FileToShockParams> params)
         returns (list<FileToShockOutput> out) authentication required;
 
     /* Input for the copy_shock_node function.

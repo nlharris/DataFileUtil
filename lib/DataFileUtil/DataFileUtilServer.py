@@ -331,18 +331,18 @@ class Application(object):
                              name='DataFileUtil.shock_to_file',
                              types=[dict])
         self.method_authentication['DataFileUtil.shock_to_file'] = 'required'
-        self.rpc_service.add(impl_DataFileUtil.shock_to_files,
-                             name='DataFileUtil.shock_to_files',
+        self.rpc_service.add(impl_DataFileUtil.shock_to_file_mass,
+                             name='DataFileUtil.shock_to_file_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.shock_to_files'] = 'required'
+        self.method_authentication['DataFileUtil.shock_to_file_mass'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.file_to_shock,
                              name='DataFileUtil.file_to_shock',
                              types=[dict])
         self.method_authentication['DataFileUtil.file_to_shock'] = 'required'
-        self.rpc_service.add(impl_DataFileUtil.files_to_shock,
-                             name='DataFileUtil.files_to_shock',
+        self.rpc_service.add(impl_DataFileUtil.file_to_shock_mass,
+                             name='DataFileUtil.file_to_shock_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.files_to_shock'] = 'required'
+        self.method_authentication['DataFileUtil.file_to_shock_mass'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.copy_shock_node,
                              name='DataFileUtil.copy_shock_node',
                              types=[dict])
