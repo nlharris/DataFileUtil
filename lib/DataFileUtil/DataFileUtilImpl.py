@@ -69,6 +69,18 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                          response.content)
                 response.raise_for_status()
             raise ShockException(errtxt + str(err))
+
+    def make_handle(self, shock_data, token):
+        hs = HandleService(self.handle_url, token=token)
+        handle = {'id': shock_data['id'],
+                  'type': 'shock',
+                  'url': self.shock_url,
+                  'file_name': shock_data['file']['name'],
+                  'remote_md5': shock_data['file']['checksum']['md5']
+                  }
+        hid = hs.persist_handle(handle)
+        handle['hid'] = hid
+        return handle
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -208,16 +220,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         shock_id = shock_data['id']
         out = {'shock_id': shock_id, 'handle_id': None}
         if params.get('make_handle'):
-            hs = HandleService(self.handle_url, token=token)
-            handle = {'id': shock_id,
-                      'type': 'shock',
-                      'url': self.shock_url,
-                      'file_name': shock_data['file']['name'],
-                      'remote_md5': shock_data['file']['checksum']['md5']
-                      }
-            hid = hs.persist_handle(handle)
-            handle['hid'] = hid
-            out['handle'] = handle
+            out['handle'] = self.make_handle(shock_data, token)
         self.log('uploading done into shock node: ' + shock_id)
         #END file_to_shock
 
