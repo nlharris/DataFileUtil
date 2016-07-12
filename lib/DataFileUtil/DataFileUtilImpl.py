@@ -37,7 +37,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "22fae02f04bd0ab16fcddf2906e19192f0221eb3"
+    GIT_COMMIT_HASH = "9e6563774194cb37c58e4a7a4d816b3d12adb62d"
     
     #BEGIN_CLASS_HEADER
 
@@ -105,6 +105,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.ws_url = config['workspace-url']
         #END_CONSTRUCTOR
         pass
+    
 
     def shock_to_file(self, ctx, params):
         """
@@ -237,12 +238,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out
@@ -307,12 +308,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out
@@ -351,12 +352,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out

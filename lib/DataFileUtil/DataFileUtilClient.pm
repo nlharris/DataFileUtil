@@ -1174,7 +1174,7 @@ hid - the id of the handle in the Handle Service that references this
    shock node
 id - the id for the shock node
 url - the url of the shock server
-type - the type of the handle. This should always be ‘shock’.
+type - the type of the handle. This should always be shock.
 file_name - the name of the file
 remote_md5 - the md5 digest of the file.
 
