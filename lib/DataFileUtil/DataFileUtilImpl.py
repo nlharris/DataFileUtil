@@ -554,10 +554,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                 results.append(None)
                 continue
             res = {'data': o['data'], 'info': o['info']}
-            ref = self.make_ref(o['info'])
             he = 'handle_error'
             hs = 'handle_stacktrace'
             if he in o or hs in o:
+                ref = self.make_ref(o['info'])
                 self.log('Handle error for object {}: {}.\nStacktrace: {}'
                          .format(ref, o.get(he), o.get(hs)))
                 if ignore_err:

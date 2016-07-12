@@ -375,7 +375,6 @@ class DataFileUtilTest(unittest.TestCase):
                          str(context.exception.message))
 
     def test_save_and_get_objects(self):
-        # ToDO get error cases
         objs = [{'name': 'whee1',
                  'type': 'Empty.AType-0.1',
                  'data': {'thingy': 1}
