@@ -41,21 +41,28 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     
     #BEGIN_CLASS_HEADER
 
-    GZIP = '.gz'
+    GZ = '.gz'
+    GZIP = '.gzip'
     TGZ = '.tgz'
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
               str(time.time()) + ': ' + str(message))
 
+    def endswith(self, string, suffixes):
+        strl = string.lower()
+        for s in suffixes:
+            if strl.endswith(s):
+                return True
+        return False
+
     # it'd be nice if you could just open the file and gzip on the fly but I
     # don't see a way to do that
     def gzip(self, oldfile):
-        lo = oldfile.lower()
-        if lo.endswith(self.GZIP) or lo.endswith(self.TGZ):
+        if self.endswith(oldfile, [self.GZ, self.GZIP, self.TGZ]):
             self.log('File {} is already gzipped, skipping'.format(oldfile))
             return oldfile
-        newfile = oldfile + self.GZIP
+        newfile = oldfile + self.GZ
         self.log('gzipping {} to {}'.format(oldfile, newfile))
         with open(oldfile, 'rb') as s, gzip.open(newfile, 'wb') as t:
             shutil.copyfileobj(s, t)
