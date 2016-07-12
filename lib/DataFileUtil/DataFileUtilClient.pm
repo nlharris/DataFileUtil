@@ -636,6 +636,341 @@ Copy a Shock node.
  
 
 
+=head2 ws_name_to_id
+
+  $id = $obj->ws_name_to_id($name)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$name is a string
+$id is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$name is a string
+$id is an int
+
+
+=end text
+
+=item Description
+
+Translate a workspace name to a workspace ID.
+
+=back
+
+=cut
+
+ sub ws_name_to_id
+{
+    my($self, @args) = @_;
+
+# Authentication: optional
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function ws_name_to_id (received $n, expecting 1)");
+    }
+    {
+	my($name) = @args;
+
+	my @_bad_arguments;
+        (!ref($name)) or push(@_bad_arguments, "Invalid type for argument 1 \"name\" (value was \"$name\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to ws_name_to_id:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'ws_name_to_id');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.ws_name_to_id",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'ws_name_to_id',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method ws_name_to_id",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'ws_name_to_id',
+				       );
+    }
+}
+ 
+
+
+=head2 save_objects
+
+  $info = $obj->save_objects($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.SaveObjectsParams
+$info is a reference to a list where each element is a DataFileUtil.object_info
+SaveObjectsParams is a reference to a hash where the following keys are defined:
+	id has a value which is an int
+	objects has a value which is a reference to a list where each element is a DataFileUtil.ObjectSaveData
+ObjectSaveData is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	data has a value which is an UnspecifiedObject, which can hold any non-null object
+	name has a value which is a string
+	objid has a value which is an int
+	meta has a value which is a reference to a hash where the key is a string and the value is a string
+	hidden has a value which is a DataFileUtil.boolean
+boolean is an int
+object_info is a reference to a list containing 11 items:
+	0: (objid) an int
+	1: (name) a string
+	2: (type) a string
+	3: (save_date) a string
+	4: (version) an int
+	5: (saved_by) a string
+	6: (wsid) an int
+	7: (workspace) a string
+	8: (chsum) a string
+	9: (size) an int
+	10: (meta) a reference to a hash where the key is a string and the value is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.SaveObjectsParams
+$info is a reference to a list where each element is a DataFileUtil.object_info
+SaveObjectsParams is a reference to a hash where the following keys are defined:
+	id has a value which is an int
+	objects has a value which is a reference to a list where each element is a DataFileUtil.ObjectSaveData
+ObjectSaveData is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	data has a value which is an UnspecifiedObject, which can hold any non-null object
+	name has a value which is a string
+	objid has a value which is an int
+	meta has a value which is a reference to a hash where the key is a string and the value is a string
+	hidden has a value which is a DataFileUtil.boolean
+boolean is an int
+object_info is a reference to a list containing 11 items:
+	0: (objid) an int
+	1: (name) a string
+	2: (type) a string
+	3: (save_date) a string
+	4: (version) an int
+	5: (saved_by) a string
+	6: (wsid) an int
+	7: (workspace) a string
+	8: (chsum) a string
+	9: (size) an int
+	10: (meta) a reference to a hash where the key is a string and the value is a string
+
+
+=end text
+
+=item Description
+
+Save objects to the workspace. Saving over a deleted object undeletes
+it.
+
+=back
+
+=cut
+
+ sub save_objects
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function save_objects (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to save_objects:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'save_objects');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.save_objects",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'save_objects',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method save_objects",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'save_objects',
+				       );
+    }
+}
+ 
+
+
+=head2 get_objects
+
+  $results = $obj->get_objects($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.GetObjectsParams
+$results is a DataFileUtil.GetObjectsResults
+GetObjectsParams is a reference to a hash where the following keys are defined:
+	object_refs has a value which is a reference to a list where each element is a string
+	ignore_errors has a value which is a DataFileUtil.boolean
+boolean is an int
+GetObjectsResults is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a DataFileUtil.ObjectData
+ObjectData is a reference to a hash where the following keys are defined:
+	data has a value which is an UnspecifiedObject, which can hold any non-null object
+	info has a value which is a DataFileUtil.object_info
+object_info is a reference to a list containing 11 items:
+	0: (objid) an int
+	1: (name) a string
+	2: (type) a string
+	3: (save_date) a string
+	4: (version) an int
+	5: (saved_by) a string
+	6: (wsid) an int
+	7: (workspace) a string
+	8: (chsum) a string
+	9: (size) an int
+	10: (meta) a reference to a hash where the key is a string and the value is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.GetObjectsParams
+$results is a DataFileUtil.GetObjectsResults
+GetObjectsParams is a reference to a hash where the following keys are defined:
+	object_refs has a value which is a reference to a list where each element is a string
+	ignore_errors has a value which is a DataFileUtil.boolean
+boolean is an int
+GetObjectsResults is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a DataFileUtil.ObjectData
+ObjectData is a reference to a hash where the following keys are defined:
+	data has a value which is an UnspecifiedObject, which can hold any non-null object
+	info has a value which is a DataFileUtil.object_info
+object_info is a reference to a list containing 11 items:
+	0: (objid) an int
+	1: (name) a string
+	2: (type) a string
+	3: (save_date) a string
+	4: (version) an int
+	5: (saved_by) a string
+	6: (wsid) an int
+	7: (workspace) a string
+	8: (chsum) a string
+	9: (size) an int
+	10: (meta) a reference to a hash where the key is a string and the value is a string
+
+
+=end text
+
+=item Description
+
+Get objects from the workspace.
+
+=back
+
+=cut
+
+ sub get_objects
+{
+    my($self, @args) = @_;
+
+# Authentication: optional
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_objects (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_objects:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_objects');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.get_objects",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_objects',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_objects",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_objects',
+				       );
+    }
+}
+ 
+
+
 =head2 versions
 
   $wsver, $shockver = $obj->versions()
@@ -1136,6 +1471,306 @@ handle has a value which is a DataFileUtil.Handle
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 handle has a value which is a DataFileUtil.Handle
+
+
+=end text
+
+=back
+
+
+
+=head2 object_info
+
+=over 4
+
+
+
+=item Description
+
+Information about an object, including user provided metadata.
+
+    objid - the numerical id of the object.
+    name - the name of the object.
+    type - the type of the object.
+    save_date - the save date of the object.
+    ver - the version of the object.
+    saved_by - the user that saved or copied the object.
+    wsid - the id of the workspace containing the object.
+    workspace - the name of the workspace containing the object.
+    chsum - the md5 checksum of the object.
+    size - the size of the object in bytes.
+    meta - arbitrary user-supplied metadata about
+        the object.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a list containing 11 items:
+0: (objid) an int
+1: (name) a string
+2: (type) a string
+3: (save_date) a string
+4: (version) an int
+5: (saved_by) a string
+6: (wsid) an int
+7: (workspace) a string
+8: (chsum) a string
+9: (size) an int
+10: (meta) a reference to a hash where the key is a string and the value is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a list containing 11 items:
+0: (objid) an int
+1: (name) a string
+2: (type) a string
+3: (save_date) a string
+4: (version) an int
+5: (saved_by) a string
+6: (wsid) an int
+7: (workspace) a string
+8: (chsum) a string
+9: (size) an int
+10: (meta) a reference to a hash where the key is a string and the value is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ObjectSaveData
+
+=over 4
+
+
+
+=item Description
+
+An object and associated data required for saving.
+
+    Required parameters:
+    type - the workspace type string for the object. Omit the version
+        information to use the latest version.
+    data - the object data.
+    
+    Optional parameters:
+    One of an object name or id. If no name or id is provided the name
+        will be set to 'auto' with the object id appended as a string,
+        possibly with -\d+ appended if that object id already exists as a
+        name.
+    name - the name of the object.
+    objid - the id of the object to save over.
+    meta - arbitrary user-supplied metadata for the object,
+        not to exceed 16kb; if the object type specifies automatic
+        metadata extraction with the 'meta ws' annotation, and your
+        metadata name conflicts, then your metadata will be silently
+        overwritten.
+    hidden - true if this object should not be listed when listing
+        workspace objects.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+type has a value which is a string
+data has a value which is an UnspecifiedObject, which can hold any non-null object
+name has a value which is a string
+objid has a value which is an int
+meta has a value which is a reference to a hash where the key is a string and the value is a string
+hidden has a value which is a DataFileUtil.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+type has a value which is a string
+data has a value which is an UnspecifiedObject, which can hold any non-null object
+name has a value which is a string
+objid has a value which is an int
+meta has a value which is a reference to a hash where the key is a string and the value is a string
+hidden has a value which is a DataFileUtil.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 SaveObjectsParams
+
+=over 4
+
+
+
+=item Description
+
+Input parameters for the "save_objects" function.
+
+    Required parameters:
+    id - the numerical ID of the workspace.
+    objects - the objects to save.
+    
+    The object provenance is automatically pulled from the SDK runner.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+id has a value which is an int
+objects has a value which is a reference to a list where each element is a DataFileUtil.ObjectSaveData
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+id has a value which is an int
+objects has a value which is a reference to a list where each element is a DataFileUtil.ObjectSaveData
+
+
+=end text
+
+=back
+
+
+
+=head2 GetObjectsParams
+
+=over 4
+
+
+
+=item Description
+
+Input parameters for the "get_objects" function.
+
+    Required parameters:
+    object_refs - a list of object references in the form X/Y/Z, where X is
+        the workspace name or id, Y is the object name or id, and Z is the
+        (optional) object version. In general, always use ids rather than
+        names if possible to avoid race conditions.
+    
+    Optional parameters:
+    ignore_errors - ignore any errors that occur when fetching an object
+        and instead insert a null into the returned list.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+object_refs has a value which is a reference to a list where each element is a string
+ignore_errors has a value which is a DataFileUtil.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+object_refs has a value which is a reference to a list where each element is a string
+ignore_errors has a value which is a DataFileUtil.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 ObjectData
+
+=over 4
+
+
+
+=item Description
+
+The data and supplemental info for an object.
+
+    UnspecifiedObject data - the object's data or subset data.
+    object_info info - information about the object.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+data has a value which is an UnspecifiedObject, which can hold any non-null object
+info has a value which is a DataFileUtil.object_info
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+data has a value which is an UnspecifiedObject, which can hold any non-null object
+info has a value which is a DataFileUtil.object_info
+
+
+=end text
+
+=back
+
+
+
+=head2 GetObjectsResults
+
+=over 4
+
+
+
+=item Description
+
+Results from the get_objects function.
+
+    list<ObjectData> data - the returned objects.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+data has a value which is a reference to a list where each element is a DataFileUtil.ObjectData
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+data has a value which is a reference to a list where each element is a DataFileUtil.ObjectData
 
 
 =end text
