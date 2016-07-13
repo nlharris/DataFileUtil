@@ -98,7 +98,8 @@ class DataFileUtilTest(unittest.TestCase):
             self.ctx,
             {'file_path': file_path})[0]
         shock_id = ret1['shock_id']
-        file_path2 = os.path.join(self.cfg['scratch'], 'output.txt')
+        # test creating a directory on download
+        file_path2 = os.path.join(self.cfg['scratch'], 'tftsab/output.txt')
         ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
@@ -319,6 +320,35 @@ class DataFileUtilTest(unittest.TestCase):
         self.fail_upload(
             {'file_path': ''},
             'No file provided for upload to Shock.')
+
+    def test_download_existing_dir(self):
+        ret1 = self.impl.file_to_shock(self.ctx,
+                                       {'file_path': 'data/file1.txt'})[0]
+        sid = ret1['shock_id']
+        d = 'foobarbazbingbang'
+        os.mkdir(d)
+        ret2 = self.impl.shock_to_file(self.ctx, {'shock_id': sid,
+                                                  'file_path': d + '/foo',
+                                                  }
+                                       )[0]
+        self.delete_shock_node(sid)
+        self.assertEquals(ret2['node_file_name'], 'file1.txt')
+        filecmp.cmp('data/file1.txt', d + '/foo')
+
+    def test_download_fail_make_dir(self):
+        ret1 = self.impl.file_to_shock(self.ctx,
+                                       {'file_path': 'data/file1.txt'})[0]
+        sid = ret1['shock_id']
+        f = 'whooptywhoopwhee'
+        with open(f, 'a'):  # touch
+            os.utime(f, None)
+        try:
+            self.impl.shock_to_file(
+                self.ctx, {'shock_id': sid, 'file_path': f + '/foo'})
+            self.fail('expecting an OSError here')
+        except OSError as e:
+            self.assertEqual(e.args, (17, 'File exists'))
+        self.delete_shock_node(sid)
 
     def test_download_err_bad_unpack_param(self):
         self.fail_unpack('data/tar1.tar', 'foo', 'Illegal unpack value: foo')

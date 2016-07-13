@@ -16,6 +16,7 @@ import tempfile
 import bz2  # @UnresolvedImport no idea why PyDev is complaining about this
 import tarfile
 import zipfile
+import errno
 
 
 class ShockException(Exception):
@@ -126,6 +127,18 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
 
         self._unarchive(file_path, unpack, t)
 
+    # http://stackoverflow.com/a/600612/643675
+    def mkdir_p(self, path):
+        if not path:
+            return
+        try:
+            os.makedirs(path)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+
     def check_shock_response(self, response, errtxt):
         if not response.ok:
             try:
@@ -201,6 +214,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('Must provide file path')
+        self.mkdir_p(os.path.dirname(file_path))
         node_url = self.shock_url + '/node/' + shock_id
         r = requests.get(node_url, headers=headers, allow_redirects=True)
         errtxt = ('Error downloading file from shock ' +
