@@ -6,6 +6,9 @@ import requests
 from os import environ
 import gzip
 import semver
+import tempfile
+import shutil
+import filecmp
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -46,6 +49,8 @@ class DataFileUtilTest(unittest.TestCase):
                                token=cls.token)
         cls.impl = DataFileUtil(cls.cfg)
         suffix = int(time.time() * 1000)
+        shutil.rmtree(cls.cfg['scratch'])
+        os.mkdir(cls.cfg['scratch'])
         wsName = "test_DataFileUtil_" + str(suffix)
         cls.ws_info = cls.ws.create_workspace({'workspace': wsName})
 
@@ -229,10 +234,94 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, contents)
         self.delete_shock_node(shock_id)
 
+    def test_unpack_archive(self):
+        self.check_unpack_archive('data/tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.txt')
+        self.check_unpack_archive('data/tar1.tgz')
+        self.check_unpack_archive('data/tar1.tar.gz')
+        self.check_unpack_archive('data/tar1.tar.gzip')
+        self.check_unpack_archive('data/tar1.tbz')
+        self.check_unpack_archive('data/tar1.tar.bz')
+        self.check_unpack_archive('data/tar1.tar.bz2')
+        self.check_unpack_archive('data/tar1.tar.bzip')
+        self.check_unpack_archive('data/tar1.tar.bzip2')
+        self.check_unpack_archive('data/zip1.zip')
+
+    def check_unpack_archive(self, file_path):
+        ret1 = self.impl.file_to_shock(self.ctx, {'file_path': file_path})[0]
+        sid = ret1['shock_id']
+        td = os.path.abspath(tempfile.mkdtemp(dir=self.cfg['scratch']))
+        ret2 = self.impl.shock_to_file(self.ctx, {'shock_id': sid,
+                                                  'file_path': td,
+                                                  'unpack': 'unpack'
+                                                  }
+                                       )[0]
+        self.delete_shock_node(sid)
+        fn = os.path.basename(file_path)
+        self.assertEquals(ret2['node_file_name'], fn)
+        filecmp.cmp(file_path, td + '/' + ret2['node_file_name'])
+        self.assertEqual(set(os.listdir(td + '/tar1')),
+                         set(['file1.txt', 'file2.txt']))
+        filecmp.cmp('data/file1.txt', td + '/tar1/file1.txt')
+        filecmp.cmp('data/file2.txt', td + '/tar1/file2.txt')
+
+    def test_uncompress(self):
+        self.check_uncompress('data/file1.txt.bz')
+        self.check_uncompress('data/file1.txt.bz.txt')
+        self.check_uncompress('data/file1.txt.bz2')
+        self.check_uncompress('data/file1.txt.bzip')
+        self.check_uncompress('data/file1.txt.bzip2')
+        self.check_uncompress('data/file1.txt.gz')
+        self.check_uncompress('data/file1.txt.gzip')
+
+    def check_uncompress(self, file_path):
+        ret1 = self.impl.file_to_shock(self.ctx, {'file_path': file_path})[0]
+        sid = ret1['shock_id']
+        td = os.path.abspath(tempfile.mkdtemp(dir=self.cfg['scratch']))
+        ret2 = self.impl.shock_to_file(self.ctx, {'shock_id': sid,
+                                                  'file_path': td,
+                                                  'unpack': 'uncompress'
+                                                  }
+                                       )[0]
+        self.delete_shock_node(sid)
+        fn = os.path.basename(file_path)
+        self.assertEquals(ret2['node_file_name'], fn)
+        filecmp.cmp('data/file1.txt', td + '/' + ret2['node_file_name'])
+
+    def test_bad_archive(self):
+        self.fail_unpack(
+            'data/bad_zip.zip', 'unpack', 'Dangerous archive file - entry ' +
+            '[../bad_file.txt] points to a file outside the archive directory')
+        self.fail_unpack(
+            'data/bad_zip2.zip', 'unpack', 'Dangerous archive file - entry ' +
+            '[tar1/../../bad_file2.txt] points to a file outside the ' +
+            'archive directory')
+
+    def fail_unpack(self, file_path, unpack, error):
+        ret1 = self.impl.file_to_shock(self.ctx, {'file_path': file_path})[0]
+        sid = ret1['shock_id']
+        td = os.path.abspath(tempfile.mkdtemp(dir=self.cfg['scratch']))
+        self.fail_download({'shock_id': sid,
+                            'file_path': td,
+                            'unpack': unpack},
+                           error)
+        self.delete_shock_node(sid)
+
+    def test_uncompress_on_archive(self):
+        self.fail_unpack('data/tar1.tar', 'uncompress',
+                         'File is tar file but only uncompress was specified')
+        self.fail_unpack('data/tar1.tgz', 'uncompress',
+                         'File is tar file but only uncompress was specified')
+        self.fail_unpack('data/zip1.zip', 'uncompress',
+                         'File is zip file but only uncompress was specified')
+
     def test_upload_err_no_file_provided(self):
         self.fail_upload(
             {'file_path': ''},
             'No file provided for upload to Shock.')
+
+    def test_download_err_bad_unpack_param(self):
+        self.fail_unpack('data/tar1.tar', 'foo', 'Illegal unpack value: foo')
 
     def test_download_err_node_not_found(self):
         # test forcing a ShockException on download.

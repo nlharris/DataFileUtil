@@ -350,7 +350,7 @@ class Application(object):
         self.rpc_service.add(impl_DataFileUtil.ws_name_to_id,
                              name='DataFileUtil.ws_name_to_id',
                              types=[basestring])
-        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'optional'
+        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.save_objects,
                              name='DataFileUtil.save_objects',
                              types=[dict])
@@ -358,11 +358,11 @@ class Application(object):
         self.rpc_service.add(impl_DataFileUtil.get_objects,
                              name='DataFileUtil.get_objects',
                              types=[dict])
-        self.method_authentication['DataFileUtil.get_objects'] = 'optional'
+        self.method_authentication['DataFileUtil.get_objects'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.versions,
                              name='DataFileUtil.versions',
                              types=[])
-        self.method_authentication['DataFileUtil.versions'] = 'none'
+        self.method_authentication['DataFileUtil.versions'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.status,
                              name='DataFileUtil.status',
                              types=[dict])

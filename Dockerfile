@@ -11,7 +11,12 @@ RUN sudo apt-get install python-dev libffi-dev libssl-dev \
     && pip install pyopenssl ndg-httpsclient pyasn1 \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
-    && pip install semver
+    && pip install semver \
+    && pip uninstall -y filemagic \
+    && pip install python-magic \
+    && pip install ftputil \
+    && pip install ipython \
+    && sudo apt-get install nano
 # -----------------------------------------
 
 COPY ./ /kb/module

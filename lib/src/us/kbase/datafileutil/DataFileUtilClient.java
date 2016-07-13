@@ -255,7 +255,7 @@ public class DataFileUtilClient {
         List<Object> args = new ArrayList<Object>();
         args.add(name);
         TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = caller.jsonrpcCall("DataFileUtil.ws_name_to_id", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        List<Long> res = caller.jsonrpcCall("DataFileUtil.ws_name_to_id", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -292,7 +292,7 @@ public class DataFileUtilClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<GetObjectsResults>> retType = new TypeReference<List<GetObjectsResults>>() {};
-        List<GetObjectsResults> res = caller.jsonrpcCall("DataFileUtil.get_objects", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        List<GetObjectsResults> res = caller.jsonrpcCall("DataFileUtil.get_objects", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -308,7 +308,7 @@ public class DataFileUtilClient {
     public Tuple2<String, String> versions(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<Tuple2<String, String>> retType = new TypeReference<Tuple2<String, String>>() {};
-        Tuple2<String, String> res = caller.jsonrpcCall("DataFileUtil.versions", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        Tuple2<String, String> res = caller.jsonrpcCall("DataFileUtil.versions", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res;
     }
 
