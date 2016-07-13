@@ -132,7 +132,7 @@ module DataFileUtil {
         returns(CopyShockNodeOutput out) authentication required;
 
     /* Translate a workspace name to a workspace ID. */
-    funcdef ws_name_to_id(string name) returns(int id) authentication optional;
+    funcdef ws_name_to_id(string name) returns(int id) authentication required;
 
     /* Information about an object, including user provided metadata.
     
@@ -243,9 +243,9 @@ module DataFileUtil {
     
     /* Get objects from the workspace. */
     funcdef get_objects(GetObjectsParams params)
-        returns(GetObjectsResults results) authentication optional;
+        returns(GetObjectsResults results) authentication required;
 
     /* Get the versions of the Workspace service and Shock service. */
     funcdef versions() returns(string wsver, string shockver)
-        authentication optional;
+        authentication required;
 };
