@@ -11,11 +11,12 @@ try:
 except:
     from configparser import ConfigParser  # py3 @UnresolvedImport @Reimport
 
-
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
+from Workspace.WorkspaceClient import Workspace
 from DataFileUtil.DataFileUtilImpl import DataFileUtil, ShockException
 from DataFileUtil.DataFileUtilServer import MethodContext
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
+from Workspace.baseclient import ServerError as WorkspaceError
+from DataFileUtil.DataFileUtilImpl import HandleError
 
 
 class DataFileUtilTest(unittest.TestCase):
@@ -39,33 +40,20 @@ class DataFileUtilTest(unittest.TestCase):
         config.read(config_file)
         for nameval in config.items('DataFileUtil'):
             cls.cfg[nameval[0]] = nameval[1]
-        cls.wsURL = cls.cfg['workspace-url']
         cls.shockURL = cls.cfg['shock-url']
-        cls.wsClient = workspaceService(cls.wsURL, token=cls.token)
+        cls.ws = Workspace(cls.cfg['workspace-url'], token=cls.token)
         cls.hs = HandleService(url=cls.cfg['handle-service-url'],
                                token=cls.token)
-        cls.serviceImpl = DataFileUtil(cls.cfg)
+        cls.impl = DataFileUtil(cls.cfg)
+        suffix = int(time.time() * 1000)
+        wsName = "test_DataFileUtil_" + str(suffix)
+        cls.ws_info = cls.ws.create_workspace({'workspace': wsName})
 
     @classmethod
     def tearDownClass(cls):
-        if hasattr(cls, 'wsName'):
-            cls.wsClient.delete_workspace({'workspace': cls.wsName})
+        if hasattr(cls, 'ws_info'):
+            cls.ws.delete_workspace({'id': cls.ws_info[0]})
             print('Test workspace was deleted')
-
-    def getWsClient(self):
-        return self.__class__.wsClient
-
-    def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_DataFileUtil_" + str(suffix)
-        self.getWsClient().create_workspace({'workspace': wsName})
-        self.__class__.wsName = wsName
-        return wsName
-
-    def getImpl(self):
-        return self.__class__.serviceImpl
 
     @classmethod
     def delete_shock_node(cls, node_id):
@@ -81,13 +69,13 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
             fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path,
              'attributes': {'foo': [{'bar': 'baz'}]}})[0]
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
+        ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
@@ -101,12 +89,12 @@ class DataFileUtilTest(unittest.TestCase):
 
     def test_file_to_shock_and_back(self):
         file_path = self.write_file('input.txt', 'Test2!!!')
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path})[0]
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(self.cfg['scratch'], 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
+        ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
@@ -121,7 +109,7 @@ class DataFileUtilTest(unittest.TestCase):
     def test_file_to_shock_mass_and_back(self):
         infile1 = self.write_file('input1.txt', 'filestoshock1')
         infile2 = self.write_file('input2.txt', 'filestoshock2')
-        ret1 = self.getImpl().file_to_shock_mass(
+        ret1 = self.impl.file_to_shock_mass(
             self.ctx,
             [{'file_path': infile1},
              {'file_path': infile2}
@@ -131,7 +119,7 @@ class DataFileUtilTest(unittest.TestCase):
         shock_id2 = ret1[1]['shock_id']
         outfile1 = os.path.join(self.cfg['scratch'], 'output1.txt')
         outfile2 = os.path.join(self.cfg['scratch'], 'output2.txt')
-        ret2 = self.getImpl().shock_to_file_mass(
+        ret2 = self.impl.shock_to_file_mass(
             self.ctx,
             [{'shock_id': shock_id1, 'file_path': outfile1},
              {'shock_id': shock_id2, 'file_path': outfile2}
@@ -171,7 +159,7 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
             fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path, 'make_handle': 1})[0]
         shock_id = ret1['shock_id']
@@ -200,12 +188,12 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
             fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path, 'gzip': 1})[0]
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
+        ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
@@ -218,42 +206,18 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(shock_id)
 
     def test_gzip_already_gzipped(self):
-        input_ = 'testgzip2'
-        tmp_dir = self.cfg['scratch']
-        input_file_name = 'input.txt.gz'
-        file_path = os.path.join(tmp_dir, input_file_name)
-        with open(file_path, 'w') as fh1:
-            fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
-            self.ctx,
-            {'file_path': file_path, 'gzip': 1})[0]
-        shock_id = ret1['shock_id']
-        file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
-            self.ctx,
-            {'shock_id': shock_id, 'file_path': file_path2})[0]
-        file_name = ret2['node_file_name']
-        attribs = ret2['attributes']
-        self.assertEqual(file_name, input_file_name)
-        self.assertIsNone(attribs)
-        with open(file_path2, 'r') as fh2:
-            output = fh2.read()
-        self.assertEqual(output, input_)
-        self.delete_shock_node(shock_id)
+        self.check_gzip_skip('input.txt.gz', 'gz test')
+        self.check_gzip_skip('input.txt.tgz', 'tgz test')
+        self.check_gzip_skip('input.txt.gzip', 'gzip test')
 
-    def test_gzip_already_targzipped(self):
-        input_ = 'testgzip3'
-        tmp_dir = self.cfg['scratch']
-        input_file_name = 'input.txt.tgz'
-        file_path = os.path.join(tmp_dir, input_file_name)
-        with open(file_path, 'w') as fh1:
-            fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+    def check_gzip_skip(self, input_file_name, contents):
+        file_path = self.write_file(input_file_name, contents)
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path, 'gzip': 1})[0]
         shock_id = ret1['shock_id']
-        file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
+        file_path2 = os.path.join(self.cfg['scratch'], 'output.txt')
+        ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         file_name = ret2['node_file_name']
@@ -262,7 +226,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertIsNone(attribs)
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
-        self.assertEqual(output, input_)
+        self.assertEqual(output, contents)
         self.delete_shock_node(shock_id)
 
     def test_upload_err_no_file_provided(self):
@@ -314,16 +278,16 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
             fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path,
              'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
         shock_id = ret1['shock_id']
-        retcopy = self.getImpl().copy_shock_node(self.ctx,
-                                                 {'shock_id': shock_id})[0]
+        retcopy = self.impl.copy_shock_node(self.ctx,
+                                            {'shock_id': shock_id})[0]
         new_id = retcopy['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.getImpl().shock_to_file(
+        ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': new_id, 'file_path': file_path2})[0]
         self.delete_shock_node(shock_id)
@@ -343,14 +307,14 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = os.path.join(tmp_dir, input_file_name)
         with open(file_path, 'w') as fh1:
             fh1.write(input_)
-        ret1 = self.getImpl().file_to_shock(
+        ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path,
              'attributes': {'foopy': [{'bar': 'baz'}]}})[0]
         shock_id = ret1['shock_id']
-        retcopy = self.getImpl().copy_shock_node(self.ctx,
-                                                 {'shock_id': shock_id,
-                                                  'make_handle': 1})[0]
+        retcopy = self.impl.copy_shock_node(self.ctx,
+                                            {'shock_id': shock_id,
+                                             'make_handle': 1})[0]
         new_id = retcopy['shock_id']
         self.delete_shock_node(shock_id)
         self.delete_shock_node(new_id)
@@ -374,22 +338,157 @@ class DataFileUtilTest(unittest.TestCase):
         self.fail_copy(
             {'shock_id': ''}, 'Must provide shock ID')
 
+    def test_translate_ws_name(self):
+        self.assertEqual(self.impl.ws_name_to_id(self.ctx, self.ws_info[1])[0],
+                         self.ws_info[0])
+
+    def test_translate_ws_name_bad_ws(self):
+        badws = 'superbadworkspacename&)^&%)&*)&^&^&('
+        with self.assertRaises(WorkspaceError) as context:
+            self.impl.ws_name_to_id(self.ctx, badws)
+        self.assertEqual('Illegal character in workspace name {}: &'
+                         .format(badws),
+                         str(context.exception.message))
+
+    def test_save_and_get_objects(self):
+        objs = [{'name': 'whee1',
+                 'type': 'Empty.AType-0.1',
+                 'data': {'thingy': 1}
+                 },
+                {'name': 'whee2',
+                 'type': 'Empty.AType-1.0',
+                 'data': {'thingy': 2}
+                 }
+                ]
+        ws = self.ws_info[0]
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs})
+        ret = self.impl.get_objects(
+            self.ctx,
+            {'object_refs': [str(ws) + '/whee2', str(ws) + '/whee1']})
+        o1 = ret[0]['data'][0]
+        o2 = ret[0]['data'][1]
+        self.assertEquals(o1['info'][1], 'whee2')
+        self.assertEquals(o1['info'][2], 'Empty.AType-1.0')
+        self.assertEquals(o1['data'], {'thingy': 2})
+        self.assertEquals(o2['info'][1], 'whee1')
+        self.assertEquals(o2['info'][2], 'Empty.AType-0.1')
+        self.assertEquals(o2['data'], {'thingy': 1})
+
+        pret = self.ws.get_objects2(
+            {'objects': [{'ref': str(ws) + '/whee1',
+                          'ref': str(ws) + '/whee2'}]})['data']
+        p1 = pret[0]['provenance'][0]
+        p2 = pret[0]['provenance'][0]
+        # this is enough to check that provenance is being saved
+        self.assertEquals(
+            p1['description'],
+            'KBase SDK method run via the KBase Execution Engine')
+        self.assertEquals(
+            p2['description'],
+            'KBase SDK method run via the KBase Execution Engine')
+        self.assertEquals(p1['service'], 'use_set_provenance')
+        self.assertEquals(p2['service'], 'use_set_provenance')
+
+    def test_save_objects_no_objects(self):
+        self.fail_save_objects({'id': 1},
+                               'Required parameter objects missing')
+
+    def test_save_objects_no_id(self):
+        self.fail_save_objects({'objects': [{}]},
+                               'Required parameter id missing')
+
+    def test_save_objects_no_data(self):
+        self.fail_save_objects({'id': self.ws_info[0],
+                                'objects': [{'name': 'foo',
+                                             'type': 'Empty.AType'
+                                             }
+                                            ]
+                                },
+                               'Object 1, foo, has no data',
+                               exception=WorkspaceError)
+
+    def test_get_objects_ws_exception(self):
+        self.fail_get_objects(
+            {'object_refs': ['bad%ws/1/1']},
+            'Error on ObjectSpecification #1: Illegal character in ' +
+            'workspace name bad%ws: %',
+            exception=WorkspaceError)
+
+    def test_get_objects_no_objs(self):
+        self.fail_get_objects({'object_refs': []},
+                              'No objects specified for retrieval')
+
+    def test_get_objects_bad_handle(self):
+        infile = self.write_file('foobar', 'foobar')
+        ret1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': infile, 'make_handle': 1})[0]
+        handle_id = ret1['handle']['hid']
+        ws = self.ws_info[0]
+        info = self.impl.save_objects(
+            self.ctx,
+            {'id': ws,
+             'objects': [{'name': 'bad_handle',
+                          'type': 'Empty.AHandle',
+                          'data': {'hid': handle_id}
+                          }
+                         ]
+             })[0][0]
+        self.delete_shock_node(ret1['shock_id'])
+        err = ('Handle error for object {}/{}/{}: The Handle Manager ' +
+               'reported a problem while attempting to set Handle ACLs: ' +
+               'Unable to set acl(s) on handles {}'
+               ).format(ws, info[0], info[4], handle_id)
+        self.fail_get_objects({'object_refs': [str(ws) + '/bad_handle']},
+                              err, exception=HandleError)
+
+        gret = self.impl.get_objects(
+            self.ctx,
+            {'object_refs': [str(ws) + '/bad_handle'],
+             'ignore_errors': 1})[0]['data']
+        self.assertIsNone(gret[0])
+        self.hs.delete_handles([handle_id])
+
+    def test_get_objects_ignore_errors(self):
+        objs = [{'name': 'whoop',
+                 'type': 'Empty.AType-0.1',
+                 'data': {'thingy': 1}
+                 }
+                ]
+        ws = self.ws_info[0]
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs})
+        gret = self.impl.get_objects(
+            self.ctx,
+            {'object_refs': [str(ws) + '/fakefakefake', str(ws) + '/whoop'],
+             'ignore_errors': 1})[0]['data']
+        self.assertIsNone(gret[0])
+        self.assertEqual(gret[1]['data'], {'thingy': 1})
+
     def test_versions(self):
-        wsver, shockver = self.getImpl().versions(self.ctx)
+        wsver, shockver = self.impl.versions(self.ctx)
         self.assertTrue(semver.match(wsver, '>=0.4.0'))
         self.assertTrue(semver.match(shockver, '>=0.9.0'))
 
     def fail_copy(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
-            self.getImpl().copy_shock_node(self.ctx, params)
+            self.impl.copy_shock_node(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
 
     def fail_download(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
-            self.getImpl().shock_to_file(self.ctx, params)
+            self.impl.shock_to_file(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
 
     def fail_upload(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
-            self.getImpl().file_to_shock(self.ctx, params)
+            self.impl.file_to_shock(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def fail_save_objects(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.impl.save_objects(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def fail_get_objects(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.impl.get_objects(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))

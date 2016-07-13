@@ -3,11 +3,13 @@ import os
 import requests
 import json
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
+from biokbase.AbstractHandle.Client import ServerError as HandleError  # @UnresolvedImport @IgnorePep8
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import time
 import gzip
 import shutil
 from Workspace.WorkspaceClient import Workspace
+from Workspace.baseclient import ServerError as WorkspaceError
 import semver
 
 
@@ -35,25 +37,32 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "fcd7a840a3db20200e4a6adb17827480bb503974"
+    GIT_COMMIT_HASH = "9e6563774194cb37c58e4a7a4d816b3d12adb62d"
     
     #BEGIN_CLASS_HEADER
 
-    GZIP = '.gz'
+    GZ = '.gz'
+    GZIP = '.gzip'
     TGZ = '.tgz'
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
               str(time.time()) + ': ' + str(message))
 
+    def endswith(self, string, suffixes):
+        strl = string.lower()
+        for s in suffixes:
+            if strl.endswith(s):
+                return True
+        return False
+
     # it'd be nice if you could just open the file and gzip on the fly but I
     # don't see a way to do that
     def gzip(self, oldfile):
-        lo = oldfile.lower()
-        if lo.endswith(self.GZIP) or lo.endswith(self.TGZ):
+        if self.endswith(oldfile, [self.GZ, self.GZIP, self.TGZ]):
             self.log('File {} is already gzipped, skipping'.format(oldfile))
             return oldfile
-        newfile = oldfile + self.GZIP
+        newfile = oldfile + self.GZ
         self.log('gzipping {} to {}'.format(oldfile, newfile))
         with open(oldfile, 'rb') as s, gzip.open(newfile, 'wb') as t:
             shutil.copyfileobj(s, t)
@@ -81,6 +90,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         hid = hs.persist_handle(handle)
         handle['hid'] = hid
         return handle
+
+    def make_ref(self, object_info):
+        return str(object_info[6]) + '/' + str(object_info[0]) + \
+            '/' + str(object_info[4])
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -92,6 +105,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.ws_url = config['workspace-url']
         #END_CONSTRUCTOR
         pass
+    
 
     def shock_to_file(self, ctx, params):
         """
@@ -224,12 +238,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out
@@ -294,12 +308,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out
@@ -338,12 +352,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            type "Handle" (A handle for a file stored in Shock. hid - the id
            of the handle in the Handle Service that references this shock
            node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be
-           ‘shock’. file_name - the name of the file remote_md5 - the md5
-           digest of the file.) -> structure: parameter "hid" of String,
-           parameter "file_name" of String, parameter "id" of String,
-           parameter "url" of String, parameter "type" of String, parameter
-           "remote_md5" of String
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
         """
         # ctx is the context object
         # return variables are: out
@@ -395,6 +409,181 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                              'out is not type dict as required.')
         # return the results
         return [out]
+
+    def ws_name_to_id(self, ctx, name):
+        """
+        Translate a workspace name to a workspace ID.
+        :param name: instance of String
+        :returns: instance of Long
+        """
+        # ctx is the context object
+        # return variables are: id
+        #BEGIN ws_name_to_id
+        ws = Workspace(self.ws_url, token=ctx['token'])
+        id = ws.get_workspace_info(  # @ReservedAssignment
+            {'workspace': name})[0]
+        #END ws_name_to_id
+
+        # At some point might do deeper type checking...
+        if not isinstance(id, int):
+            raise ValueError('Method ws_name_to_id return value ' +
+                             'id is not type int as required.')
+        # return the results
+        return [id]
+
+    def save_objects(self, ctx, params):
+        """
+        Save objects to the workspace. Saving over a deleted object undeletes
+        it.
+        :param params: instance of type "SaveObjectsParams" (Input parameters
+           for the "save_objects" function. Required parameters: id - the
+           numerical ID of the workspace. objects - the objects to save. The
+           object provenance is automatically pulled from the SDK runner.) ->
+           structure: parameter "id" of Long, parameter "objects" of list of
+           type "ObjectSaveData" (An object and associated data required for
+           saving. Required parameters: type - the workspace type string for
+           the object. Omit the version information to use the latest
+           version. data - the object data. Optional parameters: One of an
+           object name or id. If no name or id is provided the name will be
+           set to 'auto' with the object id appended as a string, possibly
+           with -\d+ appended if that object id already exists as a name.
+           name - the name of the object. objid - the id of the object to
+           save over. meta - arbitrary user-supplied metadata for the object,
+           not to exceed 16kb; if the object type specifies automatic
+           metadata extraction with the 'meta ws' annotation, and your
+           metadata name conflicts, then your metadata will be silently
+           overwritten. hidden - true if this object should not be listed
+           when listing workspace objects.) -> structure: parameter "type" of
+           String, parameter "data" of unspecified object, parameter "name"
+           of String, parameter "objid" of Long, parameter "meta" of mapping
+           from String to String, parameter "hidden" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1))
+        :returns: instance of list of type "object_info" (Information about
+           an object, including user provided metadata. objid - the numerical
+           id of the object. name - the name of the object. type - the type
+           of the object. save_date - the save date of the object. ver - the
+           version of the object. saved_by - the user that saved or copied
+           the object. wsid - the id of the workspace containing the object.
+           workspace - the name of the workspace containing the object. chsum
+           - the md5 checksum of the object. size - the size of the object in
+           bytes. meta - arbitrary user-supplied metadata about the object.)
+           -> tuple of size 11: parameter "objid" of Long, parameter "name"
+           of String, parameter "type" of String, parameter "save_date" of
+           String, parameter "version" of Long, parameter "saved_by" of
+           String, parameter "wsid" of Long, parameter "workspace" of String,
+           parameter "chsum" of String, parameter "size" of Long, parameter
+           "meta" of mapping from String to String
+        """
+        # ctx is the context object
+        # return variables are: info
+        #BEGIN save_objects
+        prov = ctx.provenance()
+        objs = params.get('objects')
+        if not objs:
+            raise ValueError('Required parameter objects missing')
+        wsid = params.get('id')
+        if not wsid:
+            raise ValueError('Required parameter id missing')
+        for o in objs:
+            o['provenance'] = prov
+        ws = Workspace(self.ws_url, token=ctx['token'])
+        try:
+            info = ws.save_objects({'id': wsid, 'objects': objs})
+        except WorkspaceError as e:
+            self.log('Logging workspace error on save_objects: {}\n{}'.format(
+                e.message, e.data))
+            raise
+        #END save_objects
+
+        # At some point might do deeper type checking...
+        if not isinstance(info, list):
+            raise ValueError('Method save_objects return value ' +
+                             'info is not type list as required.')
+        # return the results
+        return [info]
+
+    def get_objects(self, ctx, params):
+        """
+        Get objects from the workspace.
+        :param params: instance of type "GetObjectsParams" (Input parameters
+           for the "get_objects" function. Required parameters: object_refs -
+           a list of object references in the form X/Y/Z, where X is the
+           workspace name or id, Y is the object name or id, and Z is the
+           (optional) object version. In general, always use ids rather than
+           names if possible to avoid race conditions. Optional parameters:
+           ignore_errors - ignore any errors that occur when fetching an
+           object and instead insert a null into the returned list.) ->
+           structure: parameter "object_refs" of list of String, parameter
+           "ignore_errors" of type "boolean" (A boolean - 0 for false, 1 for
+           true. @range (0, 1))
+        :returns: instance of type "GetObjectsResults" (Results from the
+           get_objects function. list<ObjectData> data - the returned
+           objects.) -> structure: parameter "data" of list of type
+           "ObjectData" (The data and supplemental info for an object.
+           UnspecifiedObject data - the object's data or subset data.
+           object_info info - information about the object.) -> structure:
+           parameter "data" of unspecified object, parameter "info" of type
+           "object_info" (Information about an object, including user
+           provided metadata. objid - the numerical id of the object. name -
+           the name of the object. type - the type of the object. save_date -
+           the save date of the object. ver - the version of the object.
+           saved_by - the user that saved or copied the object. wsid - the id
+           of the workspace containing the object. workspace - the name of
+           the workspace containing the object. chsum - the md5 checksum of
+           the object. size - the size of the object in bytes. meta -
+           arbitrary user-supplied metadata about the object.) -> tuple of
+           size 11: parameter "objid" of Long, parameter "name" of String,
+           parameter "type" of String, parameter "save_date" of String,
+           parameter "version" of Long, parameter "saved_by" of String,
+           parameter "wsid" of Long, parameter "workspace" of String,
+           parameter "chsum" of String, parameter "size" of Long, parameter
+           "meta" of mapping from String to String
+        """
+        # ctx is the context object
+        # return variables are: results
+        #BEGIN get_objects
+        ignore_err = params.get('ignore_errors')
+        objlist = params.get('object_refs')
+        if not objlist:
+            raise ValueError('No objects specified for retrieval')
+        input_ = {'objects': [{'ref': x} for x in objlist]}
+        if ignore_err:
+            input_['ignoreErrors'] = 1
+        ws = Workspace(self.ws_url, token=ctx['token'])
+        try:
+            retobjs = ws.get_objects2(input_)['data']
+        except WorkspaceError as e:
+            self.log('Logging workspace error on get_objects: {}\n{}'.format(
+                e.message, e.data))
+            raise
+        results = []
+        for o in retobjs:
+            if not o:
+                results.append(None)
+                continue
+            res = {'data': o['data'], 'info': o['info']}
+            he = 'handle_error'
+            hs = 'handle_stacktrace'
+            if he in o or hs in o:
+                ref = self.make_ref(o['info'])
+                self.log('Handle error for object {}: {}.\nStacktrace: {}'
+                         .format(ref, o.get(he), o.get(hs)))
+                if ignore_err:
+                    res = None
+                else:
+                    raise HandleError(
+                        'HandleError', 0, 'Handle error for object {}: {}'
+                        .format(ref, o.get(he)), o.get(hs))
+            results.append(res)
+        results = {'data': results}
+        #END get_objects
+
+        # At some point might do deeper type checking...
+        if not isinstance(results, dict):
+            raise ValueError('Method get_objects return value ' +
+                             'results is not type dict as required.')
+        # return the results
+        return [results]
 
     def versions(self, ctx):
         """

@@ -11,6 +11,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.Tuple11;
 import us.kbase.common.service.Tuple2;
 import us.kbase.common.service.UnauthorizedException;
 
@@ -237,6 +238,61 @@ public class DataFileUtilClient {
         args.add(params);
         TypeReference<List<CopyShockNodeOutput>> retType = new TypeReference<List<CopyShockNodeOutput>>() {};
         List<CopyShockNodeOutput> res = caller.jsonrpcCall("DataFileUtil.copy_shock_node", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: ws_name_to_id</p>
+     * <pre>
+     * Translate a workspace name to a workspace ID.
+     * </pre>
+     * @param   name   instance of String
+     * @return   parameter "id" of Long
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public Long wsNameToId(String name, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(name);
+        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
+        List<Long> res = caller.jsonrpcCall("DataFileUtil.ws_name_to_id", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: save_objects</p>
+     * <pre>
+     * Save objects to the workspace. Saving over a deleted object undeletes
+     * it.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.SaveObjectsParams SaveObjectsParams}
+     * @return   parameter "info" of list of original type "object_info" (Information about an object, including user provided metadata. objid - the numerical id of the object. name - the name of the object. type - the type of the object. save_date - the save date of the object. ver - the version of the object. saved_by - the user that saved or copied the object. wsid - the id of the workspace containing the object. workspace - the name of the workspace containing the object. chsum - the md5 checksum of the object. size - the size of the object in bytes. meta - arbitrary user-supplied metadata about the object.) &rarr; tuple of size 11: parameter "objid" of Long, parameter "name" of String, parameter "type" of String, parameter "save_date" of String, parameter "version" of Long, parameter "saved_by" of String, parameter "wsid" of Long, parameter "workspace" of String, parameter "chsum" of String, parameter "size" of Long, parameter "meta" of mapping from String to String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<Tuple11<Long, String, String, String, Long, String, Long, String, String, Long, Map<String,String>>> saveObjects(SaveObjectsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<Tuple11<Long, String, String, String, Long, String, Long, String, String, Long, Map<String,String>>>>> retType = new TypeReference<List<List<Tuple11<Long, String, String, String, Long, String, Long, String, String, Long, Map<String,String>>>>>() {};
+        List<List<Tuple11<Long, String, String, String, Long, String, Long, String, String, Long, Map<String,String>>>> res = caller.jsonrpcCall("DataFileUtil.save_objects", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_objects</p>
+     * <pre>
+     * Get objects from the workspace.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.GetObjectsParams GetObjectsParams}
+     * @return   parameter "results" of type {@link us.kbase.datafileutil.GetObjectsResults GetObjectsResults}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public GetObjectsResults getObjects(GetObjectsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<GetObjectsResults>> retType = new TypeReference<List<GetObjectsResults>>() {};
+        List<GetObjectsResults> res = caller.jsonrpcCall("DataFileUtil.get_objects", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
