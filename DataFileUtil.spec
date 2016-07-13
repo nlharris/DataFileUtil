@@ -246,5 +246,6 @@ module DataFileUtil {
         returns(GetObjectsResults results) authentication optional;
 
     /* Get the versions of the Workspace service and Shock service. */
-    funcdef versions() returns(string wsver, string shockver);
+    funcdef versions() returns(string wsver, string shockver)
+        authentication optional;
 };
