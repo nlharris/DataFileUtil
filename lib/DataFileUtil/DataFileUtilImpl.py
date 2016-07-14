@@ -79,6 +79,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile() as tf:
             shutil.copyfileobj(s, tf)
             s.close()
+            tf.flush()
             shutil.copy2(tf.name, file_path)
         t = magic.from_file(file_path, mime=True)
         self._unarchive(file_path, unpack, t)
