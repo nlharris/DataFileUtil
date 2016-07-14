@@ -242,6 +242,32 @@ public class DataFileUtilClient {
     }
 
     /**
+     * <p>Original spec-file function name: own_shock_node</p>
+     * <pre>
+     * Gain ownership of a Shock node.
+     * Returns a shock node id which is owned by the caller, given a shock
+     * node id.
+     * If the shock node is already owned by the caller, returns the same
+     * shock node ID. If not, the ID of a copy of the original node will be
+     * returned.
+     * If a handle is requested, the node is already owned by the caller, and
+     * a handle already exists, that handle will be returned. Otherwise a new
+     * handle will be created and returned.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.OwnShockNodeParams OwnShockNodeParams}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.OwnShockNodeOutput OwnShockNodeOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public OwnShockNodeOutput ownShockNode(OwnShockNodeParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<OwnShockNodeOutput>> retType = new TypeReference<List<OwnShockNodeOutput>>() {};
+        List<OwnShockNodeOutput> res = caller.jsonrpcCall("DataFileUtil.own_shock_node", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: ws_name_to_id</p>
      * <pre>
      * Translate a workspace name to a workspace ID.

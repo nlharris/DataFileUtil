@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "b1421b21c5c8c159549db059feed58ee6489eed9"
+    GIT_COMMIT_HASH = "2ab5abbbba1414951a92f12e13ebe16239ddc2b2"
     
     #BEGIN_CLASS_HEADER
 
@@ -490,6 +490,50 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # At some point might do deeper type checking...
         if not isinstance(out, dict):
             raise ValueError('Method copy_shock_node return value ' +
+                             'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def own_shock_node(self, ctx, params):
+        """
+        Gain ownership of a Shock node.
+        Returns a shock node id which is owned by the caller, given a shock
+        node id.
+        If the shock node is already owned by the caller, returns the same
+        shock node ID. If not, the ID of a copy of the original node will be
+        returned.
+        If a handle is requested, the node is already owned by the caller, and
+        a handle already exists, that handle will be returned. Otherwise a new
+        handle will be created and returned.
+        :param params: instance of type "OwnShockNodeParams" (Input for the
+           own_shock_node function. Required parameters: shock_id - the id of
+           the node for which the user needs ownership. Optional parameters:
+           make_handle - make or find a Handle Service handle for the shock
+           node. Default false.) -> structure: parameter "shock_id" of
+           String, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1))
+        :returns: instance of type "OwnShockNodeOutput" (Output of the
+           own_shock_node function. shock_id - the id of the (possibly new)
+           Shock node. handle - the handle, if requested. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN own_shock_node
+        #END own_shock_node
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, dict):
+            raise ValueError('Method own_shock_node return value ' +
                              'out is not type dict as required.')
         # return the results
         return [out]

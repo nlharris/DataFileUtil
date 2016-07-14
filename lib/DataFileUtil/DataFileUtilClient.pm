@@ -644,6 +644,127 @@ Copy a Shock node.
  
 
 
+=head2 own_shock_node
+
+  $out = $obj->own_shock_node($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.OwnShockNodeParams
+$out is a DataFileUtil.OwnShockNodeOutput
+OwnShockNodeParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
+OwnShockNodeOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.OwnShockNodeParams
+$out is a DataFileUtil.OwnShockNodeOutput
+OwnShockNodeParams is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	make_handle has a value which is a DataFileUtil.boolean
+boolean is an int
+OwnShockNodeOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	handle has a value which is a DataFileUtil.Handle
+Handle is a reference to a hash where the following keys are defined:
+	hid has a value which is a string
+	file_name has a value which is a string
+	id has a value which is a string
+	url has a value which is a string
+	type has a value which is a string
+	remote_md5 has a value which is a string
+
+
+=end text
+
+=item Description
+
+Gain ownership of a Shock node.
+
+Returns a shock node id which is owned by the caller, given a shock
+node id.
+
+If the shock node is already owned by the caller, returns the same
+shock node ID. If not, the ID of a copy of the original node will be
+returned.
+
+If a handle is requested, the node is already owned by the caller, and
+a handle already exists, that handle will be returned. Otherwise a new
+handle will be created and returned.
+
+=back
+
+=cut
+
+ sub own_shock_node
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function own_shock_node (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to own_shock_node:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'own_shock_node');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.own_shock_node",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'own_shock_node',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method own_shock_node",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'own_shock_node',
+				       );
+    }
+}
+ 
+
+
 =head2 ws_name_to_id
 
   $id = $obj->ws_name_to_id($name)
@@ -1462,6 +1583,90 @@ Output of the copy_shock_node function.
 
  shock_id - the id of the new Shock node.
  handle - the new handle, if created. Null otherwise.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+handle has a value which is a DataFileUtil.Handle
+
+
+=end text
+
+=back
+
+
+
+=head2 OwnShockNodeParams
+
+=over 4
+
+
+
+=item Description
+
+Input for the own_shock_node function.
+
+       Required parameters:
+       shock_id - the id of the node for which the user needs ownership.
+       
+       Optional parameters:
+       make_handle - make or find a Handle Service handle for the shock node.
+           Default false.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+make_handle has a value which is a DataFileUtil.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 OwnShockNodeOutput
+
+=over 4
+
+
+
+=item Description
+
+Output of the own_shock_node function.
+
+ shock_id - the id of the (possibly new) Shock node.
+ handle - the handle, if requested. Null otherwise.
 
 
 =item Definition
