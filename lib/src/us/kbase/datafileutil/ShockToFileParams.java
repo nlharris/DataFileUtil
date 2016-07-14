@@ -44,7 +44,7 @@ public class ShockToFileParams {
     @JsonProperty("file_path")
     private String filePath;
     @JsonProperty("unpack")
-    private Long unpack;
+    private String unpack;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("shock_id")
@@ -78,16 +78,16 @@ public class ShockToFileParams {
     }
 
     @JsonProperty("unpack")
-    public Long getUnpack() {
+    public String getUnpack() {
         return unpack;
     }
 
     @JsonProperty("unpack")
-    public void setUnpack(Long unpack) {
+    public void setUnpack(String unpack) {
         this.unpack = unpack;
     }
 
-    public ShockToFileParams withUnpack(Long unpack) {
+    public ShockToFileParams withUnpack(String unpack) {
         this.unpack = unpack;
         return this;
     }

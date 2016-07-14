@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "2ab5abbbba1414951a92f12e13ebe16239ddc2b2"
+    GIT_COMMIT_HASH = "c661638cfffd90fe7832c90f51aad8e73dfb510c"
     
     #BEGIN_CLASS_HEADER
 
@@ -194,7 +194,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            is an archive, it will be unbundled into the directory containing
            the original output file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -270,8 +270,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            thrown. If the file is an archive, it will be unbundled into the
            directory containing the original output file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
-           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
-           for true. @range (0, 1))
+           parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,

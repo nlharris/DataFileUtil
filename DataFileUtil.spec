@@ -47,7 +47,7 @@ module DataFileUtil {
     typedef structure {
         string shock_id;
         string file_path;
-        boolean unpack;
+        string unpack;
     } ShockToFileParams;
 
     /* Output from the shock_to_file function.

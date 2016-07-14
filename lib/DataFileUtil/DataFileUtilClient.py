@@ -48,7 +48,7 @@ class DataFileUtil(object):
            is an archive, it will be unbundled into the directory containing
            the original output file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -75,8 +75,7 @@ class DataFileUtil(object):
            thrown. If the file is an archive, it will be unbundled into the
            directory containing the original output file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
-           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
-           for true. @range (0, 1))
+           parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,

@@ -126,8 +126,7 @@ $out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
-	unpack has a value which is a DataFileUtil.boolean
-boolean is an int
+	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -143,8 +142,7 @@ $out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
-	unpack has a value which is a DataFileUtil.boolean
-boolean is an int
+	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -224,8 +222,7 @@ $out is a reference to a list where each element is a DataFileUtil.ShockToFileOu
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
-	unpack has a value which is a DataFileUtil.boolean
-boolean is an int
+	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -241,8 +238,7 @@ $out is a reference to a list where each element is a DataFileUtil.ShockToFileOu
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	file_path has a value which is a string
-	unpack has a value which is a DataFileUtil.boolean
-boolean is an int
+	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
@@ -1375,7 +1371,7 @@ unpack - either null, 'uncompress', or 'unpack'. 'uncompress' will cause
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 file_path has a value which is a string
-unpack has a value which is a DataFileUtil.boolean
+unpack has a value which is a string
 
 </pre>
 
@@ -1386,7 +1382,7 @@ unpack has a value which is a DataFileUtil.boolean
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 file_path has a value which is a string
-unpack has a value which is a DataFileUtil.boolean
+unpack has a value which is a string
 
 
 =end text
