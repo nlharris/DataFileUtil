@@ -36,10 +36,13 @@ module DataFileUtil {
            directory, the file will be named as per the filename in Shock.
 
        Optional parameters:
-       unpack - if the file is compressed and / or a file bundle, it will be
-           decompressed and unbundled into the directory containing the
-           original output file. unpack supports gzip, bzip2, tar, and zip
-           files. Default false. Currently unsupported.
+       unpack - either null, 'uncompress', or 'unpack'. 'uncompress' will cause
+           any bzip or gzip files to be uncompressed. 'unpack' will behave the
+           same way, but it will also unpack tar and zip archive files
+           (uncompressing gzipped or bzipped archive files if necessary). If
+           'uncompress' is specified and an archive file is encountered, an
+           error will be thrown. If the file is an archive, it will be
+           unbundled into the directory containing the original output file.
     */
     typedef structure {
         string shock_id;

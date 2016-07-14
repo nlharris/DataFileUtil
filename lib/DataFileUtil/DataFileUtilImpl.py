@@ -11,6 +11,12 @@ import shutil
 from Workspace.WorkspaceClient import Workspace
 from Workspace.baseclient import ServerError as WorkspaceError
 import semver
+import magic
+import tempfile
+import bz2  # @UnresolvedImport no idea why PyDev is complaining about this
+import tarfile
+import zipfile
+import errno
 
 
 class ShockException(Exception):
@@ -37,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "9e6563774194cb37c58e4a7a4d816b3d12adb62d"
+    GIT_COMMIT_HASH = "b1421b21c5c8c159549db059feed58ee6489eed9"
     
     #BEGIN_CLASS_HEADER
 
@@ -67,6 +73,71 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         with open(oldfile, 'rb') as s, gzip.open(newfile, 'wb') as t:
             shutil.copyfileobj(s, t)
         return newfile
+
+    def _decompress(self, openfn, file_path, unpack):
+        self.log('decompressing...')
+        with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile() as tf:
+            shutil.copyfileobj(s, tf)
+            s.close()
+            shutil.copy2(tf.name, file_path)
+        t = magic.from_file(file_path, mime=True)
+        self._unarchive(file_path, unpack, t)
+
+    def _unarchive(self, file_path, unpack, file_type):
+        file_dir = os.path.dirname(file_path)
+        if file_type in ['application/' + x for x in 'x-tar', 'tar', 'x-gtar']:
+            if not unpack:
+                raise ValueError(
+                    'File is tar file but only uncompress was specified')
+            self.log('unpacking...')
+            with tarfile.open(file_path) as tf:
+                self._check_members(tf.getnames())
+                tf.extractall(file_dir)
+        if file_type in ['application/' + x for x in
+                         'zip', 'x-zip-compressed']:  # , 'x-compressed']:
+                        # x-compressed is apparently both .Z and .zip?
+            if not unpack:
+                raise ValueError(
+                    'File is zip file but only uncompress was specified')
+            self.log('unpacking...')
+            with zipfile.ZipFile(file_path) as zf:
+                self._check_members(zf.namelist())
+                zf.extractall(file_dir)
+
+    def _check_members(self, member_list):
+        # How the hell do I test this? Adding relative paths outside a zip is
+        # easy, but the other 3 cases aren't
+        for m in member_list:
+            n = os.path.normpath(m)
+            if n.startswith('/') or n.startswith('..'):
+                err = ('Dangerous archive file - entry [{}] points to a ' +
+                       'file outside the archive directory').format(m)
+                self.log(err)
+                raise ValueError(err)
+
+    def _unpack(self, file_path, unpack):
+        t = magic.from_file(file_path, mime=True)
+        if t in ['application/' + x for x in 'x-gzip', 'gzip']:
+            self._decompress(gzip.open, file_path, unpack)
+        # probably most of these aren't needed, but hard to find a definite
+        # source
+        if t in ['application/' + x for x in
+                 'x-bzip', 'x-bzip2', 'bzip', 'bzip2']:
+            self._decompress(bz2.BZ2File, file_path, unpack)
+
+        self._unarchive(file_path, unpack, t)
+
+    # http://stackoverflow.com/a/600612/643675
+    def mkdir_p(self, path):
+        if not path:
+            return
+        try:
+            os.makedirs(path)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
 
     def check_shock_response(self, response, errtxt):
         if not response.ok:
@@ -114,13 +185,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            shock_to_file function. Required parameters: shock_id - the ID of
            the Shock node. file_path - the location to save the file output.
            If this is a directory, the file will be named as per the filename
-           in Shock. Optional parameters: unpack - if the file is compressed
-           and / or a file bundle, it will be decompressed and unbundled into
-           the directory containing the original output file. unpack supports
-           gzip, bzip2, tar, and zip files. Default false. Currently
-           unsupported.) -> structure: parameter "shock_id" of String,
-           parameter "file_path" of String, parameter "unpack" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           in Shock. Optional parameters: unpack - either null, 'uncompress',
+           or 'unpack'. 'uncompress' will cause any bzip or gzip files to be
+           uncompressed. 'unpack' will behave the same way, but it will also
+           unpack tar and zip archive files (uncompressing gzipped or bzipped
+           archive files if necessary). If 'uncompress' is specified and an
+           archive file is encountered, an error will be thrown. If the file
+           is an archive, it will be unbundled into the directory containing
+           the original output file.) -> structure: parameter "shock_id" of
+           String, parameter "file_path" of String, parameter "unpack" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -140,6 +214,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('Must provide file path')
+        self.mkdir_p(os.path.dirname(file_path))
         node_url = self.shock_url + '/node/' + shock_id
         r = requests.get(node_url, headers=headers, allow_redirects=True)
         errtxt = ('Error downloading file from shock ' +
@@ -162,6 +237,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                 if not chunk:
                     break
                 fhandle.write(chunk)
+        unpack = params.get('unpack')
+        if unpack:
+            if unpack not in ['unpack', 'uncompress']:
+                raise ValueError('Illegal unpack value: ' + str(unpack))
+            self._unpack(file_path, unpack == 'unpack')
         out = {'node_file_name': node_file_name,
                'attributes': attributes}
         self.log('downloading done')
@@ -181,13 +261,17 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            for the shock_to_file function. Required parameters: shock_id -
            the ID of the Shock node. file_path - the location to save the
            file output. If this is a directory, the file will be named as per
-           the filename in Shock. Optional parameters: unpack - if the file
-           is compressed and / or a file bundle, it will be decompressed and
-           unbundled into the directory containing the original output file.
-           unpack supports gzip, bzip2, tar, and zip files. Default false.
-           Currently unsupported.) -> structure: parameter "shock_id" of
-           String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           the filename in Shock. Optional parameters: unpack - either null,
+           'uncompress', or 'unpack'. 'uncompress' will cause any bzip or
+           gzip files to be uncompressed. 'unpack' will behave the same way,
+           but it will also unpack tar and zip archive files (uncompressing
+           gzipped or bzipped archive files if necessary). If 'uncompress' is
+           specified and an archive file is encountered, an error will be
+           thrown. If the file is an archive, it will be unbundled into the
+           directory containing the original output file.) -> structure:
+           parameter "shock_id" of String, parameter "file_path" of String,
+           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
+           for true. @range (0, 1))
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,

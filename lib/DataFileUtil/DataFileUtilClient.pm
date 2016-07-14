@@ -89,6 +89,14 @@ sub new
 	    $self->{token} = $token->token;
 	    $self->{client}->{token} = $token->token;
 	}
+        else
+        {
+	    #
+	    # All methods in this module require authentication. In this case, if we
+	    # don't have a token, we can't continue.
+	    #
+	    die "Authentication failed: " . $token->error_message;
+	}
     }
 
     my $ua = $self->{client}->ua;	 
@@ -674,7 +682,7 @@ Translate a workspace name to a workspace ID.
 {
     my($self, @args) = @_;
 
-# Authentication: optional
+# Authentication: required
 
     if ((my $n = @args) != 1)
     {
@@ -927,7 +935,7 @@ Get objects from the workspace.
 {
     my($self, @args) = @_;
 
-# Authentication: optional
+# Authentication: required
 
     if ((my $n = @args) != 1)
     {
@@ -1009,7 +1017,7 @@ Get the versions of the Workspace service and Shock service.
 {
     my($self, @args) = @_;
 
-# Authentication: none
+# Authentication: required
 
     if ((my $n = @args) != 0)
     {
@@ -1229,10 +1237,13 @@ file_path - the location to save the file output. If this is a
     directory, the file will be named as per the filename in Shock.
 
 Optional parameters:
-unpack - if the file is compressed and / or a file bundle, it will be
-    decompressed and unbundled into the directory containing the
-    original output file. unpack supports gzip, bzip2, tar, and zip
-    files. Default false. Currently unsupported.
+unpack - either null, 'uncompress', or 'unpack'. 'uncompress' will cause
+    any bzip or gzip files to be uncompressed. 'unpack' will behave the
+    same way, but it will also unpack tar and zip archive files
+    (uncompressing gzipped or bzipped archive files if necessary). If
+    'uncompress' is specified and an archive file is encountered, an
+    error will be thrown. If the file is an archive, it will be
+    unbundled into the directory containing the original output file.
 
 
 =item Definition

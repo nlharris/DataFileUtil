@@ -39,13 +39,16 @@ class DataFileUtil(object):
            shock_to_file function. Required parameters: shock_id - the ID of
            the Shock node. file_path - the location to save the file output.
            If this is a directory, the file will be named as per the filename
-           in Shock. Optional parameters: unpack - if the file is compressed
-           and / or a file bundle, it will be decompressed and unbundled into
-           the directory containing the original output file. unpack supports
-           gzip, bzip2, tar, and zip files. Default false. Currently
-           unsupported.) -> structure: parameter "shock_id" of String,
-           parameter "file_path" of String, parameter "unpack" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           in Shock. Optional parameters: unpack - either null, 'uncompress',
+           or 'unpack'. 'uncompress' will cause any bzip or gzip files to be
+           uncompressed. 'unpack' will behave the same way, but it will also
+           unpack tar and zip archive files (uncompressing gzipped or bzipped
+           archive files if necessary). If 'uncompress' is specified and an
+           archive file is encountered, an error will be thrown. If the file
+           is an archive, it will be unbundled into the directory containing
+           the original output file.) -> structure: parameter "shock_id" of
+           String, parameter "file_path" of String, parameter "unpack" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -63,13 +66,17 @@ class DataFileUtil(object):
            for the shock_to_file function. Required parameters: shock_id -
            the ID of the Shock node. file_path - the location to save the
            file output. If this is a directory, the file will be named as per
-           the filename in Shock. Optional parameters: unpack - if the file
-           is compressed and / or a file bundle, it will be decompressed and
-           unbundled into the directory containing the original output file.
-           unpack supports gzip, bzip2, tar, and zip files. Default false.
-           Currently unsupported.) -> structure: parameter "shock_id" of
-           String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           the filename in Shock. Optional parameters: unpack - either null,
+           'uncompress', or 'unpack'. 'uncompress' will cause any bzip or
+           gzip files to be uncompressed. 'unpack' will behave the same way,
+           but it will also unpack tar and zip archive files (uncompressing
+           gzipped or bzipped archive files if necessary). If 'uncompress' is
+           specified and an archive file is encountered, an error will be
+           thrown. If the file is an archive, it will be unbundled into the
+           directory containing the original output file.) -> structure:
+           parameter "shock_id" of String, parameter "file_path" of String,
+           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
+           for true. @range (0, 1))
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,
