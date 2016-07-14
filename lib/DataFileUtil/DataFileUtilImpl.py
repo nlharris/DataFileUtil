@@ -529,6 +529,42 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # ctx is the context object
         # return variables are: out
         #BEGIN own_shock_node
+        token = ctx['token']
+        if token is None:
+            raise ValueError('Authentication token required!')
+        header = {'Authorization': 'Oauth {}'.format(token)}
+        source_id = params.get('shock_id')
+        if not source_id:
+            raise ValueError('Must provide shock ID')
+        res = requests.get(self.shock_url + '/node/' + source_id +
+                           '/acl/owner/?verbosity=full',
+                           headers=header, allow_redirects=True)
+        self.check_shock_response(
+            res, 'Error getting ACLs for Shock node {}: '.format(source_id))
+        owner = res.json()['data']['owner']['username']
+        if owner != ctx['user_id']:
+            out = self.copy_shock_node(ctx, params)[0]
+        elif params.get('make_handle'):
+            hs = HandleService(self.handle_url, token=token)
+            handles = hs.ids_to_handles([source_id])
+            if handles:
+                h = handles[0]
+                del h['created_by']
+                del h['creation_date']
+                del h['remote_sha1']
+                out = {'shock_id': source_id, 'handle': h}
+            else:
+                # possibility of race condition here, but highly unlikely, so
+                # meh
+                r = requests.get(self.shock_url + '/node/' + source_id,
+                                 headers=header, allow_redirects=True)
+                errtxt = ('Error downloading attributes from shock ' +
+                          'node {}: ').format(source_id)
+                self.check_shock_response(r, errtxt)
+                out = {'shock_id': source_id,
+                       'handle': self.make_handle(r.json()['data'], token)}
+        else:
+            out = {'shock_id': source_id}
         #END own_shock_node
 
         # At some point might do deeper type checking...
