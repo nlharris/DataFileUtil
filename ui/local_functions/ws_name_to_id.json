@@ -1,0 +1,16 @@
+{
+    "name" : "Translate Workspace name to ID",
+    "short_description" : "Translates a workspace's name to an ID",
+    "long_description" : "Function translates a mutable workspace name to an immutable workspace ID.",
+    "tags" : {
+        "categories" : ["workspace"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}

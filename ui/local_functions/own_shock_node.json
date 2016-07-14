@@ -1,0 +1,16 @@
+{
+    "name" : "Own a Shock storage node",
+    "short_description" : "Confirm or get ownership of a Shock node",
+    "long_description" : "Function confirms ownership of a Shock node or copies the node if not owned.",
+    "tags" : {
+        "categories" : ["shock"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}
