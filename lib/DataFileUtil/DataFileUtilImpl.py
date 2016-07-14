@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "b1421b21c5c8c159549db059feed58ee6489eed9"
+    GIT_COMMIT_HASH = "c661638cfffd90fe7832c90f51aad8e73dfb510c"
     
     #BEGIN_CLASS_HEADER
 
@@ -194,7 +194,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            is an archive, it will be unbundled into the directory containing
            the original output file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -270,8 +270,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            thrown. If the file is an archive, it will be unbundled into the
            directory containing the original output file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
-           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
-           for true. @range (0, 1))
+           parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,
@@ -490,6 +489,86 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # At some point might do deeper type checking...
         if not isinstance(out, dict):
             raise ValueError('Method copy_shock_node return value ' +
+                             'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def own_shock_node(self, ctx, params):
+        """
+        Gain ownership of a Shock node.
+        Returns a shock node id which is owned by the caller, given a shock
+        node id.
+        If the shock node is already owned by the caller, returns the same
+        shock node ID. If not, the ID of a copy of the original node will be
+        returned.
+        If a handle is requested, the node is already owned by the caller, and
+        a handle already exists, that handle will be returned. Otherwise a new
+        handle will be created and returned.
+        :param params: instance of type "OwnShockNodeParams" (Input for the
+           own_shock_node function. Required parameters: shock_id - the id of
+           the node for which the user needs ownership. Optional parameters:
+           make_handle - make or find a Handle Service handle for the shock
+           node. Default false.) -> structure: parameter "shock_id" of
+           String, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1))
+        :returns: instance of type "OwnShockNodeOutput" (Output of the
+           own_shock_node function. shock_id - the id of the (possibly new)
+           Shock node. handle - the handle, if requested. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN own_shock_node
+        token = ctx['token']
+        if token is None:
+            raise ValueError('Authentication token required!')
+        header = {'Authorization': 'Oauth {}'.format(token)}
+        source_id = params.get('shock_id')
+        if not source_id:
+            raise ValueError('Must provide shock ID')
+        res = requests.get(self.shock_url + '/node/' + source_id +
+                           '/acl/owner/?verbosity=full',
+                           headers=header, allow_redirects=True)
+        self.check_shock_response(
+            res, 'Error getting ACLs for Shock node {}: '.format(source_id))
+        owner = res.json()['data']['owner']['username']
+        if owner != ctx['user_id']:
+            out = self.copy_shock_node(ctx, params)[0]
+        elif params.get('make_handle'):
+            hs = HandleService(self.handle_url, token=token)
+            handles = hs.ids_to_handles([source_id])
+            if handles:
+                h = handles[0]
+                del h['created_by']
+                del h['creation_date']
+                del h['remote_sha1']
+                out = {'shock_id': source_id, 'handle': h}
+            else:
+                # possibility of race condition here, but highly unlikely, so
+                # meh
+                r = requests.get(self.shock_url + '/node/' + source_id,
+                                 headers=header, allow_redirects=True)
+                errtxt = ('Error downloading attributes from shock ' +
+                          'node {}: ').format(source_id)
+                self.check_shock_response(r, errtxt)
+                out = {'shock_id': source_id,
+                       'handle': self.make_handle(r.json()['data'], token)}
+        else:
+            out = {'shock_id': source_id}
+        #END own_shock_node
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, dict):
+            raise ValueError('Method own_shock_node return value ' +
                              'out is not type dict as required.')
         # return the results
         return [out]

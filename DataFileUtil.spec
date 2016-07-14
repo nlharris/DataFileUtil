@@ -47,7 +47,7 @@ module DataFileUtil {
     typedef structure {
         string shock_id;
         string file_path;
-        boolean unpack;
+        string unpack;
     } ShockToFileParams;
 
     /* Output from the shock_to_file function.
@@ -133,6 +133,46 @@ module DataFileUtil {
     /* Copy a Shock node. */
     funcdef copy_shock_node(CopyShockNodeParams params)
         returns(CopyShockNodeOutput out) authentication required;
+
+    /* Input for the own_shock_node function.
+
+       Required parameters:
+       shock_id - the id of the node for which the user needs ownership.
+       
+       Optional parameters:
+       make_handle - make or find a Handle Service handle for the shock node.
+           Default false.
+    */
+    typedef structure {
+        string shock_id;
+        boolean make_handle;
+    } OwnShockNodeParams;
+    
+    /* Output of the own_shock_node function.
+      
+       shock_id - the id of the (possibly new) Shock node.
+       handle - the handle, if requested. Null otherwise.
+    */
+    typedef structure {
+        string shock_id;
+        Handle handle;
+    } OwnShockNodeOutput;
+    
+    /* Gain ownership of a Shock node.
+        
+        Returns a shock node id which is owned by the caller, given a shock
+        node id.
+        
+        If the shock node is already owned by the caller, returns the same
+        shock node ID. If not, the ID of a copy of the original node will be
+        returned.
+        
+        If a handle is requested, the node is already owned by the caller, and
+        a handle already exists, that handle will be returned. Otherwise a new
+        handle will be created and returned.
+     */
+    funcdef own_shock_node(OwnShockNodeParams params)
+        returns(OwnShockNodeOutput out) authentication required;
 
     /* Translate a workspace name to a workspace ID. */
     funcdef ws_name_to_id(string name) returns(int id) authentication required;

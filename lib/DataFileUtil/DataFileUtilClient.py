@@ -48,7 +48,7 @@ class DataFileUtil(object):
            is an archive, it will be unbundled into the directory containing
            the original output file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1))
+           String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            stored in Shock. attributes - the file attributes, if any, stored
@@ -75,8 +75,7 @@ class DataFileUtil(object):
            thrown. If the file is an archive, it will be unbundled into the
            directory containing the original output file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
-           parameter "unpack" of type "boolean" (A boolean - 0 for false, 1
-           for true. @range (0, 1))
+           parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file stored in Shock. attributes - the file attributes, if any,
@@ -182,6 +181,42 @@ class DataFileUtil(object):
         """
         return self._client.call_method(
             'DataFileUtil.copy_shock_node',
+            [params], self._service_ver, context)
+
+    def own_shock_node(self, params, context=None):
+        """
+        Gain ownership of a Shock node.
+        Returns a shock node id which is owned by the caller, given a shock
+        node id.
+        If the shock node is already owned by the caller, returns the same
+        shock node ID. If not, the ID of a copy of the original node will be
+        returned.
+        If a handle is requested, the node is already owned by the caller, and
+        a handle already exists, that handle will be returned. Otherwise a new
+        handle will be created and returned.
+        :param params: instance of type "OwnShockNodeParams" (Input for the
+           own_shock_node function. Required parameters: shock_id - the id of
+           the node for which the user needs ownership. Optional parameters:
+           make_handle - make or find a Handle Service handle for the shock
+           node. Default false.) -> structure: parameter "shock_id" of
+           String, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1))
+        :returns: instance of type "OwnShockNodeOutput" (Output of the
+           own_shock_node function. shock_id - the id of the (possibly new)
+           Shock node. handle - the handle, if requested. Null otherwise.) ->
+           structure: parameter "shock_id" of String, parameter "handle" of
+           type "Handle" (A handle for a file stored in Shock. hid - the id
+           of the handle in the Handle Service that references this shock
+           node id - the id for the shock node url - the url of the shock
+           server type - the type of the handle. This should always be shock.
+           file_name - the name of the file remote_md5 - the md5 digest of
+           the file.) -> structure: parameter "hid" of String, parameter
+           "file_name" of String, parameter "id" of String, parameter "url"
+           of String, parameter "type" of String, parameter "remote_md5" of
+           String
+        """
+        return self._client.call_method(
+            'DataFileUtil.own_shock_node',
             [params], self._service_ver, context)
 
     def ws_name_to_id(self, name, context=None):

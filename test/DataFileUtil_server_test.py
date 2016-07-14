@@ -27,10 +27,14 @@ class DataFileUtilTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.token = environ.get('KB_AUTH_TOKEN', None)
+        cls.user_id = requests.post(
+            'https://kbase.us/services/authorization/Sessions/Login',
+            data='token={}&fields=user_id'.format(cls.token)).json()['user_id']
         # WARNING: don't call any logging methods on the context object,
         # it'll result in a NoneType error
         cls.ctx = MethodContext(None)
         cls.ctx.update({'token': cls.token,
+                        'user_id': cls.user_id,
                         'provenance': [
                             {'service': 'DataFileUtil',
                              'method': 'please_never_use_it_in_production',
@@ -457,6 +461,112 @@ class DataFileUtilTest(unittest.TestCase):
         self.fail_copy(
             {'shock_id': ''}, 'Must provide shock ID')
 
+    def test_own_node_owned_with_existing_handle(self):
+        fp = self.write_file('ownfile23.txt', 'ownfile23')
+        r1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': fp, 'attributes': {'id': 23}})[0]
+        # note this is missing fields that the created handles will have
+        handle = {u'id': unicode(r1['shock_id']),
+                  u'type': u'shock',
+                  u'url': unicode(self.shockURL)}
+        handle[u'hid'] = unicode(self.hs.persist_handle(handle))
+        handle[u'file_name'] = None
+        handle[u'remote_md5'] = None
+        r2 = self.impl.own_shock_node(
+            self.ctx, {'shock_id': r1['shock_id'], 'make_handle': 1})[0]
+        r3 = self.impl.shock_to_file(
+            self.ctx, {'shock_id': r1['shock_id'],
+                       'file_path': self.cfg['scratch'] + '/foo.txt'})[0]
+        self.delete_shock_node(r1['shock_id'])
+        self.assertEqual(r1['shock_id'], r2['shock_id'])
+        self.assertEqual(handle, r2['handle'])
+        self.assertEqual(r3['attributes'], {'id': 23})
+
+    def test_own_node_owned_no_handle(self):
+        fp = self.write_file('ownfile25.txt', 'ownfile25')
+        r1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': fp, 'attributes': {'id': 25}})[0]
+        # note this is missing fields that the created handles will have
+        r2 = self.impl.own_shock_node(
+            self.ctx, {'shock_id': r1['shock_id']})[0]
+        r3 = self.impl.shock_to_file(
+            self.ctx, {'shock_id': r1['shock_id'],
+                       'file_path': self.cfg['scratch'] + '/foo.txt'})[0]
+        self.delete_shock_node(r1['shock_id'])
+        self.assertEqual(r1['shock_id'], r2['shock_id'])
+        self.assertEqual(r2.get('handle'), None)
+        self.assertEqual(r3['attributes'], {'id': 25})
+
+    def test_own_node_owned_with_new_handle(self):
+        fp = self.write_file('ownfile24.txt', 'ownfile24')
+        r1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': fp, 'attributes': {'id': 24}})[0]
+        r2 = self.impl.own_shock_node(
+            self.ctx, {'shock_id': r1['shock_id'], 'make_handle': 1})[0]
+        r3 = self.impl.shock_to_file(
+            self.ctx, {'shock_id': r1['shock_id'],
+                       'file_path': self.cfg['scratch'] + '/foo.txt'})[0]
+        self.delete_shock_node(r1['shock_id'])
+        self.assertEqual(r1['shock_id'], r2['shock_id'])
+        self.check_handle(r2['handle'], r2['handle']['hid'], r1['shock_id'],
+                          '98592d7841bf95c2e7ad49d894f77eb3', 'ownfile24.txt')
+        self.assertEqual(r3['attributes'], {'id': 24})
+
+    def test_own_node_copy_with_new_handle(self):
+        fp = self.write_file('ownfile27.txt', 'ownfile27')
+        r1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': fp, 'attributes': {'id': 27}})[0]
+        sid = r1['shock_id']
+        r = requests.put(
+            # need to expand test rig for multiple users
+            # can't delete this shock node now
+            self.shockURL + '/node/' + sid + '/acl/owner?users=kbasetest2',
+            headers={'Authorization': 'OAuth ' + self.token})
+        r.raise_for_status()
+
+        r2 = self.impl.own_shock_node(
+            self.ctx, {'shock_id': sid, 'make_handle': 1})[0]
+        r3 = self.impl.shock_to_file(
+            self.ctx, {'shock_id': r1['shock_id'],
+                       'file_path': self.cfg['scratch'] + '/foo.txt'})[0]
+        self.delete_shock_node(r2['shock_id'])
+        self.assertNotEqual(r1['shock_id'], r2['shock_id'])
+        self.check_handle(r2['handle'], r2['handle']['hid'], r2['shock_id'],
+                          'a3a568735be55a9ac810cf433c9bb9ef', 'ownfile27.txt')
+        self.assertEqual(r3['attributes'], {'id': 27})
+
+    def test_own_node_copy_with_no_handle(self):
+        fp = self.write_file('ownfile28.txt', 'ownfile28')
+        r1 = self.impl.file_to_shock(
+            self.ctx, {'file_path': fp, 'attributes': {'id': 28}})[0]
+        sid = r1['shock_id']
+        r = requests.put(
+            # need to expand test rig for multiple users
+            # can't delete this shock node now
+            self.shockURL + '/node/' + sid + '/acl/owner?users=kbasetest2',
+            headers={'Authorization': 'OAuth ' + self.token})
+        r.raise_for_status()
+
+        r2 = self.impl.own_shock_node(self.ctx, {'shock_id': sid})[0]
+        r3 = self.impl.shock_to_file(
+            self.ctx, {'shock_id': r1['shock_id'],
+                       'file_path': self.cfg['scratch'] + '/foo.txt'})[0]
+        self.delete_shock_node(r2['shock_id'])
+        self.assertNotEqual(r1['shock_id'], r2['shock_id'])
+        self.assertEqual(r2['handle'], None)
+        self.assertEqual(r3['attributes'], {'id': 28})
+
+    def test_own_err_node_not_found(self):
+        self.fail_own(
+            {'shock_id': '79261fd9-ae10-4a84-853d-1b8fcd57c8f23'},
+            'Error getting ACLs for Shock node ' +
+            '79261fd9-ae10-4a84-853d-1b8fcd57c8f23: Node not found',
+            exception=ShockException)
+
+    def test_own_err_no_node_provided(self):
+        self.fail_own(
+            {'shock_id': ''}, 'Must provide shock ID')
+
     def test_translate_ws_name(self):
         self.assertEqual(self.impl.ws_name_to_id(self.ctx, self.ws_info[1])[0],
                          self.ws_info[0])
@@ -586,6 +696,11 @@ class DataFileUtilTest(unittest.TestCase):
         wsver, shockver = self.impl.versions(self.ctx)
         self.assertTrue(semver.match(wsver, '>=0.4.0'))
         self.assertTrue(semver.match(shockver, '>=0.9.0'))
+
+    def fail_own(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.impl.own_shock_node(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
 
     def fail_copy(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
