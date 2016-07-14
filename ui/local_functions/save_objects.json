@@ -1,0 +1,16 @@
+{
+    "name" : "Get objects from the Workspace",
+    "short_description" : "Get one or more data objects from one or more workspaces.",
+    "long_description" : "Function retrieves one or more data objects from a set of workspaces.",
+    "tags" : {
+        "categories" : ["workspace"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name" : "Save objects to a workspace",
+    "short_description" : "Save one or more data objects to a workspace.",
+    "long_description" : "Function saves one or more data objects to a workspace, automatically setting data provenance for each one.",
+    "tags" : {
+        "categories" : ["workspace"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}
