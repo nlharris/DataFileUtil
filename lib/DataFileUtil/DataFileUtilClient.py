@@ -51,9 +51,16 @@ class DataFileUtil(object):
            String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
-           stored in Shock. attributes - the file attributes, if any, stored
-           in Shock.) -> structure: parameter "node_file_name" of String,
-           parameter "attributes" of mapping from String to unspecified object
+           as stored in Shock. file_path - the path to the downloaded file.
+           If a directory was specified in the input, this will be the
+           directory appended with the shock file name. If a file was
+           specified, it will be that file path. In either case, if the file
+           is uncompressed any compression file extensions will be removed
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
+           attributes - the file attributes, if any, stored in Shock.) ->
+           structure: parameter "node_file_name" of String, parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object
         """
         return self._client.call_method(
             'DataFileUtil.shock_to_file',
@@ -78,10 +85,16 @@ class DataFileUtil(object):
            parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
-           file stored in Shock. attributes - the file attributes, if any,
-           stored in Shock.) -> structure: parameter "node_file_name" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object
+           file as stored in Shock. file_path - the path to the downloaded
+           file. If a directory was specified in the input, this will be the
+           directory appended with the shock file name. If a file was
+           specified, it will be that file path. In either case, if the file
+           is uncompressed any compression file extensions will be removed
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
+           attributes - the file attributes, if any, stored in Shock.) ->
+           structure: parameter "node_file_name" of String, parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object
         """
         return self._client.call_method(
             'DataFileUtil.shock_to_file_mass',
