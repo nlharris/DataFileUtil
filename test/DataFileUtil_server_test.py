@@ -92,6 +92,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(file_name, input_file_name)
         self.assertEqual(ret2['file_path'], file_path2)
         self.assertEqual(attribs, {'foo': [{'bar': 'baz'}]})
+        self.assertEqual(ret2['size'], 7)
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)
@@ -112,6 +113,7 @@ class DataFileUtilTest(unittest.TestCase):
         attribs = ret2['attributes']
         self.assertEqual(file_name, 'input.txt')
         self.assertEqual(ret2['file_path'], file_path2)
+        self.assertEqual(ret2['size'], 8)
         self.assertIsNone(attribs)
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
@@ -146,6 +148,7 @@ class DataFileUtilTest(unittest.TestCase):
         file_path1 = ret2[0]['file_path']
         self.assertEqual(file_name1, 'input1.txt')
         self.assertEqual(file_path1, outfile1)
+        self.assertEqual(ret2[0]['size'], 13)
         self.assertIsNone(attribs1)
         with open(outfile1, 'r') as fh:
             output = fh.read()
@@ -155,6 +158,7 @@ class DataFileUtilTest(unittest.TestCase):
         attribs2 = ret2[1]['attributes']
         file_path2 = ret2[1]['file_path']
         self.assertEqual(file_name2, 'input2.txt')
+        self.assertEqual(ret2[1]['size'], 13)
         self.assertEqual(file_path2, outfile2)
         self.assertIsNone(attribs2)
         with open(outfile2, 'r') as fh:
@@ -246,20 +250,20 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(shock_id)
 
     def test_unpack_archive(self):
-        self.check_unpack_archive('data/tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.txt')
-        self.check_unpack_archive('data/tar1.tgz.txt')
-        self.check_unpack_archive('data/tar1.tgz', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.gz', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.gzip', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tbz', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.bz', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.bz2', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.bzip', 'tar1.tar')
-        self.check_unpack_archive('data/tar1.tar.bzip2', 'tar1.tar')
-        self.check_unpack_archive('data/zip1.zip')
+        self.check_unpack_archive('data/tar1.tar', 10240)
+        self.check_unpack_archive('data/tar1.tar.txt', 10240)
+        self.check_unpack_archive('data/tar1.tgz.txt', 180)
+        self.check_unpack_archive('data/tar1.tgz', 180, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.gz', 189, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.gzip', 189, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tbz', 194, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.bz', 194, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.bz2', 194, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.bzip', 194, 'tar1.tar')
+        self.check_unpack_archive('data/tar1.tar.bzip2', 194, 'tar1.tar')
+        self.check_unpack_archive('data/zip1.zip', 484)
 
-    def check_unpack_archive(self, file_path, file_name=None):
+    def check_unpack_archive(self, file_path, size, file_name=None):
         ret1 = self.impl.file_to_shock(self.ctx, {'file_path': file_path})[0]
         sid = ret1['shock_id']
         td = os.path.abspath(tempfile.mkdtemp(dir=self.cfg['scratch']))
@@ -273,6 +277,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret2['node_file_name'], fn)
         newfn = file_name if file_name else fn
         self.assertEqual(ret2['file_path'], td + '/' + newfn)
+        self.assertEqual(ret2['size'], size)
         filecmp.cmp(file_path, td + '/' + ret2['node_file_name'])
         self.assertEqual(set(os.listdir(td + '/tar1')),
                          set(['file1.txt', 'file2.txt']))
@@ -280,15 +285,15 @@ class DataFileUtilTest(unittest.TestCase):
         filecmp.cmp('data/file2.txt', td + '/tar1/file2.txt')
 
     def test_uncompress(self):
-        self.check_uncompress('data/file1.txt.bz', 'file1.txt')
-        self.check_uncompress('data/file1.txt.bz.txt')
-        self.check_uncompress('data/file1.txt.bz2', 'file1.txt')
-        self.check_uncompress('data/file1.txt.bzip', 'file1.txt')
-        self.check_uncompress('data/file1.txt.bzip2', 'file1.txt')
-        self.check_uncompress('data/file1.txt.gz', 'file1.txt')
-        self.check_uncompress('data/file1.txt.gzip', 'file1.txt')
+        self.check_uncompress('data/file1.txt.bz', 44, 'file1.txt')
+        self.check_uncompress('data/file1.txt.bz.txt', 44)
+        self.check_uncompress('data/file1.txt.bz2', 44, 'file1.txt')
+        self.check_uncompress('data/file1.txt.bzip', 44, 'file1.txt')
+        self.check_uncompress('data/file1.txt.bzip2', 44, 'file1.txt')
+        self.check_uncompress('data/file1.txt.gz', 36, 'file1.txt')
+        self.check_uncompress('data/file1.txt.gzip', 36, 'file1.txt')
 
-    def check_uncompress(self, file_path, file_name=None):
+    def check_uncompress(self, file_path, size, file_name=None):
         ret1 = self.impl.file_to_shock(self.ctx, {'file_path': file_path})[0]
         sid = ret1['shock_id']
         td = os.path.abspath(tempfile.mkdtemp(dir=self.cfg['scratch']))
@@ -300,6 +305,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.delete_shock_node(sid)
         fn = os.path.basename(file_path)
         self.assertEquals(ret2['node_file_name'], fn)
+        self.assertEqual(ret2['size'], size)
         newfn = file_name if file_name else fn
         self.assertEqual(ret2['file_path'], td + '/' + newfn)
         filecmp.cmp('data/file1.txt', td + '/' + ret2['node_file_name'])

@@ -23,6 +23,8 @@ import us.kbase.common.service.UObject;
  *        In either case, if the file is uncompressed any compression file
  *        extensions will be removed (e.g. .gz) and or altered (e.g. .tgz ->
  *        .tar) as appropriate.
+ *    size - the size of the file in bytes as stored in Shock, prior to
+ *        unpacking.
  *    attributes - the file attributes, if any, stored in Shock.
  * </pre>
  * 
@@ -32,6 +34,7 @@ import us.kbase.common.service.UObject;
 @JsonPropertyOrder({
     "node_file_name",
     "file_path",
+    "size",
     "attributes"
 })
 public class ShockToFileOutput {
@@ -40,6 +43,8 @@ public class ShockToFileOutput {
     private java.lang.String nodeFileName;
     @JsonProperty("file_path")
     private java.lang.String filePath;
+    @JsonProperty("size")
+    private Long size;
     @JsonProperty("attributes")
     private Map<String, UObject> attributes;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
@@ -74,6 +79,21 @@ public class ShockToFileOutput {
         return this;
     }
 
+    @JsonProperty("size")
+    public Long getSize() {
+        return size;
+    }
+
+    @JsonProperty("size")
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public ShockToFileOutput withSize(Long size) {
+        this.size = size;
+        return this;
+    }
+
     @JsonProperty("attributes")
     public Map<String, UObject> getAttributes() {
         return attributes;
@@ -101,7 +121,7 @@ public class ShockToFileOutput {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((("ShockToFileOutput"+" [nodeFileName=")+ nodeFileName)+", filePath=")+ filePath)+", attributes=")+ attributes)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("ShockToFileOutput"+" [nodeFileName=")+ nodeFileName)+", filePath=")+ filePath)+", size=")+ size)+", attributes=")+ attributes)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

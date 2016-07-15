@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.3"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "ec54cc340a95a24d5044dfce13869f1c24101cb0"
+    GIT_COMMIT_HASH = "da973d024a8fe48ccc6ccac5b82d27adb85d187b"
     
     #BEGIN_CLASS_HEADER
 
@@ -214,7 +214,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            archive files if necessary). If 'uncompress' is specified and an
            archive file is encountered, an error will be thrown. If the file
            is an archive, it will be unbundled into the directory containing
-           the original output file.) -> structure: parameter "shock_id" of
+           the original output file. Note that if the file name (either as
+           provided by the user or by Shock) without the a decompression
+           extension (e.g. .gz, .zip or .tgz -> .tar) points to an existing
+           file and unpack is specified, that file will be overwritten by the
+           decompressed Shock file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
            String
         :returns: instance of type "ShockToFileOutput" (Output from the
@@ -224,11 +228,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            directory appended with the shock file name. If a file was
            specified, it will be that file path. In either case, if the file
            is uncompressed any compression file extensions will be removed
-           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
-           attributes - the file attributes, if any, stored in Shock.) ->
-           structure: parameter "node_file_name" of String, parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate. size
+           - the size of the file in bytes as stored in Shock, prior to
+           unpacking. attributes - the file attributes, if any, stored in
+           Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "file_path" of String, parameter "size" of Long,
+           parameter "attributes" of mapping from String to unspecified object
         """
         # ctx is the context object
         # return variables are: out
@@ -250,7 +255,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                   'node {}: ').format(shock_id)
         self.check_shock_response(r, errtxt)
         resp_obj = r.json()
-        if not resp_obj['data']['file']['size']:
+        size = resp_obj['data']['file']['size']
+        if not size:
             raise ShockException('Node {} has no file'.format(shock_id))
         node_file_name = resp_obj['data']['file']['name']
         attributes = resp_obj['data']['attributes']
@@ -273,7 +279,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             file_path = self._unpack(file_path, unpack == 'unpack')
         out = {'node_file_name': node_file_name,
                'attributes': attributes,
-               'file_path': file_path}
+               'file_path': file_path,
+               'size': size}
         self.log('downloading done')
         #END shock_to_file
 
@@ -298,7 +305,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            gzipped or bzipped archive files if necessary). If 'uncompress' is
            specified and an archive file is encountered, an error will be
            thrown. If the file is an archive, it will be unbundled into the
-           directory containing the original output file.) -> structure:
+           directory containing the original output file. Note that if the
+           file name (either as provided by the user or by Shock) without the
+           a decompression extension (e.g. .gz, .zip or .tgz -> .tar) points
+           to an existing file and unpack is specified, that file will be
+           overwritten by the decompressed Shock file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
            parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
@@ -308,11 +319,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            directory appended with the shock file name. If a file was
            specified, it will be that file path. In either case, if the file
            is uncompressed any compression file extensions will be removed
-           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
-           attributes - the file attributes, if any, stored in Shock.) ->
-           structure: parameter "node_file_name" of String, parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate. size
+           - the size of the file in bytes as stored in Shock, prior to
+           unpacking. attributes - the file attributes, if any, stored in
+           Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "file_path" of String, parameter "size" of Long,
+           parameter "attributes" of mapping from String to unspecified object
         """
         # ctx is the context object
         # return variables are: out

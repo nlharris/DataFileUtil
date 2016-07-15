@@ -46,7 +46,11 @@ class DataFileUtil(object):
            archive files if necessary). If 'uncompress' is specified and an
            archive file is encountered, an error will be thrown. If the file
            is an archive, it will be unbundled into the directory containing
-           the original output file.) -> structure: parameter "shock_id" of
+           the original output file. Note that if the file name (either as
+           provided by the user or by Shock) without the a decompression
+           extension (e.g. .gz, .zip or .tgz -> .tar) points to an existing
+           file and unpack is specified, that file will be overwritten by the
+           decompressed Shock file.) -> structure: parameter "shock_id" of
            String, parameter "file_path" of String, parameter "unpack" of
            String
         :returns: instance of type "ShockToFileOutput" (Output from the
@@ -56,11 +60,12 @@ class DataFileUtil(object):
            directory appended with the shock file name. If a file was
            specified, it will be that file path. In either case, if the file
            is uncompressed any compression file extensions will be removed
-           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
-           attributes - the file attributes, if any, stored in Shock.) ->
-           structure: parameter "node_file_name" of String, parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate. size
+           - the size of the file in bytes as stored in Shock, prior to
+           unpacking. attributes - the file attributes, if any, stored in
+           Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "file_path" of String, parameter "size" of Long,
+           parameter "attributes" of mapping from String to unspecified object
         """
         return self._client.call_method(
             'DataFileUtil.shock_to_file',
@@ -80,7 +85,11 @@ class DataFileUtil(object):
            gzipped or bzipped archive files if necessary). If 'uncompress' is
            specified and an archive file is encountered, an error will be
            thrown. If the file is an archive, it will be unbundled into the
-           directory containing the original output file.) -> structure:
+           directory containing the original output file. Note that if the
+           file name (either as provided by the user or by Shock) without the
+           a decompression extension (e.g. .gz, .zip or .tgz -> .tar) points
+           to an existing file and unpack is specified, that file will be
+           overwritten by the decompressed Shock file.) -> structure:
            parameter "shock_id" of String, parameter "file_path" of String,
            parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
@@ -90,11 +99,12 @@ class DataFileUtil(object):
            directory appended with the shock file name. If a file was
            specified, it will be that file path. In either case, if the file
            is uncompressed any compression file extensions will be removed
-           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
-           attributes - the file attributes, if any, stored in Shock.) ->
-           structure: parameter "node_file_name" of String, parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate. size
+           - the size of the file in bytes as stored in Shock, prior to
+           unpacking. attributes - the file attributes, if any, stored in
+           Shock.) -> structure: parameter "node_file_name" of String,
+           parameter "file_path" of String, parameter "size" of Long,
+           parameter "attributes" of mapping from String to unspecified object
         """
         return self._client.call_method(
             'DataFileUtil.shock_to_file_mass',
