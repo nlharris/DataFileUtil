@@ -41,15 +41,25 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
-    VERSION = "0.0.1"
+    VERSION = "0.0.3"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "c661638cfffd90fe7832c90f51aad8e73dfb510c"
+    GIT_COMMIT_HASH = "ec54cc340a95a24d5044dfce13869f1c24101cb0"
     
     #BEGIN_CLASS_HEADER
 
     GZ = '.gz'
     GZIP = '.gzip'
     TGZ = '.tgz'
+
+    DECOMPRESS_EXT_MAP = {GZ: '',
+                          GZIP: '',
+                          '.bz': '',
+                          '.bz2': '',
+                          '.bzip': '',
+                          '.bzip2': '',
+                          TGZ: '.tar',
+                          '.tbz': '.tar'
+                          }
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
@@ -74,23 +84,32 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             shutil.copyfileobj(s, t)
         return newfile
 
+    def _decompress_file_name(self, file_path):
+        for ext in self.DECOMPRESS_EXT_MAP:
+            if file_path.endswith(ext):
+                return file_path[0: -len(ext)] + self.DECOMPRESS_EXT_MAP[ext]
+        return file_path
+
     def _decompress(self, openfn, file_path, unpack):
-        self.log('decompressing...')
+        new_file = self._decompress_file_name(file_path)
+        self.log('decompressing {} to {} ...'.format(file_path, new_file))
         with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile() as tf:
             shutil.copyfileobj(s, tf)
             s.close()
             tf.flush()
-            shutil.copy2(tf.name, file_path)
-        t = magic.from_file(file_path, mime=True)
-        self._unarchive(file_path, unpack, t)
+            shutil.copy2(tf.name, new_file)
+        t = magic.from_file(new_file, mime=True)
+        self._unarchive(new_file, unpack, t)
+        return new_file
 
     def _unarchive(self, file_path, unpack, file_type):
         file_dir = os.path.dirname(file_path)
         if file_type in ['application/' + x for x in 'x-tar', 'tar', 'x-gtar']:
             if not unpack:
                 raise ValueError(
-                    'File is tar file but only uncompress was specified')
-            self.log('unpacking...')
+                    'File {} is tar file but only uncompress was specified'
+                    .format(file_path))
+            self.log('unpacking {} ...'.format(file_path))
             with tarfile.open(file_path) as tf:
                 self._check_members(tf.getnames())
                 tf.extractall(file_dir)
@@ -99,8 +118,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                         # x-compressed is apparently both .Z and .zip?
             if not unpack:
                 raise ValueError(
-                    'File is zip file but only uncompress was specified')
-            self.log('unpacking...')
+                    'File {} is zip file but only uncompress was specified'
+                    .format(file_path))
+            self.log('unpacking {} ...'.format(file_path))
             with zipfile.ZipFile(file_path) as zf:
                 self._check_members(zf.namelist())
                 zf.extractall(file_dir)
@@ -119,14 +139,15 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     def _unpack(self, file_path, unpack):
         t = magic.from_file(file_path, mime=True)
         if t in ['application/' + x for x in 'x-gzip', 'gzip']:
-            self._decompress(gzip.open, file_path, unpack)
+            return self._decompress(gzip.open, file_path, unpack)
         # probably most of these aren't needed, but hard to find a definite
         # source
         if t in ['application/' + x for x in
                  'x-bzip', 'x-bzip2', 'bzip', 'bzip2']:
-            self._decompress(bz2.BZ2File, file_path, unpack)
+            return self._decompress(bz2.BZ2File, file_path, unpack)
 
         self._unarchive(file_path, unpack, t)
+        return file_path
 
     # http://stackoverflow.com/a/600612/643675
     def mkdir_p(self, path):
@@ -198,9 +219,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
-           stored in Shock. attributes - the file attributes, if any, stored
-           in Shock.) -> structure: parameter "node_file_name" of String,
-           parameter "attributes" of mapping from String to unspecified object
+           as stored in Shock. file_path - the path to the downloaded file.
+           If a directory was specified in the input, this will be the
+           directory appended with the shock file name. If a file was
+           specified, it will be that file path. In either case, if the file
+           is uncompressed any compression file extensions will be removed
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
+           attributes - the file attributes, if any, stored in Shock.) ->
+           structure: parameter "node_file_name" of String, parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object
         """
         # ctx is the context object
         # return variables are: out
@@ -242,9 +270,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if unpack:
             if unpack not in ['unpack', 'uncompress']:
                 raise ValueError('Illegal unpack value: ' + str(unpack))
-            self._unpack(file_path, unpack == 'unpack')
+            file_path = self._unpack(file_path, unpack == 'unpack')
         out = {'node_file_name': node_file_name,
-               'attributes': attributes}
+               'attributes': attributes,
+               'file_path': file_path}
         self.log('downloading done')
         #END shock_to_file
 
@@ -274,10 +303,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
-           file stored in Shock. attributes - the file attributes, if any,
-           stored in Shock.) -> structure: parameter "node_file_name" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object
+           file as stored in Shock. file_path - the path to the downloaded
+           file. If a directory was specified in the input, this will be the
+           directory appended with the shock file name. If a file was
+           specified, it will be that file path. In either case, if the file
+           is uncompressed any compression file extensions will be removed
+           (e.g. .gz) and or altered (e.g. .tgz -> .tar) as appropriate.
+           attributes - the file attributes, if any, stored in Shock.) ->
+           structure: parameter "node_file_name" of String, parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object
         """
         # ctx is the context object
         # return variables are: out

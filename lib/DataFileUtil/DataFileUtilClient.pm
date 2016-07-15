@@ -129,6 +129,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
+	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -145,6 +146,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
+	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
@@ -225,6 +227,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
+	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -241,6 +244,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
+	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
@@ -1401,7 +1405,13 @@ unpack has a value which is a string
 
 Output from the shock_to_file function.
 
-   node_file_name - the filename of the file stored in Shock.
+   node_file_name - the filename of the file as stored in Shock.
+   file_path - the path to the downloaded file. If a directory was
+       specified in the input, this will be the directory appended with the
+       shock file name. If a file was specified, it will be that file path.
+       In either case, if the file is uncompressed any compression file
+       extensions will be removed (e.g. .gz) and or altered (e.g. .tgz ->
+       .tar) as appropriate.
    attributes - the file attributes, if any, stored in Shock.
 
 
@@ -1412,6 +1422,7 @@ Output from the shock_to_file function.
 <pre>
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
+file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -1422,6 +1433,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
+file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
