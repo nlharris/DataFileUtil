@@ -27,6 +27,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *     'uncompress' is specified and an archive file is encountered, an
  *     error will be thrown. If the file is an archive, it will be
  *     unbundled into the directory containing the original output file.
+ *     
+ *     Note that if the file name (either as provided by the user or by
+ *     Shock) without the a decompression extension (e.g. .gz, .zip or
+ *     .tgz -> .tar) points to an existing file and unpack is specified,
+ *     that file will be overwritten by the decompressed Shock file.
  * </pre>
  * 
  */

@@ -64,11 +64,14 @@ module DataFileUtil {
            In either case, if the file is uncompressed any compression file
            extensions will be removed (e.g. .gz) and or altered (e.g. .tgz ->
            .tar) as appropriate.
+       size - the size of the file in bytes as stored in Shock, prior to
+           unpacking.
        attributes - the file attributes, if any, stored in Shock.
     */
     typedef structure {
         string node_file_name;
         string file_path;
+        int size;
         mapping<string, UnspecifiedObject> attributes;
     } ShockToFileOutput;
 

@@ -130,6 +130,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	file_path has a value which is a string
+	size has a value which is an int
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -147,6 +148,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	file_path has a value which is a string
+	size has a value which is an int
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
@@ -228,6 +230,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	file_path has a value which is a string
+	size has a value which is an int
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -245,6 +248,7 @@ ShockToFileParams is a reference to a hash where the following keys are defined:
 ShockToFileOutput is a reference to a hash where the following keys are defined:
 	node_file_name has a value which is a string
 	file_path has a value which is a string
+	size has a value which is an int
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
@@ -1365,6 +1369,11 @@ unpack - either null, 'uncompress', or 'unpack'. 'uncompress' will cause
     'uncompress' is specified and an archive file is encountered, an
     error will be thrown. If the file is an archive, it will be
     unbundled into the directory containing the original output file.
+    
+    Note that if the file name (either as provided by the user or by
+    Shock) without the a decompression extension (e.g. .gz, .zip or
+    .tgz -> .tar) points to an existing file and unpack is specified,
+    that file will be overwritten by the decompressed Shock file.
 
 
 =item Definition
@@ -1412,6 +1421,8 @@ Output from the shock_to_file function.
        In either case, if the file is uncompressed any compression file
        extensions will be removed (e.g. .gz) and or altered (e.g. .tgz ->
        .tar) as appropriate.
+   size - the size of the file in bytes as stored in Shock, prior to
+       unpacking.
    attributes - the file attributes, if any, stored in Shock.
 
 
@@ -1423,6 +1434,7 @@ Output from the shock_to_file function.
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
 file_path has a value which is a string
+size has a value which is an int
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 </pre>
@@ -1434,6 +1446,7 @@ attributes has a value which is a reference to a hash where the key is a string 
 a reference to a hash where the following keys are defined:
 node_file_name has a value which is a string
 file_path has a value which is a string
+size has a value which is an int
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 
 
