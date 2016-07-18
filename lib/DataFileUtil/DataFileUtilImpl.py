@@ -17,6 +17,7 @@ import bz2  # @UnresolvedImport no idea why PyDev is complaining about this
 import tarfile
 import zipfile
 import errno
+import re
 
 
 class ShockException(Exception):
@@ -43,7 +44,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.3"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "88b2e19c6cdff01c37099a0406c2dc69def13c1d"
+    GIT_COMMIT_HASH = "62c948aa116d2e50b6414a0f5a41c17ef18ad896"
     
     #BEGIN_CLASS_HEADER
 
@@ -60,6 +61,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                           TGZ: '.tar',
                           '.tbz': '.tar'
                           }
+
+    ROOT = re.compile(r'^[\\' + os.sep + ']+$')
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
@@ -89,13 +92,23 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             raise ValueError('Invalid pack value: ' + pack)
         if pack == 'gzip':
             return self.gzip(file_path)
-        d, f = os.path.split(file_path)
-        if not f:
-            raise ValueError('file_path must end in a filename')
+        if os.path.isdir(file_path):
+            file_path = file_path + os.sep  # double seps ok here
+        d, f = os.path.split(file_path)  # will return dir as f if no / at end
         if not d:
             d = '.'
+        # note abspath removes trailing slashes incl. double seps
+        # but does NOT remove multiple slashes at the start of the path. FFS.
+        d = os.path.abspath(os.path.expanduser(d))
+        if self.ROOT.match(os.path.splitdrive(d)[1]):
+            raise ValueError('Packing root is not allowed')
+        if not os.listdir(d):
+            raise ValueError('Directory {} is empty'.format(d))
+        if not f:
+            f = os.path.basename(d)
+        file_path = d + os.sep + f
         arch = 'gztar' if pack == 'targz' else 'zip'
-        self.log('Packing {} to {}'.format(file_path, pack))
+        self.log('Packing {} to {}'.format(d, pack))
         # tar is smart enough to not pack its own archive file into the new
         # archive, zip isn't.
         # TODO is there a designated temp files dir in the scratch space?
@@ -378,22 +391,26 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         Load a file to Shock.
         :param params: instance of type "FileToShockParams" (Input for the
            file_to_shock function. Required parameters: file_path - the
-           location of the file to load to Shock. Optional parameters:
-           attributes - user-specified attributes to save to the Shock node
-           along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. pack - compress a file or
-           archive a directory before loading to Shock. In all cases, the
-           file specified in the file_path argument is required and will be
-           appended with the appropriate file extension prior to writing. For
-           gzips only, if the file extension denotes that the file is already
-           compressed, it will be skipped. The allowed values are: gzip -
-           gzip the file given by file_path. targz - tar and gzip the
-           directory specified by the directory portion of the file_path into
-           the file specified by the file_path. zip - as targz but zip the
-           directory.) -> structure: parameter "file_path" of String,
-           parameter "attributes" of mapping from String to unspecified
-           object, parameter "make_handle" of type "boolean" (A boolean - 0
-           for false, 1 for true. @range (0, 1)), parameter "pack" of String
+           location of the file (or directory if using the pack parameter) to
+           load to Shock. Optional parameters: attributes - user-specified
+           attributes to save to the Shock node along with the file.
+           make_handle - make a Handle Service handle for the shock node.
+           Default false. pack - compress a file or archive a directory
+           before loading to Shock. The file_path argument will be appended
+           with the appropriate file extension prior to writing. For gzips
+           only, if the file extension denotes that the file is already
+           compressed, it will be skipped. If file_path is a directory and
+           tarring or zipping is specified, the created file name will be set
+           to the directory name, possibly overwriting an existing file.
+           Attempting to pack the root directory is an error. The allowed
+           values are: gzip - gzip the file given by file_path. targz - tar
+           and gzip the directory specified by the directory portion of the
+           file_path into the file specified by the file_path. zip - as targz
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -419,7 +436,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         header = {'Authorization': 'Oauth ' + token}
         file_path = params.get('file_path')
         if not file_path:
-            raise ValueError('No file provided for upload to Shock.')
+            raise ValueError('No file(s) provided for upload to Shock.')
         pack = params.get('pack')
         if pack:
             file_path = self._pack(file_path, pack)
@@ -459,22 +476,26 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         Load multiple files to Shock.
         :param params: instance of list of type "FileToShockParams" (Input
            for the file_to_shock function. Required parameters: file_path -
-           the location of the file to load to Shock. Optional parameters:
-           attributes - user-specified attributes to save to the Shock node
-           along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. pack - compress a file or
-           archive a directory before loading to Shock. In all cases, the
-           file specified in the file_path argument is required and will be
-           appended with the appropriate file extension prior to writing. For
-           gzips only, if the file extension denotes that the file is already
-           compressed, it will be skipped. The allowed values are: gzip -
-           gzip the file given by file_path. targz - tar and gzip the
-           directory specified by the directory portion of the file_path into
-           the file specified by the file_path. zip - as targz but zip the
-           directory.) -> structure: parameter "file_path" of String,
-           parameter "attributes" of mapping from String to unspecified
-           object, parameter "make_handle" of type "boolean" (A boolean - 0
-           for false, 1 for true. @range (0, 1)), parameter "pack" of String
+           the location of the file (or directory if using the pack
+           parameter) to load to Shock. Optional parameters: attributes -
+           user-specified attributes to save to the Shock node along with the
+           file. make_handle - make a Handle Service handle for the shock
+           node. Default false. pack - compress a file or archive a directory
+           before loading to Shock. The file_path argument will be appended
+           with the appropriate file extension prior to writing. For gzips
+           only, if the file extension denotes that the file is already
+           compressed, it will be skipped. If file_path is a directory and
+           tarring or zipping is specified, the created file name will be set
+           to the directory name, possibly overwriting an existing file.
+           Attempting to pack the root directory is an error. The allowed
+           values are: gzip - gzip the file given by file_path. targz - tar
+           and gzip the directory specified by the directory portion of the
+           file_path into the file specified by the file_path. zip - as targz
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.

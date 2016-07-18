@@ -1475,7 +1475,8 @@ attributes has a value which is a reference to a hash where the key is a string 
 Input for the file_to_shock function.
 
 Required parameters:
-file_path - the location of the file to load to Shock.
+file_path - the location of the file (or directory if using the
+    pack parameter) to load to Shock.
 
 Optional parameters:
 attributes - user-specified attributes to save to the Shock node along
@@ -1483,11 +1484,15 @@ attributes - user-specified attributes to save to the Shock node along
 make_handle - make a Handle Service handle for the shock node. Default
     false.
 pack - compress a file or archive a directory before loading to Shock.
-    In all cases, the file specified in the file_path argument is
-    required and will be appended with the appropriate file extension
-    prior to writing. For gzips only, if the file extension denotes that
-    the file is already compressed, it will be skipped. The allowed
-    values are:
+    The file_path argument will be appended with the appropriate file
+    extension prior to writing. For gzips only, if the file extension
+    denotes that the file is already compressed, it will be skipped. If
+    file_path is a directory and tarring or zipping is specified, the
+    created file name will be set to the directory name, possibly
+    overwriting an existing file. Attempting to pack the root directory
+    is an error.
+    
+    The allowed values are:
         gzip - gzip the file given by file_path.
         targz - tar and gzip the directory specified by the directory
             portion of the file_path into the file specified by the
