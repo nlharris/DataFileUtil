@@ -17,6 +17,7 @@ import bz2  # @UnresolvedImport no idea why PyDev is complaining about this
 import tarfile
 import zipfile
 import errno
+import re
 
 
 class ShockException(Exception):
@@ -61,6 +62,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                           '.tbz': '.tar'
                           }
 
+    ROOT = re.compile(r'^[\\' + os.sep + ']+$')
+
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
               str(time.time()) + ': ' + str(message))
@@ -89,13 +92,23 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             raise ValueError('Invalid pack value: ' + pack)
         if pack == 'gzip':
             return self.gzip(file_path)
-        d, f = os.path.split(file_path)
-        if not f:
-            raise ValueError('file_path must end in a filename')
+        if os.path.isdir(file_path):
+            file_path = file_path + os.sep  # double seps ok here
+        d, f = os.path.split(file_path)  # will return dir as f if no / at end
         if not d:
             d = '.'
+        # note abspath removes trailing slashes incl. double seps
+        # but does NOT remove multiple slashes at the start of the path. FFS.
+        d = os.path.abspath(os.path.expanduser(d))
+        if self.ROOT.match(os.path.splitdrive(d)[1]):
+            raise ValueError('Packing root is not allowed')
+        if not os.listdir(d):
+            raise ValueError('Directory {} is empty'.format(d))
+        if not f:
+            f = os.path.basename(d)
+        file_path = d + os.sep + f
         arch = 'gztar' if pack == 'targz' else 'zip'
-        self.log('Packing {} to {}'.format(file_path, pack))
+        self.log('Packing {} to {}'.format(d, pack))
         # tar is smart enough to not pack its own archive file into the new
         # archive, zip isn't.
         # TODO is there a designated temp files dir in the scratch space?
@@ -419,7 +432,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         header = {'Authorization': 'Oauth ' + token}
         file_path = params.get('file_path')
         if not file_path:
-            raise ValueError('No file provided for upload to Shock.')
+            raise ValueError('No file(s) provided for upload to Shock.')
         pack = params.get('pack')
         if pack:
             file_path = self._pack(file_path, pack)

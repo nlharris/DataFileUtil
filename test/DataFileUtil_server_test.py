@@ -292,6 +292,32 @@ class DataFileUtilTest(unittest.TestCase):
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
 
+    def test_upload_tgz_with_no_file_name(self):
+        tmp_dir = self.cfg['scratch'] + '/tartest2'
+        os.makedirs(tmp_dir)
+        self.write_file('tartest2/intar1.txt', 'tar1')
+        self.write_file('tartest2/intar2.txt', 'tar2')
+        ret1 = self.impl.file_to_shock(
+            self.ctx,
+            {'file_path': tmp_dir,
+             'pack': 'targz'})[0]
+        self.assertEqual(ret1['node_file_name'], 'tartest2.tar.gz')
+        print '*******', ret1['size']
+#         self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.tgz')
+        ret2 = self.impl.shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
+        self.assertEqual(ret2['node_file_name'], 'tartest2.tar.gz')
+        self.assertIsNone(ret2['attributes'])
+        self.assertEqual(ret2['file_path'], file_path2)
+#         self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        with tarfile.open(file_path2) as t:
+            self.assertEqual(set(t.getnames()),
+                             set(['.', './intar1.txt', './intar2.txt']))
+
     def test_gzip_already_gzipped(self):
         self.check_gzip_skip('input.txt.gz', 'gz test')
         self.check_gzip_skip('input.txt.tgz', 'tgz test')
@@ -421,7 +447,7 @@ class DataFileUtilTest(unittest.TestCase):
     def test_upload_err_no_file_provided(self):
         self.fail_upload(
             {'file_path': ''},
-            'No file provided for upload to Shock.')
+            'No file(s) provided for upload to Shock.')
 
     def test_upload_err_bad_pack_param(self):
         self.fail_upload(
@@ -429,11 +455,19 @@ class DataFileUtilTest(unittest.TestCase):
              'pack': 'bar'},
             'Invalid pack value: bar')
 
+    def test_upload_err_empty_pack_dir(self):
+        tmp_dir = self.cfg['scratch'] + '/emptytest/'
+        os.makedirs(tmp_dir)
+        self.fail_upload(
+            {'file_path': tmp_dir,
+             'pack': 'targz'},
+            'Directory {} is empty'.format(tmp_dir[0: -1]))
+
     def test_upload_err_bad_pack_filename(self):
         self.fail_upload(
-            {'file_path': 'foo/',
+            {'file_path': '/',
              'pack': 'zip'},
-            'file_path must end in a filename')
+            'Packing root is not allowed')
 
     def test_download_existing_dir(self):
         ret1 = self.impl.file_to_shock(self.ctx,
