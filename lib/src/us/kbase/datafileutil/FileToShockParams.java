@@ -17,7 +17,8 @@ import us.kbase.common.service.UObject;
  * <pre>
  * Input for the file_to_shock function.
  * Required parameters:
- * file_path - the location of the file to load to Shock.
+ * file_path - the location of the file (or directory if using the
+ *     pack parameter) to load to Shock.
  * Optional parameters:
  * attributes - user-specified attributes to save to the Shock node along
  *     with the file.
