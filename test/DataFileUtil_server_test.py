@@ -83,6 +83,8 @@ class DataFileUtilTest(unittest.TestCase):
             {'file_path': file_path,
              'attributes': {'foo': [{'bar': 'baz'}]}})[0]
         shock_id = ret1['shock_id']
+        self.assertEqual(ret1['node_file_name'], 'input.txt')
+        self.assertEqual(ret1['size'], 7)
         file_path2 = os.path.join(tmp_dir, 'output.txt')
         ret2 = self.impl.shock_to_file(
             self.ctx,
@@ -104,6 +106,8 @@ class DataFileUtilTest(unittest.TestCase):
             self.ctx,
             {'file_path': file_path})[0]
         shock_id = ret1['shock_id']
+        self.assertEqual(ret1['node_file_name'], 'input.txt')
+        self.assertEqual(ret1['size'], 8)
         # test creating a directory on download
         file_path2 = os.path.join(self.cfg['scratch'], 'tftsab/output.txt')
         ret2 = self.impl.shock_to_file(
@@ -131,6 +135,10 @@ class DataFileUtilTest(unittest.TestCase):
         )[0]
         shock_id1 = ret1[0]['shock_id']
         shock_id2 = ret1[1]['shock_id']
+        self.assertEqual(ret1[0]['node_file_name'], 'input1.txt')
+        self.assertEqual(ret1[0]['size'], 13)
+        self.assertEqual(ret1[1]['node_file_name'], 'input2.txt')
+        self.assertEqual(ret1[1]['size'], 13)
         outfile1 = os.path.join(self.cfg['scratch'], 'output1.txt')
         outfile2 = os.path.join(self.cfg['scratch'], 'output2.txt')
         ret2 = self.impl.shock_to_file_mass(
@@ -182,6 +190,8 @@ class DataFileUtilTest(unittest.TestCase):
         ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': file_path, 'make_handle': 1})[0]
+        self.assertEqual(ret1['node_file_name'], 'input.txt')
+        self.assertEqual(ret1['size'], 8)
         shock_id = ret1['shock_id']
         self.delete_shock_node(shock_id)
         rethandle = ret1['handle']
@@ -210,7 +220,9 @@ class DataFileUtilTest(unittest.TestCase):
             fh1.write(input_)
         ret1 = self.impl.file_to_shock(
             self.ctx,
-            {'file_path': file_path, 'gzip': 1})[0]
+            {'file_path': file_path, 'pack': 'gzip'})[0]
+        self.assertEqual(ret1['node_file_name'], 'input.txt.gz')
+        self.assertEqual(ret1['size'], 38)
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.txt')
         ret2 = self.impl.shock_to_file(
@@ -234,8 +246,9 @@ class DataFileUtilTest(unittest.TestCase):
         file_path = self.write_file(input_file_name, contents)
         ret1 = self.impl.file_to_shock(
             self.ctx,
-            {'file_path': file_path, 'gzip': 1})[0]
+            {'file_path': file_path, 'pack': 'gzip'})[0]
         shock_id = ret1['shock_id']
+        self.assertEqual(ret1['node_file_name'], input_file_name)
         file_path2 = os.path.join(self.cfg['scratch'], 'output.txt')
         ret2 = self.impl.shock_to_file(
             self.ctx,
@@ -354,6 +367,12 @@ class DataFileUtilTest(unittest.TestCase):
         self.fail_upload(
             {'file_path': ''},
             'No file provided for upload to Shock.')
+
+    def test_upload_err_bad_pack_param(self):
+        self.fail_upload(
+            {'file_path': 'foo',
+             'pack': 'bar'},
+            'Invalid pack value: bar')
 
     def test_download_existing_dir(self):
         ret1 = self.impl.file_to_shock(self.ctx,

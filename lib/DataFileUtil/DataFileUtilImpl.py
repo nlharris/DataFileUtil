@@ -393,8 +393,13 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('No file provided for upload to Shock.')
-        if params.get('gzip'):
-            file_path = self.gzip(file_path)
+        pack = params.get('pack')
+        if pack:
+            if pack not in ['gzip', 'targz', 'zip']:
+                raise ValueError('Invalid pack value: ' + pack)
+            if pack == 'gzip':
+                file_path = self.gzip(file_path)
+            # TODO targz, zip
         attribs = params.get('attributes')
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
@@ -410,7 +415,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                        ).format(file_path))
         shock_data = response.json()['data']
         shock_id = shock_data['id']
-        out = {'shock_id': shock_id, 'handle': None}
+        out = {'shock_id': shock_id,
+               'handle': None,
+               'node_file_name': shock_data['file']['name'],
+               'size': shock_data['file']['size']}
         if params.get('make_handle'):
             out['handle'] = self.make_handle(shock_data, token)
         self.log('uploading done into shock node: ' + shock_id)
