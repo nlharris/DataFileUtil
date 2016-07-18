@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.3"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "4abd48200a2d35ec4374429e94c9aa7bb018d567"
+    GIT_COMMIT_HASH = "88b2e19c6cdff01c37099a0406c2dc69def13c1d"
     
     #BEGIN_CLASS_HEADER
 
@@ -225,6 +225,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.scratch = config['scratch']
         #END_CONSTRUCTOR
         pass
+    
 
     def shock_to_file(self, ctx, params):
         """
@@ -383,16 +384,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            for the shock node. Default false. pack - compress a file or
            archive a directory before loading to Shock. In all cases, the
            file specified in the file_path argument is required and will be
-           appended with the appropriate file extension prior to writing. If
-           the file extension denotes that the file is already packed, it
-           will be skipped. The allowed values are: gzip - gzip the file
-           given by file_path. targz - tar and gzip the directory specified
-           by the file_path into the file specified by the file path. zip -
-           as targz but zip the directory.) -> structure: parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object, parameter "make_handle" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
-           parameter "pack" of String
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -464,16 +465,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            for the shock node. Default false. pack - compress a file or
            archive a directory before loading to Shock. In all cases, the
            file specified in the file_path argument is required and will be
-           appended with the appropriate file extension prior to writing. If
-           the file extension denotes that the file is already packed, it
-           will be skipped. The allowed values are: gzip - gzip the file
-           given by file_path. targz - tar and gzip the directory specified
-           by the file_path into the file specified by the file path. zip -
-           as targz but zip the directory.) -> structure: parameter
-           "file_path" of String, parameter "attributes" of mapping from
-           String to unspecified object, parameter "make_handle" of type
-           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
-           parameter "pack" of String
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
