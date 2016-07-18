@@ -9,6 +9,8 @@ import semver
 import tempfile
 import shutil
 import filecmp
+import tarfile
+import zipfile
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -228,6 +230,7 @@ class DataFileUtilTest(unittest.TestCase):
         ret2 = self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
         file_name = ret2['node_file_name']
         attribs = ret2['attributes']
         self.assertEqual(file_name, input_file_name + '.gz')
@@ -235,7 +238,59 @@ class DataFileUtilTest(unittest.TestCase):
         with gzip.open(file_path2, 'rb') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)
+
+    def test_upload_zip(self):
+        tmp_dir = self.cfg['scratch'] + '/ziptest'
+        os.makedirs(tmp_dir)
+        self.write_file('ziptest/inzip1.txt', 'zip1')
+        self.write_file('ziptest/inzip2.txt', 'zip2')
+        ret1 = self.impl.file_to_shock(
+            self.ctx,
+            {'file_path': tmp_dir + '/target',
+             'pack': 'zip'})[0]
+        self.assertEqual(ret1['node_file_name'], 'target.zip')
+        self.assertTrue(ret1['size'] > 215 and ret1['size'] < 235)
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.zip')
+        ret2 = self.impl.shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
         self.delete_shock_node(shock_id)
+        self.assertEqual(ret2['node_file_name'], 'target.zip')
+        self.assertIsNone(ret2['attributes'])
+        self.assertEqual(ret2['file_path'], file_path2)
+        self.assertTrue(ret2['size'] > 215 and ret2['size'] < 235)
+        with zipfile.ZipFile(file_path2) as z:
+            self.assertEqual(set(z.namelist()),
+                             set(['inzip1.txt', 'inzip2.txt']))
+
+    def test_upload_tgz_with_no_dir(self):
+        tmp_dir = self.cfg['scratch'] + '/tartest'
+        os.makedirs(tmp_dir)
+        self.write_file('tartest/intar1.txt', 'tar1')
+        self.write_file('tartest/intar2.txt', 'tar2')
+        wd = os.getcwd()
+        os.chdir(tmp_dir)
+        ret1 = self.impl.file_to_shock(
+            self.ctx,
+            {'file_path': 'target',
+             'pack': 'targz'})[0]
+        os.chdir(wd)
+        self.assertEqual(ret1['node_file_name'], 'target.tar.gz')
+        self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        shock_id = ret1['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.tgz')
+        ret2 = self.impl.shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
+        self.assertEqual(ret2['node_file_name'], 'target.tar.gz')
+        self.assertIsNone(ret2['attributes'])
+        self.assertEqual(ret2['file_path'], file_path2)
+        self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        with tarfile.open(file_path2) as t:
+            self.assertEqual(set(t.getnames()),
+                             set(['.', './intar1.txt', './intar2.txt']))
 
     def test_gzip_already_gzipped(self):
         self.check_gzip_skip('input.txt.gz', 'gz test')
@@ -373,6 +428,12 @@ class DataFileUtilTest(unittest.TestCase):
             {'file_path': 'foo',
              'pack': 'bar'},
             'Invalid pack value: bar')
+
+    def test_upload_err_bad_pack_filename(self):
+        self.fail_upload(
+            {'file_path': 'foo/',
+             'pack': 'zip'},
+            'file_path must end in a filename')
 
     def test_download_existing_dir(self):
         ret1 = self.impl.file_to_shock(self.ctx,

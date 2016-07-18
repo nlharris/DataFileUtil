@@ -84,6 +84,31 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             shutil.copyfileobj(s, t)
         return newfile
 
+    def _pack(self, file_path, pack):
+        if pack not in ['gzip', 'targz', 'zip']:
+            raise ValueError('Invalid pack value: ' + pack)
+        if pack == 'gzip':
+            return self.gzip(file_path)
+        d, f = os.path.split(file_path)
+        if not f:
+            raise ValueError('file_path must end in a filename')
+        if not d:
+            d = '.'
+        arch = 'gztar' if pack == 'targz' else 'zip'
+        self.log('Packing {} to {}'.format(file_path, pack))
+        # tar is smart enough to not pack its own archive file into the new
+        # archive, zip isn't.
+        # TODO is there a designated temp files dir in the scratch space?
+        # Can't use anywhere in the scratch space now for the temp file because
+        # it might get zipped up. Use /tmp for now.
+        (fd, tf) = tempfile.mkstemp()
+        os.close(fd)
+        ctf = shutil.make_archive(tf, arch, d)
+        os.remove(tf)
+        suffix = ctf.replace(tf, '', 1)
+        shutil.move(ctf, file_path + suffix)
+        return file_path + suffix
+
     def _decompress_file_name(self, file_path):
         for ext in self.DECOMPRESS_EXT_MAP:
             if file_path.endswith(ext):
@@ -93,11 +118,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     def _decompress(self, openfn, file_path, unpack):
         new_file = self._decompress_file_name(file_path)
         self.log('decompressing {} to {} ...'.format(file_path, new_file))
-        with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile() as tf:
+        with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile(
+                delete=False) as tf:
             shutil.copyfileobj(s, tf)
             s.close()
             tf.flush()
-            shutil.copy2(tf.name, new_file)
+            shutil.move(tf.name, new_file)
         t = magic.from_file(new_file, mime=True)
         self._unarchive(new_file, unpack, t)
         return new_file
@@ -196,9 +222,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.shock_url = config['shock-url']
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
+        self.scratch = config['scratch']
         #END_CONSTRUCTOR
         pass
-    
 
     def shock_to_file(self, ctx, params):
         """
@@ -395,11 +421,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             raise ValueError('No file provided for upload to Shock.')
         pack = params.get('pack')
         if pack:
-            if pack not in ['gzip', 'targz', 'zip']:
-                raise ValueError('Invalid pack value: ' + pack)
-            if pack == 'gzip':
-                file_path = self.gzip(file_path)
-            # TODO targz, zip
+            file_path = self._pack(file_path, pack)
         attribs = params.get('attributes')
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
