@@ -23,8 +23,17 @@ import us.kbase.common.service.UObject;
  *     with the file.
  * make_handle - make a Handle Service handle for the shock node. Default
  *     false.
- * gzip - gzip the file before loading it to Shock. This will create a
- *     file_path.gz file prior to upload. Default false.
+ * pack - compress a file or archive a directory before loading to Shock.
+ *     In all cases, the file specified in the file_path argument is
+ *     required and will be appended with the appropriate file extension
+ *     prior to writing. For gzips only, if the file extension denotes that
+ *     the file is already compressed, it will be skipped. The allowed
+ *     values are:
+ *         gzip - gzip the file given by file_path.
+ *         targz - tar and gzip the directory specified by the directory
+ *             portion of the file_path into the file specified by the
+ *             file_path.
+ *         zip - as targz but zip the directory.
  * </pre>
  * 
  */
@@ -34,7 +43,7 @@ import us.kbase.common.service.UObject;
     "file_path",
     "attributes",
     "make_handle",
-    "gzip"
+    "pack"
 })
 public class FileToShockParams {
 
@@ -44,8 +53,8 @@ public class FileToShockParams {
     private Map<String, UObject> attributes;
     @JsonProperty("make_handle")
     private Long makeHandle;
-    @JsonProperty("gzip")
-    private Long gzip;
+    @JsonProperty("pack")
+    private java.lang.String pack;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -93,18 +102,18 @@ public class FileToShockParams {
         return this;
     }
 
-    @JsonProperty("gzip")
-    public Long getGzip() {
-        return gzip;
+    @JsonProperty("pack")
+    public java.lang.String getPack() {
+        return pack;
     }
 
-    @JsonProperty("gzip")
-    public void setGzip(Long gzip) {
-        this.gzip = gzip;
+    @JsonProperty("pack")
+    public void setPack(java.lang.String pack) {
+        this.pack = pack;
     }
 
-    public FileToShockParams withGzip(Long gzip) {
-        this.gzip = gzip;
+    public FileToShockParams withPack(java.lang.String pack) {
+        this.pack = pack;
         return this;
     }
 
@@ -120,7 +129,7 @@ public class FileToShockParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", gzip=")+ gzip)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", pack=")+ pack)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

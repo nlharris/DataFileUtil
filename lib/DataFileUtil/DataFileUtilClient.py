@@ -118,27 +118,34 @@ class DataFileUtil(object):
            location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. gzip - gzip the file before
-           loading it to Shock. This will create a file_path.gz file prior to
-           upload. Default false.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
-           @range (0, 1))
+           for the shock node. Default false. pack - compress a file or
+           archive a directory before loading to Shock. In all cases, the
+           file specified in the file_path argument is required and will be
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - the new handle, if created. Null otherwise.) ->
-           structure: parameter "shock_id" of String, parameter "handle" of
-           type "Handle" (A handle for a file stored in Shock. hid - the id
-           of the handle in the Handle Service that references this shock
-           node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be shock.
-           file_name - the name of the file remote_md5 - the md5 digest of
-           the file.) -> structure: parameter "hid" of String, parameter
-           "file_name" of String, parameter "id" of String, parameter "url"
-           of String, parameter "type" of String, parameter "remote_md5" of
-           String
+           handle - the new handle, if created. Null otherwise.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
         """
         return self._client.call_method(
             'DataFileUtil.file_to_shock',
@@ -152,27 +159,34 @@ class DataFileUtil(object):
            the location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. gzip - gzip the file before
-           loading it to Shock. This will create a file_path.gz file prior to
-           upload. Default false.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
-           @range (0, 1))
+           for the shock node. Default false. pack - compress a file or
+           archive a directory before loading to Shock. In all cases, the
+           file specified in the file_path argument is required and will be
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - the new handle, if created. Null otherwise.) ->
-           structure: parameter "shock_id" of String, parameter "handle" of
-           type "Handle" (A handle for a file stored in Shock. hid - the id
-           of the handle in the Handle Service that references this shock
-           node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be shock.
-           file_name - the name of the file remote_md5 - the md5 digest of
-           the file.) -> structure: parameter "hid" of String, parameter
-           "file_name" of String, parameter "id" of String, parameter "url"
-           of String, parameter "type" of String, parameter "remote_md5" of
-           String
+           handle - the new handle, if created. Null otherwise.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
         """
         return self._client.call_method(
             'DataFileUtil.file_to_shock_mass',

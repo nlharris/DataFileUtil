@@ -43,7 +43,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.3"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "da973d024a8fe48ccc6ccac5b82d27adb85d187b"
+    GIT_COMMIT_HASH = "88b2e19c6cdff01c37099a0406c2dc69def13c1d"
     
     #BEGIN_CLASS_HEADER
 
@@ -84,6 +84,31 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             shutil.copyfileobj(s, t)
         return newfile
 
+    def _pack(self, file_path, pack):
+        if pack not in ['gzip', 'targz', 'zip']:
+            raise ValueError('Invalid pack value: ' + pack)
+        if pack == 'gzip':
+            return self.gzip(file_path)
+        d, f = os.path.split(file_path)
+        if not f:
+            raise ValueError('file_path must end in a filename')
+        if not d:
+            d = '.'
+        arch = 'gztar' if pack == 'targz' else 'zip'
+        self.log('Packing {} to {}'.format(file_path, pack))
+        # tar is smart enough to not pack its own archive file into the new
+        # archive, zip isn't.
+        # TODO is there a designated temp files dir in the scratch space?
+        # Can't use anywhere in the scratch space now for the temp file because
+        # it might get zipped up. Use /tmp for now.
+        (fd, tf) = tempfile.mkstemp()
+        os.close(fd)
+        ctf = shutil.make_archive(tf, arch, d)
+        os.remove(tf)
+        suffix = ctf.replace(tf, '', 1)
+        shutil.move(ctf, file_path + suffix)
+        return file_path + suffix
+
     def _decompress_file_name(self, file_path):
         for ext in self.DECOMPRESS_EXT_MAP:
             if file_path.endswith(ext):
@@ -93,11 +118,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     def _decompress(self, openfn, file_path, unpack):
         new_file = self._decompress_file_name(file_path)
         self.log('decompressing {} to {} ...'.format(file_path, new_file))
-        with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile() as tf:
+        with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile(
+                delete=False) as tf:
             shutil.copyfileobj(s, tf)
             s.close()
             tf.flush()
-            shutil.copy2(tf.name, new_file)
+            shutil.move(tf.name, new_file)
         t = magic.from_file(new_file, mime=True)
         self._unarchive(new_file, unpack, t)
         return new_file
@@ -196,6 +222,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.shock_url = config['shock-url']
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
+        self.scratch = config['scratch']
         #END_CONSTRUCTOR
         pass
     
@@ -354,27 +381,34 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. gzip - gzip the file before
-           loading it to Shock. This will create a file_path.gz file prior to
-           upload. Default false.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
-           @range (0, 1))
+           for the shock node. Default false. pack - compress a file or
+           archive a directory before loading to Shock. In all cases, the
+           file specified in the file_path argument is required and will be
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - the new handle, if created. Null otherwise.) ->
-           structure: parameter "shock_id" of String, parameter "handle" of
-           type "Handle" (A handle for a file stored in Shock. hid - the id
-           of the handle in the Handle Service that references this shock
-           node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be shock.
-           file_name - the name of the file remote_md5 - the md5 digest of
-           the file.) -> structure: parameter "hid" of String, parameter
-           "file_name" of String, parameter "id" of String, parameter "url"
-           of String, parameter "type" of String, parameter "remote_md5" of
-           String
+           handle - the new handle, if created. Null otherwise.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
         """
         # ctx is the context object
         # return variables are: out
@@ -386,8 +420,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('No file provided for upload to Shock.')
-        if params.get('gzip'):
-            file_path = self.gzip(file_path)
+        pack = params.get('pack')
+        if pack:
+            file_path = self._pack(file_path, pack)
         attribs = params.get('attributes')
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
@@ -403,7 +438,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                        ).format(file_path))
         shock_data = response.json()['data']
         shock_id = shock_data['id']
-        out = {'shock_id': shock_id, 'handle': None}
+        out = {'shock_id': shock_id,
+               'handle': None,
+               'node_file_name': shock_data['file']['name'],
+               'size': shock_data['file']['size']}
         if params.get('make_handle'):
             out['handle'] = self.make_handle(shock_data, token)
         self.log('uploading done into shock node: ' + shock_id)
@@ -424,27 +462,34 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            the location of the file to load to Shock. Optional parameters:
            attributes - user-specified attributes to save to the Shock node
            along with the file. make_handle - make a Handle Service handle
-           for the shock node. Default false. gzip - gzip the file before
-           loading it to Shock. This will create a file_path.gz file prior to
-           upload. Default false.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "gzip" of type "boolean" (A boolean - 0 for false, 1 for true.
-           @range (0, 1))
+           for the shock node. Default false. pack - compress a file or
+           archive a directory before loading to Shock. In all cases, the
+           file specified in the file_path argument is required and will be
+           appended with the appropriate file extension prior to writing. For
+           gzips only, if the file extension denotes that the file is already
+           compressed, it will be skipped. The allowed values are: gzip -
+           gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "attributes" of mapping from String to unspecified
+           object, parameter "make_handle" of type "boolean" (A boolean - 0
+           for false, 1 for true. @range (0, 1)), parameter "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
-           handle - the new handle, if created. Null otherwise.) ->
-           structure: parameter "shock_id" of String, parameter "handle" of
-           type "Handle" (A handle for a file stored in Shock. hid - the id
-           of the handle in the Handle Service that references this shock
-           node id - the id for the shock node url - the url of the shock
-           server type - the type of the handle. This should always be shock.
-           file_name - the name of the file remote_md5 - the md5 digest of
-           the file.) -> structure: parameter "hid" of String, parameter
-           "file_name" of String, parameter "id" of String, parameter "url"
-           of String, parameter "type" of String, parameter "remote_md5" of
-           String
+           handle - the new handle, if created. Null otherwise.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
         """
         # ctx is the context object
         # return variables are: out

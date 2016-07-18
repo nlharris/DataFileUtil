@@ -17,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * Output of the file_to_shock function.
  *     shock_id - the ID of the new Shock node.
  *     handle - the new handle, if created. Null otherwise.
+ *     node_file_name - the name of the file stored in Shock.
+ *     size - the size of the file stored in shock.
  * </pre>
  * 
  */
@@ -24,7 +26,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "shock_id",
-    "handle"
+    "handle",
+    "node_file_name",
+    "size"
 })
 public class FileToShockOutput {
 
@@ -46,6 +50,10 @@ public class FileToShockOutput {
      */
     @JsonProperty("handle")
     private Handle handle;
+    @JsonProperty("node_file_name")
+    private String nodeFileName;
+    @JsonProperty("size")
+    private String size;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("shock_id")
@@ -106,6 +114,36 @@ public class FileToShockOutput {
         return this;
     }
 
+    @JsonProperty("node_file_name")
+    public String getNodeFileName() {
+        return nodeFileName;
+    }
+
+    @JsonProperty("node_file_name")
+    public void setNodeFileName(String nodeFileName) {
+        this.nodeFileName = nodeFileName;
+    }
+
+    public FileToShockOutput withNodeFileName(String nodeFileName) {
+        this.nodeFileName = nodeFileName;
+        return this;
+    }
+
+    @JsonProperty("size")
+    public String getSize() {
+        return size;
+    }
+
+    @JsonProperty("size")
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public FileToShockOutput withSize(String size) {
+        this.size = size;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -118,7 +156,7 @@ public class FileToShockOutput {
 
     @Override
     public String toString() {
-        return ((((((("FileToShockOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("FileToShockOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", nodeFileName=")+ nodeFileName)+", size=")+ size)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

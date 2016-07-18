@@ -93,24 +93,37 @@ module DataFileUtil {
            with the file.
        make_handle - make a Handle Service handle for the shock node. Default
            false.
-       gzip - gzip the file before loading it to Shock. This will create a
-           file_path.gz file prior to upload. Default false.
+       pack - compress a file or archive a directory before loading to Shock.
+           In all cases, the file specified in the file_path argument is
+           required and will be appended with the appropriate file extension
+           prior to writing. For gzips only, if the file extension denotes that
+           the file is already compressed, it will be skipped. The allowed
+           values are:
+               gzip - gzip the file given by file_path.
+               targz - tar and gzip the directory specified by the directory
+                   portion of the file_path into the file specified by the
+                   file_path.
+               zip - as targz but zip the directory. 
     */
     typedef structure {
         string file_path;
         mapping<string, UnspecifiedObject> attributes;
         boolean make_handle;
-        boolean gzip;
+        string pack;
     } FileToShockParams;
 
     /* Output of the file_to_shock function.
     
         shock_id - the ID of the new Shock node.
         handle - the new handle, if created. Null otherwise.
+        node_file_name - the name of the file stored in Shock.
+        size - the size of the file stored in shock.
     */
     typedef structure {
         string shock_id;
         Handle handle;
+        string node_file_name;
+        string size;
     } FileToShockOutput;
 
     /* Load a file to Shock. */
