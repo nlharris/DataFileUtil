@@ -327,11 +327,13 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
-	gzip has a value which is a DataFileUtil.boolean
+	pack has a value which is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	handle has a value which is a DataFileUtil.Handle
+	node_file_name has a value which is a string
+	size has a value which is a string
 Handle is a reference to a hash where the following keys are defined:
 	hid has a value which is a string
 	file_name has a value which is a string
@@ -352,11 +354,13 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
-	gzip has a value which is a DataFileUtil.boolean
+	pack has a value which is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	handle has a value which is a DataFileUtil.Handle
+	node_file_name has a value which is a string
+	size has a value which is a string
 Handle is a reference to a hash where the following keys are defined:
 	hid has a value which is a string
 	file_name has a value which is a string
@@ -441,11 +445,13 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
-	gzip has a value which is a DataFileUtil.boolean
+	pack has a value which is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	handle has a value which is a DataFileUtil.Handle
+	node_file_name has a value which is a string
+	size has a value which is a string
 Handle is a reference to a hash where the following keys are defined:
 	hid has a value which is a string
 	file_name has a value which is a string
@@ -466,11 +472,13 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
-	gzip has a value which is a DataFileUtil.boolean
+	pack has a value which is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
 	handle has a value which is a DataFileUtil.Handle
+	node_file_name has a value which is a string
+	size has a value which is a string
 Handle is a reference to a hash where the following keys are defined:
 	hid has a value which is a string
 	file_name has a value which is a string
@@ -1474,8 +1482,15 @@ attributes - user-specified attributes to save to the Shock node along
     with the file.
 make_handle - make a Handle Service handle for the shock node. Default
     false.
-gzip - gzip the file before loading it to Shock. This will create a
-    file_path.gz file prior to upload. Default false.
+pack - compress a file or archive a directory before loading to Shock.
+    In all cases, the file specified in the file_path argument is
+    required and will be appended with the appropriate file extension
+    prior to writing. If the file extension denotes that the file is
+    already packed, it will be skipped. The allowed values are:
+        gzip - gzip the file given by file_path.
+        targz - tar and gzip the directory specified by the file_path
+            into the file specified by the file path.
+        zip - as targz but zip the directory.
 
 
 =item Definition
@@ -1487,7 +1502,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
-gzip has a value which is a DataFileUtil.boolean
+pack has a value which is a string
 
 </pre>
 
@@ -1499,7 +1514,7 @@ a reference to a hash where the following keys are defined:
 file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
-gzip has a value which is a DataFileUtil.boolean
+pack has a value which is a string
 
 
 =end text
@@ -1520,6 +1535,8 @@ Output of the file_to_shock function.
 
     shock_id - the ID of the new Shock node.
     handle - the new handle, if created. Null otherwise.
+    node_file_name - the name of the file stored in Shock.
+    size - the size of the file stored in shock.
 
 
 =item Definition
@@ -1530,6 +1547,8 @@ Output of the file_to_shock function.
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 handle has a value which is a DataFileUtil.Handle
+node_file_name has a value which is a string
+size has a value which is a string
 
 </pre>
 
@@ -1540,6 +1559,8 @@ handle has a value which is a DataFileUtil.Handle
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 handle has a value which is a DataFileUtil.Handle
+node_file_name has a value which is a string
+size has a value which is a string
 
 
 =end text
