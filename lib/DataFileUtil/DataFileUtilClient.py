@@ -176,9 +176,9 @@ class DataFileUtil(object):
            from String to unspecified object, parameter "ws_refs" of list of
            String
         :returns: instance of type "PackageForDownloadOutput" (Output of the
-           file_to_shock function. shock_id - the ID of the new Shock node.
-           node_file_name - the name of the file stored in Shock. size - the
-           size of the file stored in shock.) -> structure: parameter
+           package_for_download function. shock_id - the ID of the new Shock
+           node. node_file_name - the name of the file stored in Shock. size
+           - the size of the file stored in shock.) -> structure: parameter
            "shock_id" of String, parameter "handle" of type "Handle" (A
            handle for a file stored in Shock. hid - the id of the handle in
            the Handle Service that references this shock node id - the id for

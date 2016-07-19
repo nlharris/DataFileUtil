@@ -160,7 +160,7 @@ module DataFileUtil {
         list<string> ws_refs;
     } PackageForDownloadParams;
 
-    /* Output of the file_to_shock function.
+    /* Output of the package_for_download function.
     
         shock_id - the ID of the new Shock node.
         node_file_name - the name of the file stored in Shock.

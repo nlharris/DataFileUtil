@@ -1753,7 +1753,7 @@ ws_refs has a value which is a reference to a list where each element is a strin
 
 =item Description
 
-Output of the file_to_shock function.
+Output of the package_for_download function.
 
     shock_id - the ID of the new Shock node.
     node_file_name - the name of the file stored in Shock.
