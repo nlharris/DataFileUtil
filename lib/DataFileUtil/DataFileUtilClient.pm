@@ -428,6 +428,104 @@ Load a file to Shock.
  
 
 
+=head2 package_for_download
+
+  $return = $obj->package_for_download($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.PackageForDownloadParams
+$return is a DataFileUtil.PackageForDownloadOutput
+PackageForDownloadParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	ws_refs has a value which is a reference to a list where each element is a string
+PackageForDownloadOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	node_file_name has a value which is a string
+	size has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.PackageForDownloadParams
+$return is a DataFileUtil.PackageForDownloadOutput
+PackageForDownloadParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+	ws_refs has a value which is a reference to a list where each element is a string
+PackageForDownloadOutput is a reference to a hash where the following keys are defined:
+	shock_id has a value which is a string
+	node_file_name has a value which is a string
+	size has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub package_for_download
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function package_for_download (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to package_for_download:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'package_for_download');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.package_for_download",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'package_for_download',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method package_for_download",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'package_for_download',
+				       );
+    }
+}
+ 
+
+
 =head2 file_to_shock_mass
 
   $out = $obj->file_to_shock_mass($params)
@@ -1566,6 +1664,104 @@ size has a value which is a string
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
 handle has a value which is a DataFileUtil.Handle
+node_file_name has a value which is a string
+size has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 PackageForDownloadParams
+
+=over 4
+
+
+
+=item Description
+
+Input for the package_for_download function.
+
+Required parameters:
+file_path - the location of the directory to compress as zip archive  
+    before loading to Shock. This argument will be appended with the
+    '.zip' file extension prior to writing. If it is a directory, file 
+    name of the created archive will be set to the directory name 
+    followed by '.zip', possibly overwriting an existing file. 
+    Attempting to pack the root directory is an error.
+ws_ref - list of references to workspace objects which will be used to
+    produce info-files in JSON format containing workspace metadata and
+    provenane structures each. It produces new files in folder pointed 
+    by file_path (or folder containing file pointed by file_path if 
+    it's not folder).
+Optional parameters:
+attributes - user-specified attributes to save to the Shock node along
+    with the file.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+ws_refs has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+ws_refs has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 PackageForDownloadOutput
+
+=over 4
+
+
+
+=item Description
+
+Output of the package_for_download function.
+
+    shock_id - the ID of the new Shock node.
+    node_file_name - the name of the file stored in Shock.
+    size - the size of the file stored in shock.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
+node_file_name has a value which is a string
+size has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+shock_id has a value which is a string
 node_file_name has a value which is a string
 size has a value which is a string
 

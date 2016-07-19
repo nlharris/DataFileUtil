@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #BEGIN_HEADER
 import os
 import requests
@@ -18,6 +19,7 @@ import tarfile
 import zipfile
 import errno
 import re
+import io
 
 
 class ShockException(Exception):
@@ -43,8 +45,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     # the latter method is running.
     #########################################
     VERSION = "0.0.3"
-    GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "62c948aa116d2e50b6414a0f5a41c17ef18ad896"
+    GIT_URL = "https://github.com/rsutormin/DataFileUtil"
+    GIT_COMMIT_HASH = "6717c7cd8bf67a3509eca3cd403da6940d8fd1c6"
     
     #BEGIN_CLASS_HEADER
 
@@ -470,6 +472,82 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                              'out is not type dict as required.')
         # return the results
         return [out]
+
+    def package_for_download(self, ctx, params):
+        """
+        :param params: instance of type "PackageForDownloadParams" (Input for
+           the package_for_download function. Required parameters: file_path
+           - the location of the directory to compress as zip archive before
+           loading to Shock. This argument will be appended with the '.zip'
+           file extension prior to writing. If it is a directory, file name
+           of the created archive will be set to the directory name followed
+           by '.zip', possibly overwriting an existing file. Attempting to
+           pack the root directory is an error. ws_ref - list of references
+           to workspace objects which will be used to produce info-files in
+           JSON format containing workspace metadata and provenane structures
+           each. It produces new files in folder pointed by file_path (or
+           folder containing file pointed by file_path if it's not folder).
+           Optional parameters: attributes - user-specified attributes to
+           save to the Shock node along with the file.) -> structure:
+           parameter "file_path" of String, parameter "attributes" of mapping
+           from String to unspecified object, parameter "ws_refs" of list of
+           String
+        :returns: instance of type "PackageForDownloadOutput" (Output of the
+           package_for_download function. shock_id - the ID of the new Shock
+           node. node_file_name - the name of the file stored in Shock. size
+           - the size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "node_file_name" of String,
+           parameter "size" of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN package_for_download
+        if ctx['token'] is None:
+            raise ValueError('Authentication token required!')
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('No file/directory provided.')
+        ws_refs = params.get('ws_refs')
+        if not ws_refs:
+            raise ValueError('No workspace references provided.')
+        dir_path = file_path
+        if not os.path.isdir(dir_path):
+            dir_path, temp_file_name = os.path.split(dir_path)
+        if not dir_path:
+            dir_path = '.'
+        dir_path = os.path.abspath(os.path.expanduser(dir_path))
+        objects = [{'ref': x} for x in ws_refs]
+        ws = Workspace(self.ws_url, token=ctx['token'])
+        items = ws.get_objects2({'no_data': 1, 'ignoreErrors': 0,
+                                 'objects': objects})['data']
+        for item in items:
+            item_info = item['info']
+            info_to_save = {'metadata': [item_info],
+                            'provenance': item['provenance']}
+            ws_name = item_info[7]
+            obj_name = item_info[1]
+            obj_ver = item_info[4]
+            info_file_name = 'KBase_object_details_' + ws_name + '_' + \
+                             obj_name + '_v' + str(obj_ver) + '.json'
+            info_file_path = os.path.join(dir_path, info_file_name)
+            with io.open(info_file_path, 'w', encoding="utf-8") as writer:
+                text = json.dumps(info_to_save, sort_keys = True, 
+                                  indent = 4, ensure_ascii=False, 
+                                  encoding='utf8')
+                writer.write(unicode(text))
+        fts_input = {'file_path': file_path, 'ws_refs': ws_refs,
+                     'pack': 'zip'}
+        if params.get('attributes'):
+            fts_input['attributes'] = params.get('attributes')
+        returnVal = self.file_to_shock(ctx, fts_input)[0]
+        #END package_for_download
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method package_for_download return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
 
     def file_to_shock_mass(self, ctx, params):
         """

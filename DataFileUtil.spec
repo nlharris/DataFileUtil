@@ -134,7 +134,48 @@ module DataFileUtil {
     /* Load a file to Shock. */
     funcdef file_to_shock(FileToShockParams params)
         returns (FileToShockOutput out) authentication required;
+
+
+    /* Input for the package_for_download function.
+       
+       Required parameters:
+       file_path - the location of the directory to compress as zip archive  
+           before loading to Shock. This argument will be appended with the
+           '.zip' file extension prior to writing. If it is a directory, file 
+           name of the created archive will be set to the directory name 
+           followed by '.zip', possibly overwriting an existing file. 
+           Attempting to pack the root directory is an error.
+       ws_ref - list of references to workspace objects which will be used to
+           produce info-files in JSON format containing workspace metadata and
+           provenane structures each. It produces new files in folder pointed 
+           by file_path (or folder containing file pointed by file_path if 
+           it's not folder).
+       Optional parameters:
+       attributes - user-specified attributes to save to the Shock node along
+           with the file.
+    */
+    typedef structure {
+        string file_path;
+        mapping<string, UnspecifiedObject> attributes;
+        list<string> ws_refs;
+    } PackageForDownloadParams;
+
+    /* Output of the package_for_download function.
     
+        shock_id - the ID of the new Shock node.
+        node_file_name - the name of the file stored in Shock.
+        size - the size of the file stored in shock.
+    */
+    typedef structure {
+        string shock_id;
+        string node_file_name;
+        string size;
+    } PackageForDownloadOutput;
+
+    funcdef package_for_download(PackageForDownloadParams params)
+        returns (PackageForDownloadOutput) authentication required;
+
+
     /* Load multiple files to Shock. */
     funcdef file_to_shock_mass(list<FileToShockParams> params)
         returns (list<FileToShockOutput> out) authentication required;

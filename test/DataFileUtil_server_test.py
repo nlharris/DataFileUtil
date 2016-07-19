@@ -292,6 +292,35 @@ class DataFileUtilTest(unittest.TestCase):
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
 
+    def test_package_for_download(self):
+        obj_name = 'TestForWsRef'
+        ws = self.ws_info[0]
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': 
+            [{'name': obj_name, 'type': 'Empty.AType-0.1',
+              'data': {'thingy': 1}}]})
+        tmp_dir = self.cfg['scratch'] + '/ws_refs_test'
+        os.makedirs(tmp_dir)
+        self.write_file('ws_refs_test/inzip1.txt', 'zip1')
+        shock_id = self.impl.package_for_download(
+            self.ctx,
+            {'file_path': tmp_dir,
+             'ws_refs': [str(ws) + '/' + obj_name]})[0]['shock_id']
+        file_path2 = os.path.join(tmp_dir, 'output.zip')
+        ret2 = self.impl.shock_to_file(
+            self.ctx,
+            {'shock_id': shock_id, 'file_path': file_path2})[0]
+        self.delete_shock_node(shock_id)
+        txt_found = False
+        json_found = False
+        with zipfile.ZipFile(file_path2) as z:
+            for entry in set(z.namelist()):
+                if 'inzip1.txt' in entry:
+                    txt_found = True
+                elif 'TestForWsRef_v1.json' in entry:
+                    json_found = True
+        self.assertTrue(txt_found)
+        self.assertTrue(json_found)
+
     def test_upload_tgz_with_no_file_name(self):
         tmp_dir = self.cfg['scratch'] + '/tartest2'
         os.makedirs(tmp_dir)

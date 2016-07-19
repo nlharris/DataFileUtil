@@ -206,6 +206,23 @@ public class DataFileUtilClient {
     }
 
     /**
+     * <p>Original spec-file function name: package_for_download</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.PackageForDownloadParams PackageForDownloadParams}
+     * @return   instance of type {@link us.kbase.datafileutil.PackageForDownloadOutput PackageForDownloadOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public PackageForDownloadOutput packageForDownload(PackageForDownloadParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<PackageForDownloadOutput>> retType = new TypeReference<List<PackageForDownloadOutput>>() {};
+        List<PackageForDownloadOutput> res = caller.jsonrpcCall("DataFileUtil.package_for_download", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: file_to_shock_mass</p>
      * <pre>
      * Load multiple files to Shock.
