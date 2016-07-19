@@ -131,17 +131,11 @@ class DataFileUtil(object):
            values are: gzip - gzip the file given by file_path. targz - tar
            and gzip the directory specified by the directory portion of the
            file_path into the file specified by the file_path. zip - as targz
-           but zip the directory. ws_ref - list of references to workspace
-           objects which will be used to produce info-files in JSON format
-           containing workspace metadata and provenane structures each. This
-           optional is allowed only for modes pack=targz or pack=zip. Using
-           this option will produce new files in folder pointed by file_path
-           (or folder containing file pointed by file_path if it's not
-           folder).) -> structure: parameter "file_path" of String, parameter
-           "attributes" of mapping from String to unspecified object,
-           parameter "make_handle" of type "boolean" (A boolean - 0 for
-           false, 1 for true. @range (0, 1)), parameter "pack" of String,
-           parameter "ws_refs" of list of String
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -160,6 +154,44 @@ class DataFileUtil(object):
         """
         return self._client.call_method(
             'DataFileUtil.file_to_shock',
+            [params], self._service_ver, context)
+
+    def package_for_download(self, params, context=None):
+        """
+        :param params: instance of type "PackageForDownloadParams" (Input for
+           the package_for_download function. Required parameters: file_path
+           - the location of the directory to compress as zip archive before
+           loading to Shock. This argument will be appended with the '.zip'
+           file extension prior to writing. If it is a directory, file name
+           of the created archive will be set to the directory name followed
+           by '.zip', possibly overwriting an existing file. Attempting to
+           pack the root directory is an error. ws_ref - list of references
+           to workspace objects which will be used to produce info-files in
+           JSON format containing workspace metadata and provenane structures
+           each. It produces new files in folder pointed by file_path (or
+           folder containing file pointed by file_path if it's not folder).
+           Optional parameters: attributes - user-specified attributes to
+           save to the Shock node along with the file.) -> structure:
+           parameter "file_path" of String, parameter "attributes" of mapping
+           from String to unspecified object, parameter "ws_refs" of list of
+           String
+        :returns: instance of type "PackageForDownloadOutput" (Output of the
+           file_to_shock function. shock_id - the ID of the new Shock node.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
+        """
+        return self._client.call_method(
+            'DataFileUtil.package_for_download',
             [params], self._service_ver, context)
 
     def file_to_shock_mass(self, params, context=None):
@@ -182,17 +214,11 @@ class DataFileUtil(object):
            values are: gzip - gzip the file given by file_path. targz - tar
            and gzip the directory specified by the directory portion of the
            file_path into the file specified by the file_path. zip - as targz
-           but zip the directory. ws_ref - list of references to workspace
-           objects which will be used to produce info-files in JSON format
-           containing workspace metadata and provenane structures each. This
-           optional is allowed only for modes pack=targz or pack=zip. Using
-           this option will produce new files in folder pointed by file_path
-           (or folder containing file pointed by file_path if it's not
-           folder).) -> structure: parameter "file_path" of String, parameter
-           "attributes" of mapping from String to unspecified object,
-           parameter "make_handle" of type "boolean" (A boolean - 0 for
-           false, 1 for true. @range (0, 1)), parameter "pack" of String,
-           parameter "ws_refs" of list of String
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.

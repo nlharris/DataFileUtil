@@ -340,6 +340,10 @@ class Application(object):
                              name='DataFileUtil.file_to_shock',
                              types=[dict])
         self.method_authentication['DataFileUtil.file_to_shock'] = 'required'
+        self.rpc_service.add(impl_DataFileUtil.package_for_download,
+                             name='DataFileUtil.package_for_download',
+                             types=[dict])
+        self.method_authentication['DataFileUtil.package_for_download'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.file_to_shock_mass,
                              name='DataFileUtil.file_to_shock_mass',
                              types=[list])

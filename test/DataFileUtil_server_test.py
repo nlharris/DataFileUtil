@@ -292,7 +292,7 @@ class DataFileUtilTest(unittest.TestCase):
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
 
-    def test_upload_zip_with_ws_refs(self):
+    def test_package_for_download(self):
         obj_name = 'TestForWsRef'
         ws = self.ws_info[0]
         self.impl.save_objects(self.ctx, {'id': ws, 'objects': 
@@ -301,10 +301,9 @@ class DataFileUtilTest(unittest.TestCase):
         tmp_dir = self.cfg['scratch'] + '/ws_refs_test'
         os.makedirs(tmp_dir)
         self.write_file('ws_refs_test/inzip1.txt', 'zip1')
-        shock_id = self.impl.file_to_shock(
+        shock_id = self.impl.package_for_download(
             self.ctx,
             {'file_path': tmp_dir,
-             'pack': 'zip',
              'ws_refs': [str(ws) + '/' + obj_name]})[0]['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.zip')
         ret2 = self.impl.shock_to_file(

@@ -44,8 +44,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     # the latter method is running.
     #########################################
     VERSION = "0.0.3"
-    GIT_URL = "https://github.com/kbaseapps/DataFileUtil"
-    GIT_COMMIT_HASH = "387007174476941b502dab42543cc3de8757f676"
+    GIT_URL = "https://github.com/rsutormin/DataFileUtil"
+    GIT_COMMIT_HASH = "235d12044be3d3ba61c0519f5cf16101da74a6ce"
     
     #BEGIN_CLASS_HEADER
 
@@ -407,17 +407,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            values are: gzip - gzip the file given by file_path. targz - tar
            and gzip the directory specified by the directory portion of the
            file_path into the file specified by the file_path. zip - as targz
-           but zip the directory. ws_ref - list of references to workspace
-           objects which will be used to produce info-files in JSON format
-           containing workspace metadata and provenane structures each. This
-           optional is allowed only for modes pack=targz or pack=zip. Using
-           this option will produce new files in folder pointed by file_path
-           (or folder containing file pointed by file_path if it's not
-           folder).) -> structure: parameter "file_path" of String, parameter
-           "attributes" of mapping from String to unspecified object,
-           parameter "make_handle" of type "boolean" (A boolean - 0 for
-           false, 1 for true. @range (0, 1)), parameter "pack" of String,
-           parameter "ws_refs" of list of String
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -445,38 +439,6 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if not file_path:
             raise ValueError('No file(s) provided for upload to Shock.')
         pack = params.get('pack')
-        ws_refs = params.get('ws_refs')
-        if ws_refs:
-            if not pack:
-                raise ValueError('pack should be set together with ws_refs')
-            if not pack in ('targz', 'zip'):
-                raise ValueError('Value [' + pack + '] of pack parameter ' +
-                                 'is not compatible with ws_ref option')
-            dir_path = file_path
-            if not os.path.isdir(file_path):
-                dir_path, temp_file_name = os.path.split(file_path)
-            if not dir_path:
-                dir_path = '.'
-            dir_path = os.path.abspath(os.path.expanduser(dir_path))
-            objects = []
-            for ws_ref in ws_refs:
-                objects.append({'ref': ws_ref})
-            ws = Workspace(self.ws_url, token=ctx['token'])
-            items = ws.get_objects2({'no_data': 1, 'ignoreErrors': 1,
-                                   'objects': objects})['data']
-            for item in items:
-                item_info = item['info']
-                info_to_save = {'metadata': [item_info],
-                                'provenance': item['provenance']}
-                ws_name = item_info[7]
-                obj_name = item_info[1]
-                obj_ver = item_info[4]
-                info_file_name = 'KBase_object_details_' + ws_name + '_' + \
-                                 obj_name + '_v' + str(obj_ver) + '.json'
-                info_file_path = os.path.join(dir_path, info_file_name)
-                with open(info_file_path, 'w') as info_file_writer:
-                    json.dump(info_to_save, info_file_writer, sort_keys = True, 
-                              indent = 4, ensure_ascii=False)
         if pack:
             file_path = self._pack(file_path, pack)
         attribs = params.get('attributes')
@@ -510,6 +472,88 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # return the results
         return [out]
 
+    def package_for_download(self, ctx, params):
+        """
+        :param params: instance of type "PackageForDownloadParams" (Input for
+           the package_for_download function. Required parameters: file_path
+           - the location of the directory to compress as zip archive before
+           loading to Shock. This argument will be appended with the '.zip'
+           file extension prior to writing. If it is a directory, file name
+           of the created archive will be set to the directory name followed
+           by '.zip', possibly overwriting an existing file. Attempting to
+           pack the root directory is an error. ws_ref - list of references
+           to workspace objects which will be used to produce info-files in
+           JSON format containing workspace metadata and provenane structures
+           each. It produces new files in folder pointed by file_path (or
+           folder containing file pointed by file_path if it's not folder).
+           Optional parameters: attributes - user-specified attributes to
+           save to the Shock node along with the file.) -> structure:
+           parameter "file_path" of String, parameter "attributes" of mapping
+           from String to unspecified object, parameter "ws_refs" of list of
+           String
+        :returns: instance of type "PackageForDownloadOutput" (Output of the
+           file_to_shock function. shock_id - the ID of the new Shock node.
+           node_file_name - the name of the file stored in Shock. size - the
+           size of the file stored in shock.) -> structure: parameter
+           "shock_id" of String, parameter "handle" of type "Handle" (A
+           handle for a file stored in Shock. hid - the id of the handle in
+           the Handle Service that references this shock node id - the id for
+           the shock node url - the url of the shock server type - the type
+           of the handle. This should always be shock. file_name - the name
+           of the file remote_md5 - the md5 digest of the file.) ->
+           structure: parameter "hid" of String, parameter "file_name" of
+           String, parameter "id" of String, parameter "url" of String,
+           parameter "type" of String, parameter "remote_md5" of String,
+           parameter "node_file_name" of String, parameter "size" of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN package_for_download
+        if ctx['token'] is None:
+            raise ValueError('Authentication token required!')
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('No file/directory provided.')
+        ws_refs = params.get('ws_refs')
+        if not ws_refs:
+            raise ValueError('No workspace references provided.')
+        dir_path = file_path
+        if not os.path.isdir(dir_path):
+            dir_path, temp_file_name = os.path.split(dir_path)
+        if not dir_path:
+            dir_path = '.'
+        dir_path = os.path.abspath(os.path.expanduser(dir_path))
+        objects = [{'ref': x} for x in ws_refs]
+        ws = Workspace(self.ws_url, token=ctx['token'])
+        items = ws.get_objects2({'no_data': 1, 'ignoreErrors': 1,
+                                 'objects': objects})['data']
+        for item in items:
+            item_info = item['info']
+            info_to_save = {'metadata': [item_info],
+                            'provenance': item['provenance']}
+            ws_name = item_info[7]
+            obj_name = item_info[1]
+            obj_ver = item_info[4]
+            info_file_name = 'KBase_object_details_' + ws_name + '_' + \
+                             obj_name + '_v' + str(obj_ver) + '.json'
+            info_file_path = os.path.join(dir_path, info_file_name)
+            with open(info_file_path, 'w') as info_file_writer:
+                json.dump(info_to_save, info_file_writer, sort_keys = True, 
+                          indent = 4, ensure_ascii=False)
+        fts_input = {'file_path': file_path, 'ws_refs': ws_refs,
+                     'pack': 'zip'}
+        if params.get('attributes'):
+            fts_input['attributes'] = params.get('attributes')
+        returnVal = self.file_to_shock(ctx, fts_input)[0]
+        #END package_for_download
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method package_for_download return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
     def file_to_shock_mass(self, ctx, params):
         """
         Load multiple files to Shock.
@@ -530,17 +574,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            values are: gzip - gzip the file given by file_path. targz - tar
            and gzip the directory specified by the directory portion of the
            file_path into the file specified by the file_path. zip - as targz
-           but zip the directory. ws_ref - list of references to workspace
-           objects which will be used to produce info-files in JSON format
-           containing workspace metadata and provenane structures each. This
-           optional is allowed only for modes pack=targz or pack=zip. Using
-           this option will produce new files in folder pointed by file_path
-           (or folder containing file pointed by file_path if it's not
-           folder).) -> structure: parameter "file_path" of String, parameter
-           "attributes" of mapping from String to unspecified object,
-           parameter "make_handle" of type "boolean" (A boolean - 0 for
-           false, 1 for true. @range (0, 1)), parameter "pack" of String,
-           parameter "ws_refs" of list of String
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "attributes" of mapping from String to
+           unspecified object, parameter "make_handle" of type "boolean" (A
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
