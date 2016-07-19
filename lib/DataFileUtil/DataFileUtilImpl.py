@@ -19,6 +19,7 @@ import tarfile
 import zipfile
 import errno
 import re
+import io
 
 
 class ShockException(Exception):
@@ -517,7 +518,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         dir_path = os.path.abspath(os.path.expanduser(dir_path))
         objects = [{'ref': x} for x in ws_refs]
         ws = Workspace(self.ws_url, token=ctx['token'])
-        items = ws.get_objects2({'no_data': 1, 'ignoreErrors': 1,
+        items = ws.get_objects2({'no_data': 1, 'ignoreErrors': 0,
                                  'objects': objects})['data']
         for item in items:
             item_info = item['info']
@@ -529,9 +530,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             info_file_name = 'KBase_object_details_' + ws_name + '_' + \
                              obj_name + '_v' + str(obj_ver) + '.json'
             info_file_path = os.path.join(dir_path, info_file_name)
-            with open(info_file_path, 'w') as info_file_writer:
-                json.dump(info_to_save, info_file_writer, sort_keys = True, 
-                          indent = 4, ensure_ascii=False)
+            with io.open(info_file_path, 'w', encoding="utf-8") as writer:
+                text = json.dumps(info_to_save, sort_keys = True, 
+                                  indent = 4, ensure_ascii=False, 
+                                  encoding='utf8')
+                writer.write(unicode(text))
         fts_input = {'file_path': file_path, 'ws_refs': ws_refs,
                      'pack': 'zip'}
         if params.get('attributes'):
