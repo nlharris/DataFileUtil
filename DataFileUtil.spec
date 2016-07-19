@@ -168,7 +168,6 @@ module DataFileUtil {
     */
     typedef structure {
         string shock_id;
-        Handle handle;
         string node_file_name;
         string size;
     } PackageForDownloadOutput;

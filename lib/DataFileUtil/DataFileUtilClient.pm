@@ -447,16 +447,8 @@ PackageForDownloadParams is a reference to a hash where the following keys are d
 	ws_refs has a value which is a reference to a list where each element is a string
 PackageForDownloadOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle has a value which is a DataFileUtil.Handle
 	node_file_name has a value which is a string
 	size has a value which is a string
-Handle is a reference to a hash where the following keys are defined:
-	hid has a value which is a string
-	file_name has a value which is a string
-	id has a value which is a string
-	url has a value which is a string
-	type has a value which is a string
-	remote_md5 has a value which is a string
 
 </pre>
 
@@ -472,16 +464,8 @@ PackageForDownloadParams is a reference to a hash where the following keys are d
 	ws_refs has a value which is a reference to a list where each element is a string
 PackageForDownloadOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
-	handle has a value which is a DataFileUtil.Handle
 	node_file_name has a value which is a string
 	size has a value which is a string
-Handle is a reference to a hash where the following keys are defined:
-	hid has a value which is a string
-	file_name has a value which is a string
-	id has a value which is a string
-	url has a value which is a string
-	type has a value which is a string
-	remote_md5 has a value which is a string
 
 
 =end text
@@ -1767,7 +1751,6 @@ Output of the package_for_download function.
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle has a value which is a DataFileUtil.Handle
 node_file_name has a value which is a string
 size has a value which is a string
 
@@ -1779,7 +1762,6 @@ size has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
-handle has a value which is a DataFileUtil.Handle
 node_file_name has a value which is a string
 size has a value which is a string
 

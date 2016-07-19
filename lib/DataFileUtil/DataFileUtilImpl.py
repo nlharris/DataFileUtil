@@ -45,7 +45,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.3"
     GIT_URL = "https://github.com/rsutormin/DataFileUtil"
-    GIT_COMMIT_HASH = "c7402c57a9980a819016c50d2de25a26bad1e9eb"
+    GIT_COMMIT_HASH = "6717c7cd8bf67a3509eca3cd403da6940d8fd1c6"
     
     #BEGIN_CLASS_HEADER
 
@@ -495,16 +495,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            package_for_download function. shock_id - the ID of the new Shock
            node. node_file_name - the name of the file stored in Shock. size
            - the size of the file stored in shock.) -> structure: parameter
-           "shock_id" of String, parameter "handle" of type "Handle" (A
-           handle for a file stored in Shock. hid - the id of the handle in
-           the Handle Service that references this shock node id - the id for
-           the shock node url - the url of the shock server type - the type
-           of the handle. This should always be shock. file_name - the name
-           of the file remote_md5 - the md5 digest of the file.) ->
-           structure: parameter "hid" of String, parameter "file_name" of
-           String, parameter "id" of String, parameter "url" of String,
-           parameter "type" of String, parameter "remote_md5" of String,
-           parameter "node_file_name" of String, parameter "size" of String
+           "shock_id" of String, parameter "node_file_name" of String,
+           parameter "size" of String
         """
         # ctx is the context object
         # return variables are: returnVal

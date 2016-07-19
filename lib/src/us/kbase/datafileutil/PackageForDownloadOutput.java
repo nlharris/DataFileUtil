@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "shock_id",
-    "handle",
     "node_file_name",
     "size"
 })
@@ -33,22 +32,6 @@ public class PackageForDownloadOutput {
 
     @JsonProperty("shock_id")
     private String shockId;
-    /**
-     * <p>Original spec-file type: Handle</p>
-     * <pre>
-     * A handle for a file stored in Shock.
-     * hid - the id of the handle in the Handle Service that references this
-     *    shock node
-     * id - the id for the shock node
-     * url - the url of the shock server
-     * type - the type of the handle. This should always be shock.
-     * file_name - the name of the file
-     * remote_md5 - the md5 digest of the file.
-     * </pre>
-     * 
-     */
-    @JsonProperty("handle")
-    private Handle handle;
     @JsonProperty("node_file_name")
     private String nodeFileName;
     @JsonProperty("size")
@@ -67,49 +50,6 @@ public class PackageForDownloadOutput {
 
     public PackageForDownloadOutput withShockId(String shockId) {
         this.shockId = shockId;
-        return this;
-    }
-
-    /**
-     * <p>Original spec-file type: Handle</p>
-     * <pre>
-     * A handle for a file stored in Shock.
-     * hid - the id of the handle in the Handle Service that references this
-     *    shock node
-     * id - the id for the shock node
-     * url - the url of the shock server
-     * type - the type of the handle. This should always be shock.
-     * file_name - the name of the file
-     * remote_md5 - the md5 digest of the file.
-     * </pre>
-     * 
-     */
-    @JsonProperty("handle")
-    public Handle getHandle() {
-        return handle;
-    }
-
-    /**
-     * <p>Original spec-file type: Handle</p>
-     * <pre>
-     * A handle for a file stored in Shock.
-     * hid - the id of the handle in the Handle Service that references this
-     *    shock node
-     * id - the id for the shock node
-     * url - the url of the shock server
-     * type - the type of the handle. This should always be shock.
-     * file_name - the name of the file
-     * remote_md5 - the md5 digest of the file.
-     * </pre>
-     * 
-     */
-    @JsonProperty("handle")
-    public void setHandle(Handle handle) {
-        this.handle = handle;
-    }
-
-    public PackageForDownloadOutput withHandle(Handle handle) {
-        this.handle = handle;
         return this;
     }
 
@@ -155,7 +95,7 @@ public class PackageForDownloadOutput {
 
     @Override
     public String toString() {
-        return ((((((((((("PackageForDownloadOutput"+" [shockId=")+ shockId)+", handle=")+ handle)+", nodeFileName=")+ nodeFileName)+", size=")+ size)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("PackageForDownloadOutput"+" [shockId=")+ shockId)+", nodeFileName=")+ nodeFileName)+", size=")+ size)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
