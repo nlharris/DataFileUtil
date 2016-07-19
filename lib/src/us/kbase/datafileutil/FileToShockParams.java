@@ -2,6 +2,7 @@
 package us.kbase.datafileutil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -39,6 +40,12 @@ import us.kbase.common.service.UObject;
  *             portion of the file_path into the file specified by the
  *             file_path.
  *         zip - as targz but zip the directory.
+ * ws_ref - list of references to workspace objects which will be used to
+ *     produce info-files in JSON format containing workspace metadata and
+ *     provenane structures each. This optional is allowed only for modes
+ *     pack=targz or pack=zip. Using this option will produce new files
+ *     in folder pointed by file_path (or folder containing file pointed
+ *     by file_path if it's not folder).
  * </pre>
  * 
  */
@@ -48,7 +55,8 @@ import us.kbase.common.service.UObject;
     "file_path",
     "attributes",
     "make_handle",
-    "pack"
+    "pack",
+    "ws_refs"
 })
 public class FileToShockParams {
 
@@ -60,6 +68,8 @@ public class FileToShockParams {
     private Long makeHandle;
     @JsonProperty("pack")
     private java.lang.String pack;
+    @JsonProperty("ws_refs")
+    private List<String> wsRefs;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("file_path")
@@ -122,6 +132,21 @@ public class FileToShockParams {
         return this;
     }
 
+    @JsonProperty("ws_refs")
+    public List<String> getWsRefs() {
+        return wsRefs;
+    }
+
+    @JsonProperty("ws_refs")
+    public void setWsRefs(List<String> wsRefs) {
+        this.wsRefs = wsRefs;
+    }
+
+    public FileToShockParams withWsRefs(List<String> wsRefs) {
+        this.wsRefs = wsRefs;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -134,7 +159,7 @@ public class FileToShockParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", pack=")+ pack)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("FileToShockParams"+" [filePath=")+ filePath)+", attributes=")+ attributes)+", makeHandle=")+ makeHandle)+", pack=")+ pack)+", wsRefs=")+ wsRefs)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

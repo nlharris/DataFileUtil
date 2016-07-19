@@ -109,12 +109,19 @@ module DataFileUtil {
                    portion of the file_path into the file specified by the
                    file_path.
                zip - as targz but zip the directory.
+       ws_ref - list of references to workspace objects which will be used to
+           produce info-files in JSON format containing workspace metadata and
+           provenane structures each. This optional is allowed only for modes
+           pack=targz or pack=zip. Using this option will produce new files
+           in folder pointed by file_path (or folder containing file pointed
+           by file_path if it's not folder).
     */
     typedef structure {
         string file_path;
         mapping<string, UnspecifiedObject> attributes;
         boolean make_handle;
         string pack;
+        list<string> ws_refs;
     } FileToShockParams;
 
     /* Output of the file_to_shock function.

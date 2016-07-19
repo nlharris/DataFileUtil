@@ -328,6 +328,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
 	pack has a value which is a string
+	ws_refs has a value which is a reference to a list where each element is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -355,6 +356,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
 	pack has a value which is a string
+	ws_refs has a value which is a reference to a list where each element is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -446,6 +448,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
 	pack has a value which is a string
+	ws_refs has a value which is a reference to a list where each element is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -473,6 +476,7 @@ FileToShockParams is a reference to a hash where the following keys are defined:
 	attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 	make_handle has a value which is a DataFileUtil.boolean
 	pack has a value which is a string
+	ws_refs has a value which is a reference to a list where each element is a string
 boolean is an int
 FileToShockOutput is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
@@ -1498,6 +1502,12 @@ pack - compress a file or archive a directory before loading to Shock.
             portion of the file_path into the file specified by the
             file_path.
         zip - as targz but zip the directory.
+ws_ref - list of references to workspace objects which will be used to
+    produce info-files in JSON format containing workspace metadata and
+    provenane structures each. This optional is allowed only for modes
+    pack=targz or pack=zip. Using this option will produce new files
+    in folder pointed by file_path (or folder containing file pointed
+    by file_path if it's not folder).
 
 
 =item Definition
@@ -1510,6 +1520,7 @@ file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
 pack has a value which is a string
+ws_refs has a value which is a reference to a list where each element is a string
 
 </pre>
 
@@ -1522,6 +1533,7 @@ file_path has a value which is a string
 attributes has a value which is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
 make_handle has a value which is a DataFileUtil.boolean
 pack has a value which is a string
+ws_refs has a value which is a reference to a list where each element is a string
 
 
 =end text
