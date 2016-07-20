@@ -523,7 +523,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         for item in items:
             item_info = item['info']
             info_to_save = {'metadata': [item_info],
-                            'provenance': item['provenance']}
+                            'provenance': [item]}
             ws_name = item_info[7]
             obj_name = item_info[1]
             obj_ver = item_info[4]

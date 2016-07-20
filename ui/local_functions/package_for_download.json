@@ -1,0 +1,16 @@
+{
+    "name" : "Prepare folder for download using Shock",
+    "short_description" : "Prepare local folder for download and upload it into Shock storage",
+    "long_description" : "Function prepares information files for source workspace objects and uploads local folder into Shock storage as a Shock node.",
+    "tags" : {
+        "categories" : ["shock"],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}
