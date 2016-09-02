@@ -12,7 +12,7 @@ RUN sudo apt-get install python-dev libffi-dev libssl-dev \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
     && pip install semver \
-    && pip uninstall -y filemagic \
+    && ( [ $(pip show filemagic|grep -c filemagic) -eq 0 ] || pip uninstall -y filemagic ) \
     && pip install python-magic \
     && pip install ftputil \
     && pip install ipython \
