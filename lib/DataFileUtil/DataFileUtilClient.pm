@@ -443,7 +443,8 @@ $params is a DataFileUtil.UnpackFileParams
 $out is a DataFileUtil.UnpackFileResult
 UnpackFileParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
-UnpackFileResult is a reference to a hash where the following keys are defined
+UnpackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
 
 </pre>
 
@@ -455,7 +456,8 @@ $params is a DataFileUtil.UnpackFileParams
 $out is a DataFileUtil.UnpackFileResult
 UnpackFileParams is a reference to a hash where the following keys are defined:
 	file_path has a value which is a string
-UnpackFileResult is a reference to a hash where the following keys are defined
+UnpackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
 
 
 =end text
@@ -1807,14 +1809,18 @@ file_path has a value which is a string
 =begin html
 
 <pre>
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
 </pre>
 
 =end html
 
 =begin text
 
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
 
 =end text
 

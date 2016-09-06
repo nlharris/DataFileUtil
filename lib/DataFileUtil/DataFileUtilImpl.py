@@ -46,7 +46,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     #########################################
     VERSION = "0.0.5"
     GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
-    GIT_COMMIT_HASH = "9940dbcb32b39109523fd92d5ccce3342c28bc45"
+    GIT_COMMIT_HASH = "295dbd287391decb4804af7b4b7d64f1a12b2600"
     
     #BEGIN_CLASS_HEADER
 
@@ -482,7 +482,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
-        :returns: instance of type "UnpackFileResult" -> structure:
+        :returns: instance of type "UnpackFileResult" -> structure: parameter
+           "file_path" of String
         """
         # ctx is the context object
         # return variables are: out

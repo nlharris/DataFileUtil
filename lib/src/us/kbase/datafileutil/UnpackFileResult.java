@@ -7,6 +7,7 @@ import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
@@ -18,11 +19,28 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-
+    "file_path"
 })
 public class UnpackFileResult {
 
+    @JsonProperty("file_path")
+    private String filePath;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("file_path")
+    public String getFilePath() {
+        return filePath;
+    }
+
+    @JsonProperty("file_path")
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public UnpackFileResult withFilePath(String filePath) {
+        this.filePath = filePath;
+        return this;
+    }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
@@ -36,7 +54,7 @@ public class UnpackFileResult {
 
     @Override
     public String toString() {
-        return ((("UnpackFileResult"+" [additionalProperties=")+ additionalProperties)+"]");
+        return ((((("UnpackFileResult"+" [filePath=")+ filePath)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

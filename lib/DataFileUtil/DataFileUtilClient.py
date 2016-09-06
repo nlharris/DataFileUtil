@@ -165,7 +165,8 @@ class DataFileUtil(object):
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
-        :returns: instance of type "UnpackFileResult" -> structure:
+        :returns: instance of type "UnpackFileResult" -> structure: parameter
+           "file_path" of String
         """
         return self._client.call_method(
             'DataFileUtil.unpack_file',

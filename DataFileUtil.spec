@@ -141,7 +141,7 @@ module DataFileUtil {
     } UnpackFileParams;
 
     typedef structure {
-
+        string file_path;
     } UnpackFileResult;
 
     /*
