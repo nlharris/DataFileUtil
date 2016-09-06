@@ -156,6 +156,21 @@ class DataFileUtil(object):
             'DataFileUtil.file_to_shock',
             [params], self._service_ver, context)
 
+    def unpack_file(self, params, context=None):
+        """
+        Using the same logic as unpacking a Shock file, this method will cause
+        any bzip or gzip files to be uncompressed, and then unpack tar and zip
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
+        directory containing the original output file.
+        :param params: instance of type "UnpackFileParams" -> structure:
+           parameter "file_path" of String
+        :returns: instance of type "UnpackFileResult" -> structure:
+        """
+        return self._client.call_method(
+            'DataFileUtil.unpack_file',
+            [params], self._service_ver, context)
+
     def package_for_download(self, params, context=None):
         """
         :param params: instance of type "PackageForDownloadParams" (Input for
@@ -405,4 +420,4 @@ class DataFileUtil(object):
 
     def status(self, context=None):
         return self._client.call_method('DataFileUtil.status',
-            [], self._service_ver, context)
+                                        [], self._service_ver, context)
