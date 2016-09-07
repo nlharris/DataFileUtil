@@ -598,7 +598,7 @@ class DataFileUtilTest(unittest.TestCase):
             {'shock_id': '',
              'file_path': 'foo'
              },
-            'Must provide shock ID')
+            'Must provide shock ID or handle ID')
 
     def test_download_err_no_file_provided(self):
         self.fail_download(
