@@ -285,13 +285,25 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             raise ValueError('Authentication token required.')
         headers = {'Authorization': 'OAuth ' + token}
         shock_id = params.get('shock_id')
-        if not shock_id:
-            raise ValueError('Must provide shock ID')
+        handle_id = params.get('handle_id')
+        if not shock_id and not handle_id:
+            raise ValueError('Must provide shock ID or handle ID')
+        if shock_id and handle_id:
+            raise ValueError('Must provide either a shock ID or handle ID, not both')
+
+        shock_url = self.shock_url
+        if handle_id:
+            self.log('Fetching info for handle: '+handle_id)
+            hs = HandleService(self.handle_url, token=token)
+            handles = hs.hids_to_handles([handle_id])
+            shock_url = handles[0]['url']
+            shock_id = handles[0]['id']
+
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('Must provide file path')
         self.mkdir_p(os.path.dirname(file_path))
-        node_url = self.shock_url + '/node/' + shock_id
+        node_url = shock_url + '/node/' + shock_id
         r = requests.get(node_url, headers=headers, allow_redirects=True)
         errtxt = ('Error downloading file from shock ' +
                   'node {}: ').format(shock_id)
