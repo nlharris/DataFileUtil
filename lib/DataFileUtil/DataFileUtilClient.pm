@@ -428,6 +428,100 @@ Load a file to Shock.
  
 
 
+=head2 unpack_file
+
+  $out = $obj->unpack_file($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.UnpackFileParams
+$out is a DataFileUtil.UnpackFileResult
+UnpackFileParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+UnpackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.UnpackFileParams
+$out is a DataFileUtil.UnpackFileResult
+UnpackFileParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+UnpackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+
+
+=end text
+
+=item Description
+
+Using the same logic as unpacking a Shock file, this method will cause
+any bzip or gzip files to be uncompressed, and then unpack tar and zip
+archive files (uncompressing gzipped or bzipped archive files if 
+necessary). If the file is an archive, it will be unbundled into the 
+directory containing the original output file.
+
+=back
+
+=cut
+
+ sub unpack_file
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function unpack_file (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to unpack_file:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'unpack_file');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.unpack_file",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'unpack_file',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method unpack_file",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'unpack_file',
+				       );
+    }
+}
+ 
+
+
 =head2 package_for_download
 
   $return = $obj->package_for_download($params)
@@ -1666,6 +1760,66 @@ shock_id has a value which is a string
 handle has a value which is a DataFileUtil.Handle
 node_file_name has a value which is a string
 size has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 UnpackFileParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 UnpackFileResult
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
 
 
 =end text

@@ -56,6 +56,20 @@ public class DataFileUtilClient {
         caller = new JsonClientCaller(url, user, password);
     }
 
+    /** Constructs a client with a custom URL
+     * and a custom authorization service URL.
+     * @param url the URL of the service.
+     * @param user the user name.
+     * @param password the password for the user name.
+     * @param auth the URL of the authorization server.
+     * @throws UnauthorizedException if the credentials are not valid.
+     * @throws IOException if an IOException occurs when checking the user's
+     * credentials.
+     */
+    public DataFileUtilClient(URL url, String user, String password, URL auth) throws UnauthorizedException, IOException {
+        caller = new JsonClientCaller(url, user, password, auth);
+    }
+
     /** Get the token this client uses to communicate with the server.
      * @return the authorization token.
      */
@@ -202,6 +216,28 @@ public class DataFileUtilClient {
         args.add(params);
         TypeReference<List<FileToShockOutput>> retType = new TypeReference<List<FileToShockOutput>>() {};
         List<FileToShockOutput> res = caller.jsonrpcCall("DataFileUtil.file_to_shock", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: unpack_file</p>
+     * <pre>
+     * Using the same logic as unpacking a Shock file, this method will cause
+     * any bzip or gzip files to be uncompressed, and then unpack tar and zip
+     * archive files (uncompressing gzipped or bzipped archive files if 
+     * necessary). If the file is an archive, it will be unbundled into the 
+     * directory containing the original output file.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.UnpackFileParams UnpackFileParams}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.UnpackFileResult UnpackFileResult}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public UnpackFileResult unpackFile(UnpackFileParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<UnpackFileResult>> retType = new TypeReference<List<UnpackFileResult>>() {};
+        List<UnpackFileResult> res = caller.jsonrpcCall("DataFileUtil.unpack_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

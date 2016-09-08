@@ -136,6 +136,25 @@ module DataFileUtil {
         returns (FileToShockOutput out) authentication required;
 
 
+    typedef structure {
+        string file_path;
+    } UnpackFileParams;
+
+    typedef structure {
+        string file_path;
+    } UnpackFileResult;
+
+    /*
+        Using the same logic as unpacking a Shock file, this method will cause
+        any bzip or gzip files to be uncompressed, and then unpack tar and zip
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
+        directory containing the original output file.
+    */
+    funcdef unpack_file(UnpackFileParams params)
+        returns (UnpackFileResult out) authentication required;
+
+
     /* Input for the package_for_download function.
        
        Required parameters:

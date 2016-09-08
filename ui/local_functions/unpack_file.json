@@ -1,0 +1,16 @@
+{
+    "name" : "Unpack File",
+    "short_description" : "Uncompress and unpack a local file archive",
+    "long_description" : "",
+    "tags" : {
+        "categories" : [],
+        "input": {
+            "file_types": [],
+            "kb_types": []
+        },
+        "output": {
+            "file_types": [],
+            "kb_types": []
+        }
+    }
+}

@@ -44,9 +44,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
-    VERSION = "0.0.3"
-    GIT_URL = "https://github.com/rsutormin/DataFileUtil"
-    GIT_COMMIT_HASH = "6717c7cd8bf67a3509eca3cd403da6940d8fd1c6"
+    VERSION = "0.0.5"
+    GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
+    GIT_COMMIT_HASH = "295dbd287391decb4804af7b4b7d64f1a12b2600"
     
     #BEGIN_CLASS_HEADER
 
@@ -469,6 +469,37 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # At some point might do deeper type checking...
         if not isinstance(out, dict):
             raise ValueError('Method file_to_shock return value ' +
+                             'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def unpack_file(self, ctx, params):
+        """
+        Using the same logic as unpacking a Shock file, this method will cause
+        any bzip or gzip files to be uncompressed, and then unpack tar and zip
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
+        directory containing the original output file.
+        :param params: instance of type "UnpackFileParams" -> structure:
+           parameter "file_path" of String
+        :returns: instance of type "UnpackFileResult" -> structure: parameter
+           "file_path" of String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN unpack_file
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('Must provide file path')
+
+        unpack = True
+        new_file_path = self._unpack(file_path, unpack)
+        out = { 'file_path':new_file_path }
+        #END unpack_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, dict):
+            raise ValueError('Method unpack_file return value ' +
                              'out is not type dict as required.')
         # return the results
         return [out]
