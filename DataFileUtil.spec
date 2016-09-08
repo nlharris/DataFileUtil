@@ -31,7 +31,7 @@ module DataFileUtil {
     /* Input for the shock_to_file function.
        
        Required parameters:
-       shock_id - the ID of the Shock node.
+       shock_id | handle_id - the ID of the Shock node, or the Handle to a shock node.
        file_path - the location to save the file output. If this is a
            directory, the file will be named as per the filename in Shock.
 
@@ -51,6 +51,7 @@ module DataFileUtil {
     */
     typedef structure {
         string shock_id;
+        string handle_id;
         string file_path;
         string unpack;
     } ShockToFileParams;

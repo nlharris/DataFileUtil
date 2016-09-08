@@ -74,6 +74,28 @@ class DataFileUtilTest(unittest.TestCase):
                         allow_redirects=True)
         print('Deleted shock node ' + node_id)
 
+    def test_file_to_shock_and_back_by_handle(self):
+        input_ = "Test!!!"
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        ret1 = self.impl.file_to_shock(
+                    self.ctx,
+                    {'file_path': file_path,
+                    'make_handle': 1})[0]
+        shock_id = ret1['shock_id']
+        handle_id = ret1['handle']['hid']
+        file_path2 = os.path.join(tmp_dir, 'output.txt')
+        ret2 = self.impl.shock_to_file(self.ctx,
+            {'handle_id': handle_id, 'file_path': file_path2})[0]
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+        self.delete_shock_node(shock_id)
+
+
     def test_file_to_shock_and_back_with_attribs(self):
         input_ = "Test!!!"
         tmp_dir = self.cfg['scratch']
@@ -576,7 +598,7 @@ class DataFileUtilTest(unittest.TestCase):
             {'shock_id': '',
              'file_path': 'foo'
              },
-            'Must provide shock ID')
+            'Must provide shock ID or handle ID')
 
     def test_download_err_no_file_provided(self):
         self.fail_download(
