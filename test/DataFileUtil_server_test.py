@@ -11,7 +11,6 @@ import shutil
 import filecmp
 import tarfile
 import zipfile
-from pprint import pprint
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -84,17 +83,17 @@ class DataFileUtilTest(unittest.TestCase):
         ret1 = self.impl.file_to_shock(
                     self.ctx,
                     {'file_path': file_path,
-                    'make_handle': 1})[0]
+                     'make_handle': 1})[0]
         shock_id = ret1['shock_id']
         handle_id = ret1['handle']['hid']
         file_path2 = os.path.join(tmp_dir, 'output.txt')
-        ret2 = self.impl.shock_to_file(self.ctx,
+        self.impl.shock_to_file(
+            self.ctx,
             {'handle_id': handle_id, 'file_path': file_path2})[0]
         with open(file_path2, 'r') as fh2:
             output = fh2.read()
         self.assertEqual(output, input_)
         self.delete_shock_node(shock_id)
-
 
     def test_file_to_shock_and_back_with_attribs(self):
         input_ = "Test!!!"
@@ -213,7 +212,8 @@ class DataFileUtilTest(unittest.TestCase):
                 self.ctx,
                 {'file_path': test_file_path}
             )[0]
-        self.assertEqual(ret1['file_path'],str(os.path.join(unpack_dir,'file1.txt')))
+        self.assertEqual(ret1['file_path'],
+                         str(os.path.join(unpack_dir, 'file1.txt')))
 
     def write_file(self, filename, content):
         tmp_dir = self.cfg['scratch']
@@ -335,9 +335,10 @@ class DataFileUtilTest(unittest.TestCase):
     def test_package_for_download(self):
         obj_name = 'TestForWsRef'
         ws = self.ws_info[0]
-        self.impl.save_objects(self.ctx, {'id': ws, 'objects': 
-            [{'name': obj_name, 'type': 'Empty.AType-0.1',
-              'data': {'thingy': 1}}]})
+        self.impl.save_objects(
+            self.ctx, {'id': ws, 'objects':
+                       [{'name': obj_name, 'type': 'Empty.AType-0.1',
+                         'data': {'thingy': 1}}]})
         tmp_dir = self.cfg['scratch'] + '/ws_refs_test'
         os.makedirs(tmp_dir)
         self.write_file('ws_refs_test/inzip1.txt', 'zip1')
@@ -346,7 +347,7 @@ class DataFileUtilTest(unittest.TestCase):
             {'file_path': tmp_dir,
              'ws_refs': [str(ws) + '/' + obj_name]})[0]['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.zip')
-        ret2 = self.impl.shock_to_file(
+        self.impl.shock_to_file(
             self.ctx,
             {'shock_id': shock_id, 'file_path': file_path2})[0]
         self.delete_shock_node(shock_id)
@@ -793,6 +794,7 @@ class DataFileUtilTest(unittest.TestCase):
                          str(context.exception.message))
 
     def test_save_and_get_objects(self):
+        print('**** test_save_and_get_objects ****')
         objs = [{'name': 'whee1',
                  'type': 'Empty.AType-0.1',
                  'data': {'thingy': 1}
@@ -817,10 +819,10 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEquals(o2['data'], {'thingy': 1})
 
         pret = self.ws.get_objects2(
-            {'objects': [{'ref': str(ws) + '/whee1',
-                          'ref': str(ws) + '/whee2'}]})['data']
+            {'objects': [{'ref': str(ws) + '/whee1'},
+                         {'ref': str(ws) + '/whee2'}]})['data']
         p1 = pret[0]['provenance'][0]
-        p2 = pret[0]['provenance'][0]
+        p2 = pret[1]['provenance'][0]
         # this is enough to check that provenance is being saved
         self.assertEquals(
             p1['description'],

@@ -47,7 +47,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     VERSION = "0.0.5"
     GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
     GIT_COMMIT_HASH = "295dbd287391decb4804af7b4b7d64f1a12b2600"
-    
+
     #BEGIN_CLASS_HEADER
 
     GZ = '.gz'
@@ -240,7 +240,6 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.scratch = config['scratch']
         #END_CONSTRUCTOR
         pass
-    
 
     def shock_to_file(self, ctx, params):
         """
@@ -289,7 +288,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         if not shock_id and not handle_id:
             raise ValueError('Must provide shock ID or handle ID')
         if shock_id and handle_id:
-            raise ValueError('Must provide either a shock ID or handle ID, not both')
+            raise ValueError(
+                'Must provide either a shock ID or handle ID, not both')
 
         shock_url = self.shock_url
         if handle_id:
@@ -489,8 +489,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         Using the same logic as unpacking a Shock file, this method will cause
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
-        archive files (uncompressing gzipped or bzipped archive files if 
-        necessary). If the file is an archive, it will be unbundled into the 
+        archive files (uncompressing gzipped or bzipped archive files if
+        necessary). If the file is an archive, it will be unbundled into the
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
@@ -500,13 +500,14 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # ctx is the context object
         # return variables are: out
         #BEGIN unpack_file
+        del ctx
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('Must provide file path')
 
         unpack = True
         new_file_path = self._unpack(file_path, unpack)
-        out = { 'file_path':new_file_path }
+        out = {'file_path': new_file_path}
         #END unpack_file
 
         # At some point might do deeper type checking...
@@ -555,7 +556,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
             raise ValueError('No workspace references provided.')
         dir_path = file_path
         if not os.path.isdir(dir_path):
-            dir_path, temp_file_name = os.path.split(dir_path)
+            dir_path, _ = os.path.split(dir_path)
         if not dir_path:
             dir_path = '.'
         dir_path = os.path.abspath(os.path.expanduser(dir_path))
@@ -574,8 +575,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
                              obj_name + '_v' + str(obj_ver) + '.json'
             info_file_path = os.path.join(dir_path, info_file_name)
             with io.open(info_file_path, 'w', encoding="utf-8") as writer:
-                text = json.dumps(info_to_save, sort_keys = True, 
-                                  indent = 4, ensure_ascii=False, 
+                text = json.dumps(info_to_save, sort_keys=True,
+                                  indent=4, ensure_ascii=False,
                                   encoding='utf8')
                 writer.write(unicode(text))
         fts_input = {'file_path': file_path, 'ws_refs': ws_refs,
