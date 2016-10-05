@@ -242,6 +242,24 @@ public class DataFileUtilClient {
     }
 
     /**
+     * <p>Original spec-file function name: pack_file</p>
+     * <pre>
+     * Pack a file or directory into gzip, targz, or zip archives.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.PackFileParams PackFileParams}
+     * @return   parameter "out" of type {@link us.kbase.datafileutil.PackFileResult PackFileResult}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public PackFileResult packFile(PackFileParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<PackFileResult>> retType = new TypeReference<List<PackFileResult>>() {};
+        List<PackFileResult> res = caller.jsonrpcCall("DataFileUtil.pack_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: package_for_download</p>
      * <pre>
      * </pre>

@@ -44,10 +44,10 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
-    VERSION = "0.0.5"
-    GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
-    GIT_COMMIT_HASH = "295dbd287391decb4804af7b4b7d64f1a12b2600"
-
+    VERSION = "0.0.6"
+    GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
+    GIT_COMMIT_HASH = "4267fe62c152371eb12444ff99442822cc134707"
+    
     #BEGIN_CLASS_HEADER
 
     GZ = '.gz'
@@ -245,11 +245,12 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         Download a file from Shock.
         :param params: instance of type "ShockToFileParams" (Input for the
-           shock_to_file function. Required parameters: shock_id - the ID of
-           the Shock node. file_path - the location to save the file output.
-           If this is a directory, the file will be named as per the filename
-           in Shock. Optional parameters: unpack - either null, 'uncompress',
-           or 'unpack'. 'uncompress' will cause any bzip or gzip files to be
+           shock_to_file function. Required parameters: shock_id | handle_id
+           - the ID of the Shock node, or the Handle to a shock node.
+           file_path - the location to save the file output. If this is a
+           directory, the file will be named as per the filename in Shock.
+           Optional parameters: unpack - either null, 'uncompress', or
+           'unpack'. 'uncompress' will cause any bzip or gzip files to be
            uncompressed. 'unpack' will behave the same way, but it will also
            unpack tar and zip archive files (uncompressing gzipped or bzipped
            archive files if necessary). If 'uncompress' is specified and an
@@ -260,8 +261,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            extension (e.g. .gz, .zip or .tgz -> .tar) points to an existing
            file and unpack is specified, that file will be overwritten by the
            decompressed Shock file.) -> structure: parameter "shock_id" of
-           String, parameter "file_path" of String, parameter "unpack" of
-           String
+           String, parameter "handle_id" of String, parameter "file_path" of
+           String, parameter "unpack" of String
         :returns: instance of type "ShockToFileOutput" (Output from the
            shock_to_file function. node_file_name - the filename of the file
            as stored in Shock. file_path - the path to the downloaded file.
@@ -349,23 +350,24 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         Download multiple files from Shock.
         :param params: instance of list of type "ShockToFileParams" (Input
-           for the shock_to_file function. Required parameters: shock_id -
-           the ID of the Shock node. file_path - the location to save the
-           file output. If this is a directory, the file will be named as per
-           the filename in Shock. Optional parameters: unpack - either null,
-           'uncompress', or 'unpack'. 'uncompress' will cause any bzip or
-           gzip files to be uncompressed. 'unpack' will behave the same way,
-           but it will also unpack tar and zip archive files (uncompressing
-           gzipped or bzipped archive files if necessary). If 'uncompress' is
-           specified and an archive file is encountered, an error will be
-           thrown. If the file is an archive, it will be unbundled into the
-           directory containing the original output file. Note that if the
-           file name (either as provided by the user or by Shock) without the
-           a decompression extension (e.g. .gz, .zip or .tgz -> .tar) points
-           to an existing file and unpack is specified, that file will be
-           overwritten by the decompressed Shock file.) -> structure:
-           parameter "shock_id" of String, parameter "file_path" of String,
-           parameter "unpack" of String
+           for the shock_to_file function. Required parameters: shock_id |
+           handle_id - the ID of the Shock node, or the Handle to a shock
+           node. file_path - the location to save the file output. If this is
+           a directory, the file will be named as per the filename in Shock.
+           Optional parameters: unpack - either null, 'uncompress', or
+           'unpack'. 'uncompress' will cause any bzip or gzip files to be
+           uncompressed. 'unpack' will behave the same way, but it will also
+           unpack tar and zip archive files (uncompressing gzipped or bzipped
+           archive files if necessary). If 'uncompress' is specified and an
+           archive file is encountered, an error will be thrown. If the file
+           is an archive, it will be unbundled into the directory containing
+           the original output file. Note that if the file name (either as
+           provided by the user or by Shock) without the a decompression
+           extension (e.g. .gz, .zip or .tgz -> .tar) points to an existing
+           file and unpack is specified, that file will be overwritten by the
+           decompressed Shock file.) -> structure: parameter "shock_id" of
+           String, parameter "handle_id" of String, parameter "file_path" of
+           String, parameter "unpack" of String
         :returns: instance of list of type "ShockToFileOutput" (Output from
            the shock_to_file function. node_file_name - the filename of the
            file as stored in Shock. file_path - the path to the downloaded
@@ -489,8 +491,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         """
         Using the same logic as unpacking a Shock file, this method will cause
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
-        archive files (uncompressing gzipped or bzipped archive files if
-        necessary). If the file is an archive, it will be unbundled into the
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
@@ -513,6 +515,41 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # At some point might do deeper type checking...
         if not isinstance(out, dict):
             raise ValueError('Method unpack_file return value ' +
+                             'out is not type dict as required.')
+        # return the results
+        return [out]
+
+    def pack_file(self, ctx, params):
+        """
+        Pack a file or directory into gzip, targz, or zip archives.
+        :param params: instance of type "PackFileParams" (Input for the
+           pack_file function. Required parameters: file_path - the location
+           of the file (or directory if using the pack parameter) to load to
+           Shock. pack - The format into which the file or files will be
+           packed. The file_path argument will be appended with the
+           appropriate file extension prior to writing. For gzips only, if
+           the file extension denotes that the file is already compressed, it
+           will be skipped. If file_path is a directory and tarring or
+           zipping is specified, the created file name will be set to the
+           directory name, possibly overwriting an existing file. Attempting
+           to pack the root directory is an error. The allowed values are:
+           gzip - gzip the file given by file_path. targz - tar and gzip the
+           directory specified by the directory portion of the file_path into
+           the file specified by the file_path. zip - as targz but zip the
+           directory.) -> structure: parameter "file_path" of String,
+           parameter "pack" of String
+        :returns: instance of type "PackFileResult" (Output from the
+           pack_file function. file_path - the path to the packed file.) ->
+           structure: parameter "file_path" of String
+        """
+        # ctx is the context object
+        # return variables are: out
+        #BEGIN pack_file
+        #END pack_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(out, dict):
+            raise ValueError('Method pack_file return value ' +
                              'out is not type dict as required.')
         # return the results
         return [out]

@@ -125,6 +125,7 @@ $params is a DataFileUtil.ShockToFileParams
 $out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 	file_path has a value which is a string
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
@@ -143,6 +144,7 @@ $params is a DataFileUtil.ShockToFileParams
 $out is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 	file_path has a value which is a string
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
@@ -225,6 +227,7 @@ $params is a reference to a list where each element is a DataFileUtil.ShockToFil
 $out is a reference to a list where each element is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 	file_path has a value which is a string
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
@@ -243,6 +246,7 @@ $params is a reference to a list where each element is a DataFileUtil.ShockToFil
 $out is a reference to a list where each element is a DataFileUtil.ShockToFileOutput
 ShockToFileParams is a reference to a hash where the following keys are defined:
 	shock_id has a value which is a string
+	handle_id has a value which is a string
 	file_path has a value which is a string
 	unpack has a value which is a string
 ShockToFileOutput is a reference to a hash where the following keys are defined:
@@ -516,6 +520,98 @@ directory containing the original output file.
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method unpack_file",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'unpack_file',
+				       );
+    }
+}
+ 
+
+
+=head2 pack_file
+
+  $out = $obj->pack_file($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.PackFileParams
+$out is a DataFileUtil.PackFileResult
+PackFileParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	pack has a value which is a string
+PackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.PackFileParams
+$out is a DataFileUtil.PackFileResult
+PackFileParams is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+	pack has a value which is a string
+PackFileResult is a reference to a hash where the following keys are defined:
+	file_path has a value which is a string
+
+
+=end text
+
+=item Description
+
+Pack a file or directory into gzip, targz, or zip archives.
+
+=back
+
+=cut
+
+ sub pack_file
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function pack_file (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to pack_file:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'pack_file');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.pack_file",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'pack_file',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method pack_file",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'pack_file',
 				       );
     }
 }
@@ -1557,7 +1653,7 @@ remote_md5 has a value which is a string
 Input for the shock_to_file function.
 
 Required parameters:
-shock_id - the ID of the Shock node.
+shock_id | handle_id - the ID of the Shock node, or the Handle to a shock node.
 file_path - the location to save the file output. If this is a
     directory, the file will be named as per the filename in Shock.
 
@@ -1583,6 +1679,7 @@ unpack - either null, 'uncompress', or 'unpack'. 'uncompress' will cause
 <pre>
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle_id has a value which is a string
 file_path has a value which is a string
 unpack has a value which is a string
 
@@ -1594,6 +1691,7 @@ unpack has a value which is a string
 
 a reference to a hash where the following keys are defined:
 shock_id has a value which is a string
+handle_id has a value which is a string
 file_path has a value which is a string
 unpack has a value which is a string
 
@@ -1802,6 +1900,99 @@ file_path has a value which is a string
 
 =over 4
 
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 PackFileParams
+
+=over 4
+
+
+
+=item Description
+
+Input for the pack_file function.
+
+       Required parameters:
+       file_path - the location of the file (or directory if using the
+           pack parameter) to load to Shock.
+       pack - The format into which the file or files will be packed.
+           The file_path argument will be appended with the appropriate file
+           extension prior to writing. For gzips only, if the file extension
+           denotes that the file is already compressed, it will be skipped. If
+           file_path is a directory and tarring or zipping is specified, the
+           created file name will be set to the directory name, possibly
+           overwriting an existing file. Attempting to pack the root directory
+           is an error.
+           
+           The allowed values are:
+               gzip - gzip the file given by file_path.
+               targz - tar and gzip the directory specified by the directory
+                   portion of the file_path into the file specified by the
+                   file_path.
+               zip - as targz but zip the directory.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+pack has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_path has a value which is a string
+pack has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 PackFileResult
+
+=over 4
+
+
+
+=item Description
+
+Output from the pack_file function.
+
+    file_path - the path to the packed file.
 
 
 =item Definition

@@ -156,6 +156,47 @@ module DataFileUtil {
         returns (UnpackFileResult out) authentication required;
 
 
+    /* Input for the pack_file function.
+
+       Required parameters:
+       file_path - the location of the file (or directory if using the
+           pack parameter) to load to Shock.
+       pack - The format into which the file or files will be packed.
+           The file_path argument will be appended with the appropriate file
+           extension prior to writing. For gzips only, if the file extension
+           denotes that the file is already compressed, it will be skipped. If
+           file_path is a directory and tarring or zipping is specified, the
+           created file name will be set to the directory name, possibly
+           overwriting an existing file. Attempting to pack the root directory
+           is an error.
+           
+           The allowed values are:
+               gzip - gzip the file given by file_path.
+               targz - tar and gzip the directory specified by the directory
+                   portion of the file_path into the file specified by the
+                   file_path.
+               zip - as targz but zip the directory.
+     */
+    typedef structure {
+        string file_path;
+        string pack;
+    } PackFileParams;
+
+    /* Output from the pack_file function.
+    
+        file_path - the path to the packed file.
+     */
+    typedef structure {
+        string file_path;
+    } PackFileResult;
+
+    /*
+        Pack a file or directory into gzip, targz, or zip archives.
+    */
+    funcdef pack_file(PackFileParams params)
+        returns (PackFileResult out) authentication required;
+
+
     /* Input for the package_for_download function.
        
        Required parameters:

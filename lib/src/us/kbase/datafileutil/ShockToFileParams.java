@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * Input for the shock_to_file function.
  * Required parameters:
- * shock_id - the ID of the Shock node.
+ * shock_id | handle_id - the ID of the Shock node, or the Handle to a shock node.
  * file_path - the location to save the file output. If this is a
  *     directory, the file will be named as per the filename in Shock.
  * Optional parameters:
@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "shock_id",
+    "handle_id",
     "file_path",
     "unpack"
 })
@@ -46,6 +47,8 @@ public class ShockToFileParams {
 
     @JsonProperty("shock_id")
     private String shockId;
+    @JsonProperty("handle_id")
+    private String handleId;
     @JsonProperty("file_path")
     private String filePath;
     @JsonProperty("unpack")
@@ -64,6 +67,21 @@ public class ShockToFileParams {
 
     public ShockToFileParams withShockId(String shockId) {
         this.shockId = shockId;
+        return this;
+    }
+
+    @JsonProperty("handle_id")
+    public String getHandleId() {
+        return handleId;
+    }
+
+    @JsonProperty("handle_id")
+    public void setHandleId(String handleId) {
+        this.handleId = handleId;
+    }
+
+    public ShockToFileParams withHandleId(String handleId) {
+        this.handleId = handleId;
         return this;
     }
 
@@ -109,7 +127,7 @@ public class ShockToFileParams {
 
     @Override
     public String toString() {
-        return ((((((((("ShockToFileParams"+" [shockId=")+ shockId)+", filePath=")+ filePath)+", unpack=")+ unpack)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("ShockToFileParams"+" [shockId=")+ shockId)+", handleId=")+ handleId)+", filePath=")+ filePath)+", unpack=")+ unpack)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -345,6 +345,10 @@ class Application(object):
                              name='DataFileUtil.unpack_file',
                              types=[dict])
         self.method_authentication['DataFileUtil.unpack_file'] = 'required'
+        self.rpc_service.add(impl_DataFileUtil.pack_file,
+                             name='DataFileUtil.pack_file',
+                             types=[dict])
+        self.method_authentication['DataFileUtil.pack_file'] = 'required'
         self.rpc_service.add(impl_DataFileUtil.package_for_download,
                              name='DataFileUtil.package_for_download',
                              types=[dict])
