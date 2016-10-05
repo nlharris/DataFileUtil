@@ -280,10 +280,10 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(output, input_)
 
     def test_upload_zip(self):
-        tmp_dir = self.cfg['scratch'] + '/ziptest'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'ziptest')
         os.makedirs(tmp_dir)
-        self.write_file('ziptest/inzip1.txt', 'zip1')
-        self.write_file('ziptest/inzip2.txt', 'zip2')
+        self.write_file(os.path.join(tmp_dir, 'inzip1.txt'), 'zip1')
+        self.write_file(os.path.join(tmp_dir, 'inzip2.txt'), 'zip2')
         ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': tmp_dir + '/target',
@@ -305,10 +305,10 @@ class DataFileUtilTest(unittest.TestCase):
                              set(['inzip1.txt', 'inzip2.txt']))
 
     def test_upload_tgz_with_no_dir(self):
-        tmp_dir = self.cfg['scratch'] + '/tartest'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'tartest')
         os.makedirs(tmp_dir)
-        self.write_file('tartest/intar1.txt', 'tar1')
-        self.write_file('tartest/intar2.txt', 'tar2')
+        self.write_file(os.path.join(tmp_dir, 'intar1.txt'), 'tar1')
+        self.write_file(os.path.join(tmp_dir, 'intar2.txt'), 'tar2')
         wd = os.getcwd()
         os.chdir(tmp_dir)
         ret1 = self.impl.file_to_shock(
@@ -363,10 +363,10 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertTrue(json_found)
 
     def test_upload_tgz_with_no_file_name(self):
-        tmp_dir = self.cfg['scratch'] + '/tartest2'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'tartest2')
         os.makedirs(tmp_dir)
-        self.write_file('tartest2/intar1.txt', 'tar1')
-        self.write_file('tartest2/intar2.txt', 'tar2')
+        self.write_file(os.path.join(tmp_dir, 'intar1.txt'), 'tar1')
+        self.write_file(os.path.join(tmp_dir, 'intar2.txt'), 'tar2')
         ret1 = self.impl.file_to_shock(
             self.ctx,
             {'file_path': tmp_dir,
@@ -388,6 +388,7 @@ class DataFileUtilTest(unittest.TestCase):
                              set(['.', './intar1.txt', './intar2.txt']))
 
     def test_gzip_already_gzipped(self):
+        print('*** test_gzip_already_gzipped ***')
         self.check_gzip_skip('input.txt.gz', 'gz test')
         self.check_gzip_skip('input.txt.tgz', 'tgz test')
         self.check_gzip_skip('input.txt.gzip', 'gzip test')
@@ -411,6 +412,14 @@ class DataFileUtilTest(unittest.TestCase):
             output = fh2.read()
         self.assertEqual(output, contents)
         self.delete_shock_node(shock_id)
+
+        # test with pack function
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': file_path, 'pack': 'gzip'})[0]['file_path']
+        self.assertEqual(new_file_path, file_path)
+        with open(file_path2, 'r') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, contents)
 
     def test_unpack_archive(self):
         self.check_unpack_archive('data/tar1.tar', 10240)
@@ -534,6 +543,90 @@ class DataFileUtilTest(unittest.TestCase):
 
     def test_upload_err_bad_pack_filename(self):
         self.fail_upload(
+            {'file_path': '/',
+             'pack': 'zip'},
+            'Packing root is not allowed')
+
+    def test_pack_gzip(self):
+        input_ = 'testgzip'
+        tmp_dir = self.cfg['scratch']
+        input_file_name = 'input.txt'
+        file_path = os.path.join(tmp_dir, input_file_name)
+        with open(file_path, 'w') as fh1:
+            fh1.write(input_)
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': file_path, 'pack': 'gzip'})[0]['file_path']
+        self.assertEqual(new_file_path, file_path + '.gz')
+        with gzip.open(new_file_path, 'rb') as fh2:
+            output = fh2.read()
+        self.assertEqual(output, input_)
+
+    def test_pack_tgz_with_no_dir(self):
+        tmp_dir = os.path.join(self.cfg['scratch'], 'packtartest')
+        os.makedirs(tmp_dir)
+        self.write_file(os.path.join(tmp_dir, 'intar1.txt'), 'tar1')
+        self.write_file(os.path.join(tmp_dir, 'intar2.txt'), 'tar2')
+        wd = os.getcwd()
+        os.chdir(tmp_dir)
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': 'target', 'pack': 'targz'})[0]['file_path']
+        os.chdir(wd)
+        self.assertEqual(new_file_path,
+                         '/kb/module/work/tmp/packtartest/target.tar.gz')
+        with tarfile.open(new_file_path) as t:
+            self.assertEqual(set(t.getnames()),
+                             set(['.', './intar1.txt', './intar2.txt']))
+
+    def test_pack_tgz_with_no_file_name(self):
+        tmp_dir = os.path.join(self.cfg['scratch'], 'packtartest2')
+        os.makedirs(tmp_dir)
+        self.write_file(os.path.join(tmp_dir, 'intar1.txt'), 'tar1')
+        self.write_file(os.path.join(tmp_dir, 'intar2.txt'), 'tar2')
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': tmp_dir, 'pack': 'targz'})[0]['file_path']
+        self.assertEqual(
+            new_file_path,
+            '/kb/module/work/tmp/packtartest2/packtartest2.tar.gz')
+        with tarfile.open(new_file_path) as t:
+            self.assertEqual(set(t.getnames()),
+                             set(['.', './intar1.txt', './intar2.txt']))
+
+    def test_pack_zip(self):
+        tmp_dir = os.path.join(self.cfg['scratch'], 'packziptest')
+        os.makedirs(tmp_dir)
+        self.write_file(os.path.join(tmp_dir, 'inzip1.txt'), 'zip1')
+        self.write_file(os.path.join(tmp_dir, 'inzip2.txt'), 'zip2')
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': tmp_dir + '/target',
+                       'pack': 'zip'})[0]['file_path']
+        self.assertEqual(
+            new_file_path,
+            '/kb/module/work/tmp/packziptest/target.zip')
+        with zipfile.ZipFile(new_file_path) as z:
+            self.assertEqual(set(z.namelist()),
+                             set(['inzip1.txt', 'inzip2.txt']))
+
+    def test_pack_err_no_file_provided(self):
+        self.fail_pack(
+            {'file_path': ''},
+            'file_path is required')
+
+    def test_pack_err_bad_pack_param(self):
+        self.fail_pack(
+            {'file_path': 'foo',
+             'pack': 'bar'},
+            'Invalid pack value: bar')
+
+    def test_pack_err_empty_pack_dir(self):
+        tmp_dir = self.cfg['scratch'] + '/packemptytest/'
+        os.makedirs(tmp_dir)
+        self.fail_pack(
+            {'file_path': tmp_dir,
+             'pack': 'targz'},
+            'Directory {} is empty'.format(tmp_dir[0: -1]))
+
+    def test_pack_err_bad_pack_filename(self):
+        self.fail_pack(
             {'file_path': '/',
              'pack': 'zip'},
             'Packing root is not allowed')
@@ -930,6 +1023,11 @@ class DataFileUtilTest(unittest.TestCase):
     def fail_upload(self, params, error, exception=ValueError):
         with self.assertRaises(exception) as context:
             self.impl.file_to_shock(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def fail_pack(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.impl.pack_file(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
 
     def fail_save_objects(self, params, error, exception=ValueError):

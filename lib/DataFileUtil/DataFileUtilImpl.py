@@ -545,6 +545,11 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         # ctx is the context object
         # return variables are: out
         #BEGIN pack_file
+        del ctx
+        file_path = params.get('file_path')
+        if not file_path:
+            raise ValueError('file_path is required')
+        out = {'file_path': self._pack(file_path, params.get('pack'))}
         #END pack_file
 
         # At some point might do deeper type checking...
