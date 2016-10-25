@@ -483,12 +483,17 @@ class DataFileUtilTest(unittest.TestCase):
         filecmp.cmp('data/file1.txt', td + '/' + ret2['node_file_name'])
 
     def test_bad_archive(self):
+        # haven't figured out how to make a malicious tgz yet
         self.fail_unpack(
             'data/bad_zip.zip', 'unpack', 'Dangerous archive file - entry ' +
             '[../bad_file.txt] points to a file outside the archive directory')
         self.fail_unpack(
             'data/bad_zip2.zip', 'unpack', 'Dangerous archive file - entry ' +
             '[tar1/../../bad_file2.txt] points to a file outside the ' +
+            'archive directory')
+        self.fail_unpack(
+            'data/rootzip.zip', 'unpack', 'Dangerous archive file - entry ' +
+            '[/foo/bar] points to a file outside the ' +
             'archive directory')
 
     def fail_unpack(self, file_path, unpack, error):
