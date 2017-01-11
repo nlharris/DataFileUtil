@@ -11,6 +11,7 @@ RUN sudo apt-get install python-dev libffi-dev libssl-dev \
     && pip install pyopenssl ndg-httpsclient pyasn1 \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
+    && pip install requests_toolbelt --upgrade \
     && pip install semver \
     && ( [ $(pip show filemagic|grep -c filemagic) -eq 0 ] || pip uninstall -y filemagic ) \
     && pip install python-magic \

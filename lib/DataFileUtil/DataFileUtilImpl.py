@@ -449,7 +449,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         token = ctx['token']
         if not token:
             raise ValueError('Authentication token required.')
-        header = {'Authorization': 'Oauth ' + token}
+        headers = {'Authorization': 'Oauth ' + token}
         file_path = params.get('file_path')
         if not file_path:
             raise ValueError('No file(s) provided for upload to Shock.')
@@ -459,12 +459,14 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         attribs = params.get('attributes')
         self.log('uploading file ' + str(file_path) + ' into shock node')
         with open(os.path.abspath(file_path), 'rb') as data_file:
-            files = {'upload': data_file}
+            files = {'upload': (os.path.basename(file_path), data_file)}
             if attribs:
                 files['attributes'] = ('attributes',
                                        json.dumps(attribs).encode('UTF-8'))
+            mpe = MultipartEncoder(fields=files)
+            headers['content-type'] = mpe.content_type
             response = requests.post(
-                self.shock_url + '/node', headers=header, files=files,
+                self.shock_url + '/node', headers=headers, data=mpe,
                 stream=True, allow_redirects=True)
         self.check_shock_response(
             response, ('Error trying to upload file {} to Shock: '
