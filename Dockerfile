@@ -8,7 +8,7 @@ MAINTAINER KBase Developer
 # RUN apt-get update
 
 RUN sudo apt-get install python-dev libffi-dev libssl-dev \
-    && pip install pyopenssl ndg-httpsclient pyasn1 \
+    && pip install pyopenssl ndg-httpsclient pyasn1 --upgrade \
     && pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
     && pip install requests_toolbelt --upgrade \
