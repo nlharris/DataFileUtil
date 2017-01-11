@@ -2,13 +2,13 @@ module-name:
     DataFileUtil
 
 module-description:
-    Utility functions converting KBase data (like Shock nodes or Workspace objects) into files and back.
+    Utility functions for communicating with KBase data stores like Shock and the Workspace service.
 
 service-language:
     python
 
 module-version:
-    0.0.7
+    0.0.8
 
 owners:
     [rsutormin, msneddon, gaprice, scanon]
