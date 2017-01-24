@@ -31,7 +31,8 @@ import us.kbase.common.service.UObject;
  *     file_path is a directory and tarring or zipping is specified, the
  *     created file name will be set to the directory name, possibly
  *     overwriting an existing file. Attempting to pack the root directory
- *     is an error.
+ *     is an error. Do not attempt to pack the scratch space root as noted
+ *     in the module description.
  *     
  *     The allowed values are:
  *         gzip - gzip the file given by file_path.

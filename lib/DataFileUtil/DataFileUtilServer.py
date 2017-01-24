@@ -45,7 +45,7 @@ def get_config():
 
 config = get_config()
 
-from DataFileUtil.DataFileUtilImpl import DataFileUtil  # @IgnorePep8
+from DataFileUtil.DataFileUtilImpl import DataFileUtil  # noqa @IgnorePep8
 impl_DataFileUtil = DataFileUtil(config)
 
 
@@ -171,7 +171,7 @@ class JSONRPCServiceCustom(JSONRPCService):
 
     def _handle_request(self, ctx, request):
         """Handles given request and returns its response."""
-        if self.method_data[request['method']].has_key('types'): # @IgnorePep8
+        if self.method_data[request['method']].has_key('types'):  # noqa @IgnorePep8
             self._validate_params_types(request['method'], request['params'])
 
         result = self._call_method(ctx, request)
@@ -332,55 +332,55 @@ class Application(object):
         self.rpc_service.add(impl_DataFileUtil.shock_to_file,
                              name='DataFileUtil.shock_to_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.shock_to_file'] = 'required'
+        self.method_authentication['DataFileUtil.shock_to_file'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.shock_to_file_mass,
                              name='DataFileUtil.shock_to_file_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.shock_to_file_mass'] = 'required'
+        self.method_authentication['DataFileUtil.shock_to_file_mass'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.file_to_shock,
                              name='DataFileUtil.file_to_shock',
                              types=[dict])
-        self.method_authentication['DataFileUtil.file_to_shock'] = 'required'
+        self.method_authentication['DataFileUtil.file_to_shock'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.unpack_file,
                              name='DataFileUtil.unpack_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.unpack_file'] = 'required'
+        self.method_authentication['DataFileUtil.unpack_file'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.pack_file,
                              name='DataFileUtil.pack_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.pack_file'] = 'required'
+        self.method_authentication['DataFileUtil.pack_file'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.package_for_download,
                              name='DataFileUtil.package_for_download',
                              types=[dict])
-        self.method_authentication['DataFileUtil.package_for_download'] = 'required'
+        self.method_authentication['DataFileUtil.package_for_download'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.file_to_shock_mass,
                              name='DataFileUtil.file_to_shock_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.file_to_shock_mass'] = 'required'
+        self.method_authentication['DataFileUtil.file_to_shock_mass'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.copy_shock_node,
                              name='DataFileUtil.copy_shock_node',
                              types=[dict])
-        self.method_authentication['DataFileUtil.copy_shock_node'] = 'required'
+        self.method_authentication['DataFileUtil.copy_shock_node'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.own_shock_node,
                              name='DataFileUtil.own_shock_node',
                              types=[dict])
-        self.method_authentication['DataFileUtil.own_shock_node'] = 'required'
+        self.method_authentication['DataFileUtil.own_shock_node'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.ws_name_to_id,
                              name='DataFileUtil.ws_name_to_id',
                              types=[basestring])
-        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'required'
+        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.save_objects,
                              name='DataFileUtil.save_objects',
                              types=[dict])
-        self.method_authentication['DataFileUtil.save_objects'] = 'required'
+        self.method_authentication['DataFileUtil.save_objects'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.get_objects,
                              name='DataFileUtil.get_objects',
                              types=[dict])
-        self.method_authentication['DataFileUtil.get_objects'] = 'required'
+        self.method_authentication['DataFileUtil.get_objects'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.versions,
                              name='DataFileUtil.versions',
                              types=[])
-        self.method_authentication['DataFileUtil.versions'] = 'required'
+        self.method_authentication['DataFileUtil.versions'] = 'required' # noqa
         self.rpc_service.add(impl_DataFileUtil.status,
                              name='DataFileUtil.status',
                              types=[dict])
@@ -436,7 +436,8 @@ class Application(object):
                         if token is None and auth_req == 'required':
                             err = JSONServerError()
                             err.data = (
-                                'Authentication required for DataFileUtil ' +
+                                'Authentication required for ' +
+                                'DataFileUtil ' +
                                 'but no authentication header was passed')
                             raise err
                         elif token is None and auth_req == 'optional':
@@ -468,7 +469,7 @@ class Application(object):
                            }
                     trace = jre.trace if hasattr(jre, 'trace') else None
                     rpc_result = self.process_error(err, ctx, req, trace)
-                except Exception, e:
+                except Exception:
                     err = {'error': {'code': 0,
                                      'name': 'Unexpected Server Error',
                                      'message': 'An unexpected server error ' +
@@ -478,10 +479,10 @@ class Application(object):
                     rpc_result = self.process_error(err, ctx, req,
                                                     traceback.format_exc())
 
-        # print 'The request method was %s\n' % environ['REQUEST_METHOD']
-        # print 'The environment dictionary is:\n%s\n' % pprint.pformat(environ) @IgnorePep8
-        # print 'The request body was: %s' % request_body
-        # print 'The result from the method call is:\n%s\n' % \
+        # print 'Request method was %s\n' % environ['REQUEST_METHOD']
+        # print 'Environment dictionary is:\n%s\n' % pprint.pformat(environ)
+        # print 'Request body was: %s' % request_body
+        # print 'Result from the method call is:\n%s\n' % \
         #    pprint.pformat(rpc_result)
 
         if rpc_result:
@@ -517,11 +518,12 @@ class Application(object):
         return json.dumps(error)
 
     def now_in_utc(self):
-        # Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone @IgnorePep8
+        # noqa Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone @IgnorePep8
         dtnow = datetime.datetime.now()
         dtutcnow = datetime.datetime.utcnow()
         delta = dtnow - dtutcnow
-        hh, mm = divmod((delta.days * 24*60*60 + delta.seconds + 30) // 60, 60)
+        hh, mm = divmod((delta.days * 24 * 60 * 60 + delta.seconds + 30) // 60,
+                        60)
         return "%s%+02d:%02d" % (dtnow.isoformat(), hh, mm)
 
 application = Application()
@@ -550,9 +552,7 @@ try:
         print "Monkeypatching std libraries for async"
         from gevent import monkey
         monkey.patch_all()
-    uwsgi.applications = {
-        '': application
-        }
+    uwsgi.applications = {'': application}
 except ImportError:
     # Not available outside of wsgi, ignore
     pass

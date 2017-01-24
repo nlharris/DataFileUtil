@@ -20,6 +20,7 @@ import zipfile
 import errno
 import re
 import io
+import uuid
 
 
 class ShockException(Exception):
@@ -36,18 +37,24 @@ class DataFileUtil:
     Module Description:
     Contains utilities for saving and retrieving data to and from KBase data
 services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
+
+Note that some calls may create files or directories in the root of the scratch space (typically
+/kb/module/work/tmp). For this reason client programmers should not request that DFU archive from
+the root of the scratch space - always create a new directory (e.g. using a UUID for a name or a
+standard library temporary directory utility) and add the target files to that directory when
+archiving.
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
-    VERSION = "0.0.6"
+    ######################################### noqa
+    VERSION = "0.0.9"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "4267fe62c152371eb12444ff99442822cc134707"
-    
+    GIT_COMMIT_HASH = "c067962f4738fd8767d974cda78f8448ec77b407"
+
     #BEGIN_CLASS_HEADER
 
     GZ = '.gz'
@@ -111,12 +118,9 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         file_path = d + os.sep + f
         arch = 'gztar' if pack == 'targz' else 'zip'
         self.log('Packing {} to {}'.format(d, pack))
-        # tar is smart enough to not pack its own archive file into the new
-        # archive, zip isn't.
-        # TODO is there a designated temp files dir in the scratch space?
-        # Can't use anywhere in the scratch space now for the temp file because
-        # it might get zipped up. Use /tmp for now.
-        (fd, tf) = tempfile.mkstemp()
+        # tar is smart enough to not pack its own archive file into the new archive, zip isn't.
+        # TODO is there a designated temp files dir in the scratch space? Nope.
+        (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
         ctf = shutil.make_archive(tf, arch, d)
         os.remove(tf)
@@ -134,7 +138,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         new_file = self._decompress_file_name(file_path)
         self.log('decompressing {} to {} ...'.format(file_path, new_file))
         with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile(
-                delete=False) as tf:
+                dir=self.tmp, delete=False) as tf:
+            # don't create the target file until it's done decompressing
             shutil.copyfileobj(s, tf)
             s.close()
             tf.flush()
@@ -238,6 +243,8 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
         self.scratch = config['scratch']
+        self.tmp = os.path.join(self.scratch, str(uuid.uuid4()))
+        self.mkdir_p(self.tmp)
         #END_CONSTRUCTOR
         pass
 
@@ -317,8 +324,7 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
         attributes = resp_obj['data']['attributes']
         if os.path.isdir(file_path):
             file_path = os.path.join(file_path, node_file_name)
-        self.log('downloading shock node ' + shock_id + ' into file: ' +
-                 str(file_path))
+        self.log('downloading shock node ' + shock_id + ' into file: ' + str(file_path))
         with open(file_path, 'wb') as fhandle:
             r = requests.get(node_url + '?download_raw', stream=True,
                              headers=headers, allow_redirects=True)
@@ -418,15 +424,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            compressed, it will be skipped. If file_path is a directory and
            tarring or zipping is specified, the created file name will be set
            to the directory name, possibly overwriting an existing file.
-           Attempting to pack the root directory is an error. The allowed
-           values are: gzip - gzip the file given by file_path. targz - tar
-           and gzip the directory specified by the directory portion of the
-           file_path into the file specified by the file_path. zip - as targz
-           but zip the directory.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "pack" of String
+           Attempting to pack the root directory is an error. Do not attempt
+           to pack the scratch space root as noted in the module description.
+           The allowed values are: gzip - gzip the file given by file_path.
+           targz - tar and gzip the directory specified by the directory
+           portion of the file_path into the file specified by the file_path.
+           zip - as targz but zip the directory.) -> structure: parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object, parameter "make_handle" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -534,12 +541,13 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            will be skipped. If file_path is a directory and tarring or
            zipping is specified, the created file name will be set to the
            directory name, possibly overwriting an existing file. Attempting
-           to pack the root directory is an error. The allowed values are:
-           gzip - gzip the file given by file_path. targz - tar and gzip the
-           directory specified by the directory portion of the file_path into
-           the file specified by the file_path. zip - as targz but zip the
-           directory.) -> structure: parameter "file_path" of String,
-           parameter "pack" of String
+           to pack the root directory is an error. Do not attempt to pack the
+           scratch space root as noted in the module description. The allowed
+           values are: gzip - gzip the file given by file_path. targz - tar
+           and gzip the directory specified by the directory portion of the
+           file_path into the file specified by the file_path. zip - as targz
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "pack" of String
         :returns: instance of type "PackFileResult" (Output from the
            pack_file function. file_path - the path to the packed file.) ->
            structure: parameter "file_path" of String
@@ -570,16 +578,17 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            file extension prior to writing. If it is a directory, file name
            of the created archive will be set to the directory name followed
            by '.zip', possibly overwriting an existing file. Attempting to
-           pack the root directory is an error. ws_ref - list of references
-           to workspace objects which will be used to produce info-files in
-           JSON format containing workspace metadata and provenane structures
-           each. It produces new files in folder pointed by file_path (or
-           folder containing file pointed by file_path if it's not folder).
-           Optional parameters: attributes - user-specified attributes to
-           save to the Shock node along with the file.) -> structure:
-           parameter "file_path" of String, parameter "attributes" of mapping
-           from String to unspecified object, parameter "ws_refs" of list of
-           String
+           pack the root directory is an error. Do not attempt to pack the
+           scratch space root as noted in the module description. ws_ref -
+           list of references to workspace objects which will be used to
+           produce info-files in JSON format containing workspace metadata
+           and provenance structures. It produces new files in folder pointed
+           by file_path (or folder containing file pointed by file_path if
+           it's not folder). Optional parameters: attributes - user-specified
+           attributes to save to the Shock node along with the file.) ->
+           structure: parameter "file_path" of String, parameter "attributes"
+           of mapping from String to unspecified object, parameter "ws_refs"
+           of list of String
         :returns: instance of type "PackageForDownloadOutput" (Output of the
            package_for_download function. shock_id - the ID of the new Shock
            node. node_file_name - the name of the file stored in Shock. size
@@ -653,15 +662,16 @@ services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
            compressed, it will be skipped. If file_path is a directory and
            tarring or zipping is specified, the created file name will be set
            to the directory name, possibly overwriting an existing file.
-           Attempting to pack the root directory is an error. The allowed
-           values are: gzip - gzip the file given by file_path. targz - tar
-           and gzip the directory specified by the directory portion of the
-           file_path into the file specified by the file_path. zip - as targz
-           but zip the directory.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "pack" of String
+           Attempting to pack the root directory is an error. Do not attempt
+           to pack the scratch space root as noted in the module description.
+           The allowed values are: gzip - gzip the file given by file_path.
+           targz - tar and gzip the directory specified by the directory
+           portion of the file_path into the file specified by the file_path.
+           zip - as targz but zip the directory.) -> structure: parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object, parameter "make_handle" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.

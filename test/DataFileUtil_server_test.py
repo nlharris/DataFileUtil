@@ -38,7 +38,7 @@ class DataFileUtilTest(unittest.TestCase):
         cls.ctx.update({'token': cls.token,
                         'user_id': cls.user_id,
                         'provenance': [
-                            {'service': 'DataFileUtil',
+                            {'service': 'DataFileUtilFakeProv',
                              'method': 'please_never_use_it_in_production',
                              'method_params': []
                              }],
@@ -53,10 +53,10 @@ class DataFileUtilTest(unittest.TestCase):
         cls.ws = Workspace(cls.cfg['workspace-url'], token=cls.token)
         cls.hs = HandleService(url=cls.cfg['handle-service-url'],
                                token=cls.token)
-        cls.impl = DataFileUtil(cls.cfg)
-        suffix = int(time.time() * 1000)
         shutil.rmtree(cls.cfg['scratch'])
         os.mkdir(cls.cfg['scratch'])
+        cls.impl = DataFileUtil(cls.cfg)
+        suffix = int(time.time() * 1000)
         wsName = "test_DataFileUtil_" + str(suffix)
         cls.ws_info = cls.ws.create_workspace({'workspace': wsName})
 
@@ -317,7 +317,8 @@ class DataFileUtilTest(unittest.TestCase):
              'pack': 'targz'})[0]
         os.chdir(wd)
         self.assertEqual(ret1['node_file_name'], 'target.tar.gz')
-        self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.tgz')
         ret2 = self.impl.shock_to_file(
@@ -327,7 +328,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret2['node_file_name'], 'target.tar.gz')
         self.assertIsNone(ret2['attributes'])
         self.assertEqual(ret2['file_path'], file_path2)
-        self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        self.assertGreater(ret2['size'], 220)
+        self.assertLess(ret2['size'], 240)
         with tarfile.open(file_path2) as t:
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
@@ -372,7 +374,8 @@ class DataFileUtilTest(unittest.TestCase):
             {'file_path': tmp_dir,
              'pack': 'targz'})[0]
         self.assertEqual(ret1['node_file_name'], 'tartest2.tar.gz')
-        self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.tgz')
         ret2 = self.impl.shock_to_file(
@@ -382,7 +385,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret2['node_file_name'], 'tartest2.tar.gz')
         self.assertIsNone(ret2['attributes'])
         self.assertEqual(ret2['file_path'], file_path2)
-        self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         with tarfile.open(file_path2) as t:
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
@@ -921,6 +925,7 @@ class DataFileUtilTest(unittest.TestCase):
                          {'ref': str(ws) + '/whee2'}]})['data']
         p1 = pret[0]['provenance'][0]
         p2 = pret[1]['provenance'][0]
+
         # this is enough to check that provenance is being saved
         self.assertEquals(
             p1['description'],
@@ -928,8 +933,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEquals(
             p2['description'],
             'KBase SDK method run via the KBase Execution Engine')
-        self.assertEquals(p1['service'], 'use_set_provenance')
-        self.assertEquals(p2['service'], 'use_set_provenance')
+        self.assertEquals(p1['service'], 'DataFileUtil')
+        self.assertEquals(p2['service'], 'DataFileUtil')
 
     def test_save_objects_no_objects(self):
         self.fail_save_objects({'id': 1},

@@ -20,6 +20,11 @@ import us.kbase.common.service.UnauthorizedException;
  * <pre>
  * Contains utilities for saving and retrieving data to and from KBase data
  * services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
+ * Note that some calls may create files or directories in the root of the scratch space (typically
+ * /kb/module/work/tmp). For this reason client programmers should not request that DFU archive from
+ * the root of the scratch space - always create a new directory (e.g. using a UUID for a name or a
+ * standard library temporary directory utility) and add the target files to that directory when
+ * archiving.
  * </pre>
  */
 public class DataFileUtilClient {
