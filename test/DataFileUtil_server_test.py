@@ -53,10 +53,10 @@ class DataFileUtilTest(unittest.TestCase):
         cls.ws = Workspace(cls.cfg['workspace-url'], token=cls.token)
         cls.hs = HandleService(url=cls.cfg['handle-service-url'],
                                token=cls.token)
-        cls.impl = DataFileUtil(cls.cfg)
-        suffix = int(time.time() * 1000)
         shutil.rmtree(cls.cfg['scratch'])
         os.mkdir(cls.cfg['scratch'])
+        cls.impl = DataFileUtil(cls.cfg)
+        suffix = int(time.time() * 1000)
         wsName = "test_DataFileUtil_" + str(suffix)
         cls.ws_info = cls.ws.create_workspace({'workspace': wsName})
 
@@ -317,7 +317,8 @@ class DataFileUtilTest(unittest.TestCase):
              'pack': 'targz'})[0]
         os.chdir(wd)
         self.assertEqual(ret1['node_file_name'], 'target.tar.gz')
-        self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.tgz')
         ret2 = self.impl.shock_to_file(
@@ -327,7 +328,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret2['node_file_name'], 'target.tar.gz')
         self.assertIsNone(ret2['attributes'])
         self.assertEqual(ret2['file_path'], file_path2)
-        self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        self.assertGreater(ret2['size'], 220)
+        self.assertLess(ret2['size'], 240)
         with tarfile.open(file_path2) as t:
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))
@@ -372,7 +374,8 @@ class DataFileUtilTest(unittest.TestCase):
             {'file_path': tmp_dir,
              'pack': 'targz'})[0]
         self.assertEqual(ret1['node_file_name'], 'tartest2.tar.gz')
-        self.assertTrue(ret1['size'] > 170 and ret1['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         shock_id = ret1['shock_id']
         file_path2 = os.path.join(tmp_dir, 'output.tgz')
         ret2 = self.impl.shock_to_file(
@@ -382,7 +385,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret2['node_file_name'], 'tartest2.tar.gz')
         self.assertIsNone(ret2['attributes'])
         self.assertEqual(ret2['file_path'], file_path2)
-        self.assertTrue(ret2['size'] > 170 and ret2['size'] < 190)
+        self.assertGreater(ret1['size'], 220)
+        self.assertLess(ret1['size'], 240)
         with tarfile.open(file_path2) as t:
             self.assertEqual(set(t.getnames()),
                              set(['.', './intar1.txt', './intar2.txt']))

@@ -20,6 +20,7 @@ import zipfile
 import errno
 import re
 import io
+import uuid
 
 
 class ShockException(Exception):
@@ -117,12 +118,9 @@ archiving.
         file_path = d + os.sep + f
         arch = 'gztar' if pack == 'targz' else 'zip'
         self.log('Packing {} to {}'.format(d, pack))
-        # tar is smart enough to not pack its own archive file into the new
-        # archive, zip isn't.
-        # TODO is there a designated temp files dir in the scratch space?
-        # Can't use anywhere in the scratch space now for the temp file because
-        # it might get zipped up. Use /tmp for now.
-        (fd, tf) = tempfile.mkstemp()
+        # tar is smart enough to not pack its own archive file into the new archive, zip isn't.
+        # TODO is there a designated temp files dir in the scratch space? Nope.
+        (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
         ctf = shutil.make_archive(tf, arch, d)
         os.remove(tf)
@@ -140,7 +138,8 @@ archiving.
         new_file = self._decompress_file_name(file_path)
         self.log('decompressing {} to {} ...'.format(file_path, new_file))
         with openfn(file_path, 'rb') as s, tempfile.NamedTemporaryFile(
-                delete=False) as tf:
+                dir=self.tmp, delete=False) as tf:
+            # don't create the target file until it's done decompressing
             shutil.copyfileobj(s, tf)
             s.close()
             tf.flush()
@@ -244,6 +243,8 @@ archiving.
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
         self.scratch = config['scratch']
+        self.tmp = os.path.join(self.scratch, str(uuid.uuid4()))
+        self.mkdir_p(self.tmp)
         #END_CONSTRUCTOR
         pass
 
