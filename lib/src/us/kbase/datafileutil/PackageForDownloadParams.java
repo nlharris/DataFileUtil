@@ -23,10 +23,11 @@ import us.kbase.common.service.UObject;
  *     '.zip' file extension prior to writing. If it is a directory, file 
  *     name of the created archive will be set to the directory name 
  *     followed by '.zip', possibly overwriting an existing file. 
- *     Attempting to pack the root directory is an error.
+ *     Attempting to pack the root directory is an error. Do not attempt
+ *     to pack the scratch space root as noted in the module description.
  * ws_ref - list of references to workspace objects which will be used to
  *     produce info-files in JSON format containing workspace metadata and
- *     provenane structures each. It produces new files in folder pointed 
+ *     provenance structures. It produces new files in folder pointed 
  *     by file_path (or folder containing file pointed by file_path if 
  *     it's not folder).
  * Optional parameters:

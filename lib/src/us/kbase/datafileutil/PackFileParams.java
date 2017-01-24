@@ -25,7 +25,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *            file_path is a directory and tarring or zipping is specified, the
  *            created file name will be set to the directory name, possibly
  *            overwriting an existing file. Attempting to pack the root directory
- *            is an error.
+ *            is an error. Do not attempt to pack the scratch space root as noted
+ *            in the module description. If the files to be compressed or archived
+ *            are outside the scratch space, the resulting file will be written to
+ *            the scratch space.
  *            
  *            The allowed values are:
  *                gzip - gzip the file given by file_path.

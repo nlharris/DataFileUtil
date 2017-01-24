@@ -129,15 +129,18 @@ class DataFileUtil(object):
            compressed, it will be skipped. If file_path is a directory and
            tarring or zipping is specified, the created file name will be set
            to the directory name, possibly overwriting an existing file.
-           Attempting to pack the root directory is an error. The allowed
-           values are: gzip - gzip the file given by file_path. targz - tar
-           and gzip the directory specified by the directory portion of the
-           file_path into the file specified by the file_path. zip - as targz
-           but zip the directory.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "pack" of String
+           Attempting to pack the root directory is an error. Do not attempt
+           to pack the scratch space root as noted in the module description.
+           If the files to be compressed or archived are outside the scratch
+           space, the resulting file will be written to the scratch space.
+           The allowed values are: gzip - gzip the file given by file_path.
+           targz - tar and gzip the directory specified by the directory
+           portion of the file_path into the file specified by the file_path.
+           zip - as targz but zip the directory.) -> structure: parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object, parameter "make_handle" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "pack" of String
         :returns: instance of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.
@@ -164,7 +167,9 @@ class DataFileUtil(object):
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
         archive files (uncompressing gzipped or bzipped archive files if 
         necessary). If the file is an archive, it will be unbundled into the 
-        directory containing the original output file.
+        directory containing the original output file. In all cases if the
+        source file(s) are outside the scratch space the resulting files
+        will be created inside the scratch space.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
         :returns: instance of type "UnpackFileResult" -> structure: parameter
@@ -187,12 +192,15 @@ class DataFileUtil(object):
            will be skipped. If file_path is a directory and tarring or
            zipping is specified, the created file name will be set to the
            directory name, possibly overwriting an existing file. Attempting
-           to pack the root directory is an error. The allowed values are:
-           gzip - gzip the file given by file_path. targz - tar and gzip the
-           directory specified by the directory portion of the file_path into
-           the file specified by the file_path. zip - as targz but zip the
-           directory.) -> structure: parameter "file_path" of String,
-           parameter "pack" of String
+           to pack the root directory is an error. Do not attempt to pack the
+           scratch space root as noted in the module description. If the
+           files to be compressed or archived are outside the scratch space,
+           the resulting file will be written to the scratch space. The
+           allowed values are: gzip - gzip the file given by file_path. targz
+           - tar and gzip the directory specified by the directory portion of
+           the file_path into the file specified by the file_path. zip - as
+           targz but zip the directory.) -> structure: parameter "file_path"
+           of String, parameter "pack" of String
         :returns: instance of type "PackFileResult" (Output from the
            pack_file function. file_path - the path to the packed file.) ->
            structure: parameter "file_path" of String
@@ -210,16 +218,17 @@ class DataFileUtil(object):
            file extension prior to writing. If it is a directory, file name
            of the created archive will be set to the directory name followed
            by '.zip', possibly overwriting an existing file. Attempting to
-           pack the root directory is an error. ws_ref - list of references
-           to workspace objects which will be used to produce info-files in
-           JSON format containing workspace metadata and provenane structures
-           each. It produces new files in folder pointed by file_path (or
-           folder containing file pointed by file_path if it's not folder).
-           Optional parameters: attributes - user-specified attributes to
-           save to the Shock node along with the file.) -> structure:
-           parameter "file_path" of String, parameter "attributes" of mapping
-           from String to unspecified object, parameter "ws_refs" of list of
-           String
+           pack the root directory is an error. Do not attempt to pack the
+           scratch space root as noted in the module description. ws_ref -
+           list of references to workspace objects which will be used to
+           produce info-files in JSON format containing workspace metadata
+           and provenance structures. It produces new files in folder pointed
+           by file_path (or folder containing file pointed by file_path if
+           it's not folder). Optional parameters: attributes - user-specified
+           attributes to save to the Shock node along with the file.) ->
+           structure: parameter "file_path" of String, parameter "attributes"
+           of mapping from String to unspecified object, parameter "ws_refs"
+           of list of String
         :returns: instance of type "PackageForDownloadOutput" (Output of the
            package_for_download function. shock_id - the ID of the new Shock
            node. node_file_name - the name of the file stored in Shock. size
@@ -247,15 +256,18 @@ class DataFileUtil(object):
            compressed, it will be skipped. If file_path is a directory and
            tarring or zipping is specified, the created file name will be set
            to the directory name, possibly overwriting an existing file.
-           Attempting to pack the root directory is an error. The allowed
-           values are: gzip - gzip the file given by file_path. targz - tar
-           and gzip the directory specified by the directory portion of the
-           file_path into the file specified by the file_path. zip - as targz
-           but zip the directory.) -> structure: parameter "file_path" of
-           String, parameter "attributes" of mapping from String to
-           unspecified object, parameter "make_handle" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
-           "pack" of String
+           Attempting to pack the root directory is an error. Do not attempt
+           to pack the scratch space root as noted in the module description.
+           If the files to be compressed or archived are outside the scratch
+           space, the resulting file will be written to the scratch space.
+           The allowed values are: gzip - gzip the file given by file_path.
+           targz - tar and gzip the directory specified by the directory
+           portion of the file_path into the file specified by the file_path.
+           zip - as targz but zip the directory.) -> structure: parameter
+           "file_path" of String, parameter "attributes" of mapping from
+           String to unspecified object, parameter "make_handle" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "pack" of String
         :returns: instance of list of type "FileToShockOutput" (Output of the
            file_to_shock function. shock_id - the ID of the new Shock node.
            handle - the new handle, if created. Null otherwise.

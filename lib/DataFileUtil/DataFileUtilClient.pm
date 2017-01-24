@@ -29,6 +29,12 @@ DataFileUtil::DataFileUtilClient
 Contains utilities for saving and retrieving data to and from KBase data
 services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
 
+Note that some calls may create files or directories in the root of the scratch space (typically
+/kb/module/work/tmp). For this reason client programmers should not request that DFU archive from
+the root of the scratch space - always create a new directory (e.g. using a UUID for a name or a
+standard library temporary directory utility) and add the target files to that directory when
+archiving.
+
 
 =cut
 
@@ -472,7 +478,9 @@ Using the same logic as unpacking a Shock file, this method will cause
 any bzip or gzip files to be uncompressed, and then unpack tar and zip
 archive files (uncompressing gzipped or bzipped archive files if 
 necessary). If the file is an archive, it will be unbundled into the 
-directory containing the original output file.
+directory containing the original output file. In all cases if the
+source file(s) are outside the scratch space the resulting files
+will be created inside the scratch space.
 
 =back
 
@@ -1780,7 +1788,10 @@ pack - compress a file or archive a directory before loading to Shock.
     file_path is a directory and tarring or zipping is specified, the
     created file name will be set to the directory name, possibly
     overwriting an existing file. Attempting to pack the root directory
-    is an error.
+    is an error. Do not attempt to pack the scratch space root as noted
+    in the module description. If the files to be compressed or archived
+    are outside the scratch space, the resulting file will be written to
+    the scratch space.
     
     The allowed values are:
         gzip - gzip the file given by file_path.
@@ -1946,7 +1957,10 @@ Input for the pack_file function.
            file_path is a directory and tarring or zipping is specified, the
            created file name will be set to the directory name, possibly
            overwriting an existing file. Attempting to pack the root directory
-           is an error.
+           is an error. Do not attempt to pack the scratch space root as noted
+           in the module description. If the files to be compressed or archived
+           are outside the scratch space, the resulting file will be written to
+           the scratch space.
            
            The allowed values are:
                gzip - gzip the file given by file_path.
@@ -2035,10 +2049,11 @@ file_path - the location of the directory to compress as zip archive
     '.zip' file extension prior to writing. If it is a directory, file 
     name of the created archive will be set to the directory name 
     followed by '.zip', possibly overwriting an existing file. 
-    Attempting to pack the root directory is an error.
+    Attempting to pack the root directory is an error. Do not attempt
+    to pack the scratch space root as noted in the module description.
 ws_ref - list of references to workspace objects which will be used to
     produce info-files in JSON format containing workspace metadata and
-    provenane structures each. It produces new files in folder pointed 
+    provenance structures. It produces new files in folder pointed 
     by file_path (or folder containing file pointed by file_path if 
     it's not folder).
 Optional parameters:

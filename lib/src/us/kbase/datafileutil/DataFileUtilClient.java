@@ -20,6 +20,11 @@ import us.kbase.common.service.UnauthorizedException;
  * <pre>
  * Contains utilities for saving and retrieving data to and from KBase data
  * services. Requires Shock 0.9.6+ and Workspace Service 0.4.1+.
+ * Note that some calls may create files or directories in the root of the scratch space (typically
+ * /kb/module/work/tmp). For this reason client programmers should not request that DFU archive from
+ * the root of the scratch space - always create a new directory (e.g. using a UUID for a name or a
+ * standard library temporary directory utility) and add the target files to that directory when
+ * archiving.
  * </pre>
  */
 public class DataFileUtilClient {
@@ -226,7 +231,9 @@ public class DataFileUtilClient {
      * any bzip or gzip files to be uncompressed, and then unpack tar and zip
      * archive files (uncompressing gzipped or bzipped archive files if 
      * necessary). If the file is an archive, it will be unbundled into the 
-     * directory containing the original output file.
+     * directory containing the original output file. In all cases if the
+     * source file(s) are outside the scratch space the resulting files
+     * will be created inside the scratch space.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.UnpackFileParams UnpackFileParams}
      * @return   parameter "out" of type {@link us.kbase.datafileutil.UnpackFileResult UnpackFileResult}
