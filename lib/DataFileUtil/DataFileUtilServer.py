@@ -109,7 +109,11 @@ class JSONRPCServiceCustom(JSONRPCService):
             # Exception was raised inside the method.
             newerr = JSONServerError()
             newerr.trace = traceback.format_exc()
-            newerr.data = e.message
+            if isinstance(e.message, basestring):
+                newerr.data = e.message
+            else:
+                # Some exceptions embed other exceptions as the message
+                newerr.data = repr(e.message)
             raise newerr
         return result
 
@@ -332,55 +336,55 @@ class Application(object):
         self.rpc_service.add(impl_DataFileUtil.shock_to_file,
                              name='DataFileUtil.shock_to_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.shock_to_file'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.shock_to_file'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.shock_to_file_mass,
                              name='DataFileUtil.shock_to_file_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.shock_to_file_mass'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.shock_to_file_mass'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.file_to_shock,
                              name='DataFileUtil.file_to_shock',
                              types=[dict])
-        self.method_authentication['DataFileUtil.file_to_shock'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.file_to_shock'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.unpack_file,
                              name='DataFileUtil.unpack_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.unpack_file'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.unpack_file'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.pack_file,
                              name='DataFileUtil.pack_file',
                              types=[dict])
-        self.method_authentication['DataFileUtil.pack_file'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.pack_file'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.package_for_download,
                              name='DataFileUtil.package_for_download',
                              types=[dict])
-        self.method_authentication['DataFileUtil.package_for_download'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.package_for_download'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.file_to_shock_mass,
                              name='DataFileUtil.file_to_shock_mass',
                              types=[list])
-        self.method_authentication['DataFileUtil.file_to_shock_mass'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.file_to_shock_mass'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.copy_shock_node,
                              name='DataFileUtil.copy_shock_node',
                              types=[dict])
-        self.method_authentication['DataFileUtil.copy_shock_node'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.copy_shock_node'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.own_shock_node,
                              name='DataFileUtil.own_shock_node',
                              types=[dict])
-        self.method_authentication['DataFileUtil.own_shock_node'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.own_shock_node'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.ws_name_to_id,
                              name='DataFileUtil.ws_name_to_id',
                              types=[basestring])
-        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.ws_name_to_id'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.save_objects,
                              name='DataFileUtil.save_objects',
                              types=[dict])
-        self.method_authentication['DataFileUtil.save_objects'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.save_objects'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.get_objects,
                              name='DataFileUtil.get_objects',
                              types=[dict])
-        self.method_authentication['DataFileUtil.get_objects'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.get_objects'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.versions,
                              name='DataFileUtil.versions',
                              types=[])
-        self.method_authentication['DataFileUtil.versions'] = 'required' # noqa
+        self.method_authentication['DataFileUtil.versions'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.status,
                              name='DataFileUtil.status',
                              types=[dict])

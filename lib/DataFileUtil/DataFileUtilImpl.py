@@ -53,7 +53,7 @@ archiving.
     ######################################### noqa
     VERSION = "0.0.9"
     GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "c067962f4738fd8767d974cda78f8448ec77b407"
+    GIT_COMMIT_HASH = "812b7afe400575967432b83b560724fdb8770eb0"
 
     #BEGIN_CLASS_HEADER
 
