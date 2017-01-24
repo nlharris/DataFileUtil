@@ -131,8 +131,6 @@ class DataFileUtil(object):
            to the directory name, possibly overwriting an existing file.
            Attempting to pack the root directory is an error. Do not attempt
            to pack the scratch space root as noted in the module description.
-           If the files to be compressed or archived are outside the scratch
-           space, the resulting file will be written to the scratch space.
            The allowed values are: gzip - gzip the file given by file_path.
            targz - tar and gzip the directory specified by the directory
            portion of the file_path into the file specified by the file_path.
@@ -167,9 +165,7 @@ class DataFileUtil(object):
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
         archive files (uncompressing gzipped or bzipped archive files if 
         necessary). If the file is an archive, it will be unbundled into the 
-        directory containing the original output file. In all cases if the
-        source file(s) are outside the scratch space the resulting files
-        will be created inside the scratch space.
+        directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
         :returns: instance of type "UnpackFileResult" -> structure: parameter
@@ -193,14 +189,12 @@ class DataFileUtil(object):
            zipping is specified, the created file name will be set to the
            directory name, possibly overwriting an existing file. Attempting
            to pack the root directory is an error. Do not attempt to pack the
-           scratch space root as noted in the module description. If the
-           files to be compressed or archived are outside the scratch space,
-           the resulting file will be written to the scratch space. The
-           allowed values are: gzip - gzip the file given by file_path. targz
-           - tar and gzip the directory specified by the directory portion of
-           the file_path into the file specified by the file_path. zip - as
-           targz but zip the directory.) -> structure: parameter "file_path"
-           of String, parameter "pack" of String
+           scratch space root as noted in the module description. The allowed
+           values are: gzip - gzip the file given by file_path. targz - tar
+           and gzip the directory specified by the directory portion of the
+           file_path into the file specified by the file_path. zip - as targz
+           but zip the directory.) -> structure: parameter "file_path" of
+           String, parameter "pack" of String
         :returns: instance of type "PackFileResult" (Output from the
            pack_file function. file_path - the path to the packed file.) ->
            structure: parameter "file_path" of String
@@ -258,8 +252,6 @@ class DataFileUtil(object):
            to the directory name, possibly overwriting an existing file.
            Attempting to pack the root directory is an error. Do not attempt
            to pack the scratch space root as noted in the module description.
-           If the files to be compressed or archived are outside the scratch
-           space, the resulting file will be written to the scratch space.
            The allowed values are: gzip - gzip the file given by file_path.
            targz - tar and gzip the directory specified by the directory
            portion of the file_path into the file specified by the file_path.

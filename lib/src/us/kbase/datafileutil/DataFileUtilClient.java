@@ -231,9 +231,7 @@ public class DataFileUtilClient {
      * any bzip or gzip files to be uncompressed, and then unpack tar and zip
      * archive files (uncompressing gzipped or bzipped archive files if 
      * necessary). If the file is an archive, it will be unbundled into the 
-     * directory containing the original output file. In all cases if the
-     * source file(s) are outside the scratch space the resulting files
-     * will be created inside the scratch space.
+     * directory containing the original output file.
      * </pre>
      * @param   params   instance of type {@link us.kbase.datafileutil.UnpackFileParams UnpackFileParams}
      * @return   parameter "out" of type {@link us.kbase.datafileutil.UnpackFileResult UnpackFileResult}

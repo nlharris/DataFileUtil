@@ -478,9 +478,7 @@ Using the same logic as unpacking a Shock file, this method will cause
 any bzip or gzip files to be uncompressed, and then unpack tar and zip
 archive files (uncompressing gzipped or bzipped archive files if 
 necessary). If the file is an archive, it will be unbundled into the 
-directory containing the original output file. In all cases if the
-source file(s) are outside the scratch space the resulting files
-will be created inside the scratch space.
+directory containing the original output file.
 
 =back
 
@@ -1789,9 +1787,7 @@ pack - compress a file or archive a directory before loading to Shock.
     created file name will be set to the directory name, possibly
     overwriting an existing file. Attempting to pack the root directory
     is an error. Do not attempt to pack the scratch space root as noted
-    in the module description. If the files to be compressed or archived
-    are outside the scratch space, the resulting file will be written to
-    the scratch space.
+    in the module description.
     
     The allowed values are:
         gzip - gzip the file given by file_path.
@@ -1958,10 +1954,8 @@ Input for the pack_file function.
            created file name will be set to the directory name, possibly
            overwriting an existing file. Attempting to pack the root directory
            is an error. Do not attempt to pack the scratch space root as noted
-           in the module description. If the files to be compressed or archived
-           are outside the scratch space, the resulting file will be written to
-           the scratch space.
-           
+           in the module description.
+
            The allowed values are:
                gzip - gzip the file given by file_path.
                targz - tar and gzip the directory specified by the directory
