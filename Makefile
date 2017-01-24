@@ -25,8 +25,8 @@ compile:
 		--pyclname $(SERVICE_CAPS).$(SERVICE_CAPS)Client \
 		--javasrc src \
 		--java \
-		#--pysrvname $(SERVICE_CAPS).$(SERVICE_CAPS)Server # add slash when restore
 		--pyimplname $(SERVICE_CAPS).$(SERVICE_CAPS)Impl;
+		#--pysrvname $(SERVICE_CAPS).$(SERVICE_CAPS)Server # add slash when restore
 	kb-sdk compile --html $(SPEC_FILE)
 
 build:
