@@ -38,7 +38,7 @@ class DataFileUtilTest(unittest.TestCase):
         cls.ctx.update({'token': cls.token,
                         'user_id': cls.user_id,
                         'provenance': [
-                            {'service': 'DataFileUtil',
+                            {'service': 'DataFileUtilFakeProv',
                              'method': 'please_never_use_it_in_production',
                              'method_params': []
                              }],
@@ -921,6 +921,7 @@ class DataFileUtilTest(unittest.TestCase):
                          {'ref': str(ws) + '/whee2'}]})['data']
         p1 = pret[0]['provenance'][0]
         p2 = pret[1]['provenance'][0]
+
         # this is enough to check that provenance is being saved
         self.assertEquals(
             p1['description'],
@@ -928,8 +929,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEquals(
             p2['description'],
             'KBase SDK method run via the KBase Execution Engine')
-        self.assertEquals(p1['service'], 'use_set_provenance')
-        self.assertEquals(p2['service'], 'use_set_provenance')
+        self.assertEquals(p1['service'], 'DataFileUtil')
+        self.assertEquals(p2['service'], 'DataFileUtil')
 
     def test_save_objects_no_objects(self):
         self.fail_save_objects({'id': 1},
