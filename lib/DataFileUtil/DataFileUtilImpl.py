@@ -240,6 +240,13 @@ archiving.
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.shock_url = config['shock-url']
+        self.log('Shock url: ' + self.shock_url)
+        self.shock_effective = self.shock_url
+        # note that the unit tests cannot easily test this. Be careful with changes here
+        r = requests.get(config['kbase-endpoint'] + '/shock-direct', allow_redirects=False)
+        if r.status_code == 302:
+            self.log('Using direct shock url for transferring files')
+            self.shock_effective = r.headers['Location']
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
         self.scratch = config['scratch']
@@ -299,7 +306,7 @@ archiving.
             raise ValueError(
                 'Must provide either a shock ID or handle ID, not both')
 
-        shock_url = self.shock_url
+        shock_url = self.shock_effective
         if handle_id:
             self.log('Fetching info for handle: '+handle_id)
             hs = HandleService(self.handle_url, token=token)
@@ -473,7 +480,7 @@ archiving.
             mpe = MultipartEncoder(fields=files)
             headers['content-type'] = mpe.content_type
             response = requests.post(
-                self.shock_url + '/node', headers=headers, data=mpe,
+                self.shock_effective + '/node', headers=headers, data=mpe,
                 stream=True, allow_redirects=True)
         self.check_shock_response(
             response, ('Error trying to upload file {} to Shock: '
