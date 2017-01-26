@@ -825,8 +825,7 @@ archiving.
         source_id = params.get('shock_id')
         if not source_id:
             raise ValueError('Must provide shock ID')
-        res = requests.get(self.shock_url + '/node/' + source_id +
-                           '/acl/owner/?verbosity=full',
+        res = requests.get(self.shock_url + '/node/' + source_id + '/acl/?verbosity=full',
                            headers=header, allow_redirects=True)
         self.check_shock_response(
             res, 'Error getting ACLs for Shock node {}: '.format(source_id))
