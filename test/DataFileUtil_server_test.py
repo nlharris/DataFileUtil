@@ -11,7 +11,6 @@ import shutil
 import filecmp
 import tarfile
 import zipfile
-import urllib2
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
