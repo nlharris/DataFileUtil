@@ -224,19 +224,20 @@ class DataFileUtilTest(unittest.TestCase):
         zip_file_path = os.path.join(tmp_dir, zip_filename)
         txt_file_path = os.path.join(tmp_dir, txt_filename)
 
-        size_2GB = 2 * 1024 * 1024 * 1024
+        size_3GB = 3 * 1024 * 1024 * 1024
 
         with open(txt_file_path, "wb") as output:
-            output.seek(size_2GB)
+            output.seek(size_3GB)
             output.write('0')
 
         print ('--- generating a 2GB zipfile ---\n' +
             '--- to speed up your local test, ' +
             'please comment out test_unpack_large_zip ---')
+
         compress_size = 0
         count = 0
-        while compress_size < size_2GB:
-            with zipfile.ZipFile(zip_file_path, 'a' ,zipfile.ZIP_DEFLATED,
+        while compress_size < size_3GB:
+            with zipfile.ZipFile(zip_file_path, 'a', zipfile.ZIP_STORED,
                     allowZip64=True) as output:
                 output.write(txt_file_path, str(count) + '.zip')
             count += 1
