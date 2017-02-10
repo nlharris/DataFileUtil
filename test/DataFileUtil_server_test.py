@@ -230,10 +230,6 @@ class DataFileUtilTest(unittest.TestCase):
             output.seek(size_3GB)
             output.write('0')
 
-        print ('--- generating a 2GB zipfile ---\n' +
-            '--- to speed up your local test, ' +
-            'please comment out test_unpack_large_zip ---')
-
         compress_size = 0
         count = 0
         while compress_size < size_3GB:
