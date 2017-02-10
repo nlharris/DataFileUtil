@@ -122,11 +122,12 @@ archiving.
         # TODO is there a designated temp files dir in the scratch space? Nope.
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
-        if arch == 'gztar':
+        if pack == 'targz':
+          arch = 'gztar'
           ctf = shutil.make_archive(tf, arch, d)
           suffix = ctf.replace(tf, '', 1)
           shutil.move(ctf, file_path + suffix)
-        elif arch == 'zip':
+        else:
           suffix  = '.zip'
           with zipfile.ZipFile(tf + suffix, 'w',
                         zipfile.ZIP_DEFLATED,
@@ -136,8 +137,6 @@ archiving.
                   zip_file.write(os.path.join(root, file), file)
 
           shutil.move(tf + suffix, file_path + suffix)
-        else:
-          raise ValueError('Unexpected archive type: {}'.format(arch))
 
         os.remove(tf)
 

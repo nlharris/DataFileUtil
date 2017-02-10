@@ -620,38 +620,20 @@ class DataFileUtilTest(unittest.TestCase):
 
         filename = 'large_file.txt'
         tmp_dir = os.path.join(self.cfg['scratch'], 'packlargeziptest')
-
         if not os.path.exists(tmp_dir):
                 os.makedirs(tmp_dir)
-
         file_path = os.path.join(tmp_dir, filename)
 
-        file_url = 'https://anl.box.com/shared/static/'
-        file_url += '0lfnzcijmnje741h7us1f23srvclgo4u.txt'
-
-        print ('--- Start downloading a 2GB+ file ---\n' +
-                '--- To speed up local test process, ' +
-                'please comment out test_pack_large_zip ---')
-
-        req = urllib2.urlopen(file_url)
-        total_size = int(req.info().getheader('Content-Length').strip())
-        CHUNK = 128 * 1024 * 1024
-        downloaded = 0
+        size_3GB = 3 * 1024 * 1024 * 1024
 
         with open(file_path, "wb") as output:
-            start_time = time.time()
-            while True:
-                chunk = req.read(CHUNK)
-                if not chunk: break
-                output.write(chunk)
-                downloaded += len(chunk)
-                process = float(downloaded) / total_size * 100
-                used_time = time.time() - start_time
-                print 'downloaded: {:.2f}%, used: {:.2f}s'.format(process, used_time)
+            output.seek(size_3GB)
+            output.write('0')
 
         new_file_path = self.impl.pack_file(
             self.ctx, {'file_path': tmp_dir + '/' + filename,
                        'pack': 'zip'})[0]['file_path']
+
         self.assertEqual(
             new_file_path,
             '/kb/module/work/tmp/packlargeziptest/{}.zip'.format(filename))
