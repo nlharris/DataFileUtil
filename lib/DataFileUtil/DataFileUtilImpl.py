@@ -51,9 +51,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.9"
-    GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "812b7afe400575967432b83b560724fdb8770eb0"
+    VERSION = "0.0.12"
+    GIT_URL = "git@github.com:Tianhao-Gu/DataFileUtil.git"
+    GIT_COMMIT_HASH = "49d7ceadb3aa1f774c58a5220d5bf202c01dfc07"
 
     #BEGIN_CLASS_HEADER
 
@@ -122,10 +122,25 @@ archiving.
         # TODO is there a designated temp files dir in the scratch space? Nope.
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
-        ctf = shutil.make_archive(tf, arch, d)
+        if arch == 'gztar':
+          ctf = shutil.make_archive(tf, arch, d)
+          suffix = ctf.replace(tf, '', 1)
+          shutil.move(ctf, file_path + suffix)
+        elif arch == 'zip':
+          suffix  = '.zip'
+          with zipfile.ZipFile(tf + suffix, 'w',
+                        zipfile.ZIP_DEFLATED,
+                        allowZip64=True) as zip_file:
+              for root, dirs, files in os.walk(d):
+                for file in files:
+                  zip_file.write(os.path.join(root, file), file)
+
+          shutil.move(tf + suffix, file_path + suffix)
+        else:
+          raise ValueError('Unexpected archive type: {}'.format(arch))
+
         os.remove(tf)
-        suffix = ctf.replace(tf, '', 1)
-        shutil.move(ctf, file_path + suffix)
+
         return file_path + suffix
 
     def _decompress_file_name(self, file_path):
