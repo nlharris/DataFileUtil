@@ -215,6 +215,46 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret1['file_path'],
                          str(os.path.join(unpack_dir, 'file1.txt')))
 
+    def test_unpack_large_zip(self):
+        txt_filename = 'large_file.txt'
+        zip_filename = 'large_file.txt.zip'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'unpacklargeziptest')
+        if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+        zip_file_path = os.path.join(tmp_dir, zip_filename)
+        txt_file_path = os.path.join(tmp_dir, txt_filename)
+
+        size_3GB = 3 * 1024 * 1024 * 1024
+
+        with open(txt_file_path, "wb") as output:
+            output.seek(size_3GB)
+            output.write('0')
+
+        print ('--- generating a 3GB zipfile ---\n' +
+            '--- to speed up your local test, ' +
+            'please comment out test_unpack_large_zip ---')
+
+        compress_size = 0
+        count = 0
+        while compress_size < size_3GB:
+            with zipfile.ZipFile(zip_file_path, 'a', zipfile.ZIP_STORED,
+                    allowZip64=True) as output:
+                output.write(txt_file_path, str(count) + '.zip')
+            count += 1
+            compress_size = os.stat(zip_file_path).st_size
+
+        ret1 = self.impl.unpack_file(
+                self.ctx,
+                {'file_path': zip_file_path}
+            )[0]
+        self.assertEqual(ret1['file_path'],
+                         str(os.path.join(tmp_dir, zip_file_path)))
+
+        self.assertIn('0.zip', os.listdir(tmp_dir))
+
+        os.remove(zip_file_path)
+        os.remove(txt_file_path)
+
     def write_file(self, filename, content):
         tmp_dir = self.cfg['scratch']
         file_path = os.path.join(tmp_dir, filename)
@@ -614,6 +654,33 @@ class DataFileUtilTest(unittest.TestCase):
         with zipfile.ZipFile(new_file_path) as z:
             self.assertEqual(set(z.namelist()),
                              set(['inzip1.txt', 'inzip2.txt']))
+
+    def test_pack_large_zip(self):
+
+        filename = 'large_file.txt'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'packlargeziptest')
+        if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+        file_path = os.path.join(tmp_dir, filename)
+
+        size_3GB = 3 * 1024 * 1024 * 1024
+
+        with open(file_path, "wb") as output:
+            output.seek(size_3GB)
+            output.write('0')
+
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': tmp_dir + '/' + filename,
+                       'pack': 'zip'})[0]['file_path']
+
+        self.assertEqual(
+            new_file_path,
+            '/kb/module/work/tmp/packlargeziptest/{}.zip'.format(filename))
+        with zipfile.ZipFile(new_file_path) as z:
+            self.assertEqual(set(z.namelist()),
+                             set([filename]))
+
+        os.remove(file_path)
 
     def test_pack_err_no_file_provided(self):
         self.fail_pack(

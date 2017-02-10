@@ -51,9 +51,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.9"
-    GIT_URL = "https://github.com/mrcreosote/DataFileUtil"
-    GIT_COMMIT_HASH = "812b7afe400575967432b83b560724fdb8770eb0"
+    VERSION = "0.0.12"
+    GIT_URL = "git@github.com:Tianhao-Gu/DataFileUtil.git"
+    GIT_COMMIT_HASH = "49d7ceadb3aa1f774c58a5220d5bf202c01dfc07"
 
     #BEGIN_CLASS_HEADER
 
@@ -116,16 +116,28 @@ archiving.
         if not f:
             f = os.path.basename(d)
         file_path = d + os.sep + f
-        arch = 'gztar' if pack == 'targz' else 'zip'
         self.log('Packing {} to {}'.format(d, pack))
         # tar is smart enough to not pack its own archive file into the new archive, zip isn't.
         # TODO is there a designated temp files dir in the scratch space? Nope.
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
-        ctf = shutil.make_archive(tf, arch, d)
+        if pack == 'targz':
+          ctf = shutil.make_archive(tf, 'gztar', d)
+          suffix = ctf.replace(tf, '', 1)
+          shutil.move(ctf, file_path + suffix)
+        else:
+          suffix  = '.zip'
+          with zipfile.ZipFile(tf + suffix, 'w',
+                        zipfile.ZIP_DEFLATED,
+                        allowZip64=True) as zip_file:
+              for root, dirs, files in os.walk(d):
+                for file in files:
+                  zip_file.write(os.path.join(root, file), file)
+
+          shutil.move(tf + suffix, file_path + suffix)
+
         os.remove(tf)
-        suffix = ctf.replace(tf, '', 1)
-        shutil.move(ctf, file_path + suffix)
+
         return file_path + suffix
 
     def _decompress_file_name(self, file_path):
