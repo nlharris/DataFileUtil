@@ -122,8 +122,7 @@ archiving.
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
         if pack == 'targz':
-          arch = 'gztar'
-          ctf = shutil.make_archive(tf, arch, d)
+          ctf = shutil.make_archive(tf, 'gztar', d)
           suffix = ctf.replace(tf, '', 1)
           shutil.move(ctf, file_path + suffix)
         else:

@@ -215,6 +215,45 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(ret1['file_path'],
                          str(os.path.join(unpack_dir, 'file1.txt')))
 
+    def test_unpack_large_zip(self):
+        txt_filename = 'large_file.txt'
+        zip_filename = 'large_file.txt.zip'
+        tmp_dir = os.path.join(self.cfg['scratch'], 'unpacklargeziptest')
+        if not os.path.exists(tmp_dir):
+                os.makedirs(tmp_dir)
+        zip_file_path = os.path.join(tmp_dir, zip_filename)
+        txt_file_path = os.path.join(tmp_dir, txt_filename)
+
+        size_2GB = 2 * 1024 * 1024 * 1024
+
+        with open(txt_file_path, "wb") as output:
+            output.seek(size_2GB)
+            output.write('0')
+
+        print ('--- generating a 2GB zipfile ---\n' +
+            '--- to speed up your local test, ' +
+            'please comment out test_unpack_large_zip ---')
+        compress_size = 0
+        count = 0
+        while compress_size < size_2GB:
+            with zipfile.ZipFile(zip_file_path, 'a' ,zipfile.ZIP_DEFLATED,
+                    allowZip64=True) as output:
+                output.write(txt_file_path, str(count) + '.zip')
+            count += 1
+            compress_size = os.stat(zip_file_path).st_size
+
+        ret1 = self.impl.unpack_file(
+                self.ctx,
+                {'file_path': zip_file_path}
+            )[0]
+        self.assertEqual(ret1['file_path'],
+                         str(os.path.join(tmp_dir, zip_file_path)))
+
+        self.assertIn('0.zip', os.listdir(tmp_dir))
+
+        os.remove(zip_file_path)
+        os.remove(txt_file_path)
+
     def write_file(self, filename, content):
         tmp_dir = self.cfg['scratch']
         file_path = os.path.join(tmp_dir, filename)
