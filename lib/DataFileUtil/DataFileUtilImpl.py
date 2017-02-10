@@ -116,7 +116,6 @@ archiving.
         if not f:
             f = os.path.basename(d)
         file_path = d + os.sep + f
-        arch = 'gztar' if pack == 'targz' else 'zip'
         self.log('Packing {} to {}'.format(d, pack))
         # tar is smart enough to not pack its own archive file into the new archive, zip isn't.
         # TODO is there a designated temp files dir in the scratch space? Nope.
