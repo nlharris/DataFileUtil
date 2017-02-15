@@ -289,13 +289,15 @@ archiving.
 
         """
         try:
-            response = requests.get(file_url)
+            response = requests.get(file_url, stream=True)
             content_disposition = response.headers['content-disposition']
-        except:
+        except KeyError:
             self.log('Parsing file name directly from URL')
             file_name = file_url.split('/')[-1]
         else:
             file_name = content_disposition.split('filename="')[-1].split('";')[0]
+        finally:
+            response.close()
             
         self.log('Retrieving file name from url: {}'.format(file_name))
         copy_file_path = os.path.join(self.tmp, file_name)
