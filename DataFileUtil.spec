@@ -435,4 +435,54 @@ module DataFileUtil {
     /* Get the versions of the Workspace service and Shock service. */
     funcdef versions() returns(string wsver, string shockver)
         authentication required;
+
+    /* Input parameters for the "download_staging_file" function.
+
+      Required parameters:
+      staging_file_subdir_path: subdirectory file path
+      e.g. 
+        for file: /data/bulk/user_name/file_name
+        staging_file_subdir_path is file_name
+        for file: /data/bulk/user_name/subdir_1/subdir_2/file_name
+        staging_file_subdir_path is subdir_1/subdir_2/file_name
+    */
+    typedef structure {
+      string staging_file_subdir_path;
+    }DownloadStagingFileParams;
+
+    /* Results from the download_staging_file function.
+
+      copy_file_path: copied file scratch area path
+    */
+    typedef structure {
+      string copy_file_path;
+    }DownloadStagingFileOutput;
+
+    /* Download a staging area file to scratch area */
+    funcdef download_staging_file(DownloadStagingFileParams params)
+        returns(DownloadStagingFileOutput results) authentication required;
+
+    /* Input parameters for the "download_web_file" function.
+
+      Required parameters:
+      file_url: file URL
+      download_type: one of ['Direct Download', 'FTP', 'DropBox', 'Google Drive']
+
+    */
+    typedef structure {
+      string file_url;
+      string download_type;
+    }DownloadWebFileParams;
+
+    /* Results from the download_web_file function.
+
+      copy_file_path: copied file scratch area path
+    */
+    typedef structure {
+      string copy_file_path;
+    }DownloadWebFileOutput;
+
+    /* Download a web file to scratch area */
+    funcdef download_web_file(DownloadWebFileParams params)
+        returns(DownloadWebFileOutput results) authentication required;
 };

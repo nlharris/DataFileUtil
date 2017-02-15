@@ -21,6 +21,9 @@ import errno
 import re
 import io
 import uuid
+import urllib2
+from contextlib import closing
+import ftplib
 
 
 class ShockException(Exception):
@@ -51,9 +54,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.12"
-    GIT_URL = "git@github.com:Tianhao-Gu/DataFileUtil.git"
-    GIT_COMMIT_HASH = "49d7ceadb3aa1f774c58a5220d5bf202c01dfc07"
+    VERSION = "0.0.13"
+    GIT_URL = "https://github.com/Tianhao-Gu/DataFileUtil.git"
+    GIT_COMMIT_HASH = "1df5cd5c9df50dcd7f41f4d61b3b77c738d17442"
 
     #BEGIN_CLASS_HEADER
 
@@ -72,6 +75,9 @@ archiving.
                           }
 
     ROOT = re.compile(r'^[\\' + os.sep + ']+$')
+
+    # staging file prefix
+    STAGING_FILE_PREFIX = '/data/bulk/'
 
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
@@ -245,6 +251,269 @@ archiving.
     def make_ref(self, object_info):
         return str(object_info[6]) + '/' + str(object_info[0]) + \
             '/' + str(object_info[4])
+
+    def _get_staging_file_path(self, token_user, staging_file_subdir_path):
+        """
+        _get_staging_file_path: return staging area file path
+
+        directory pattern: /data/bulk/user_name/file_name
+
+        """
+        return self.STAGING_FILE_PREFIX + token_user + '/' + staging_file_subdir_path
+
+    def _download_file(self, download_type, file_url):
+        """
+        _download_file: download execution distributor
+
+        params:
+        download_type: download type for web source file
+        file_url: file URL
+
+        """
+        if download_type == 'Direct Download':
+            copy_file_path = self._download_direct_download_link(file_url)
+        elif download_type == 'DropBox':
+            copy_file_path = self._download_dropbox_link(file_url)
+        elif download_type == 'FTP':
+            copy_file_path = self._download_ftp_link(file_url)
+        elif download_type == 'Google Drive':
+            copy_file_path = self._download_google_drive_link(file_url)
+        else:
+            raise ValueError('Invalid download type: {}'.format(download_type))
+
+        return copy_file_path
+
+    def _retrieve_filepath(self, file_url, download_type):
+        """
+        _retrieve_filepath: retrieve file name from download URL and return local file path
+
+        """
+        try:
+            response = requests.get(file_url)
+            content_disposition = response.headers['content-disposition']
+        except:
+            self.log('Parsing file name directly from URL')
+            file_name = file_url.split('/')[-1]
+        else:
+            file_name = content_disposition.split('filename="')[-1].split('";')[0]
+            
+        self.log('Retrieving file name from url: {}'.format(file_name))
+        copy_file_path = os.path.join(self.tmp, file_name)
+
+        return copy_file_path
+
+    def _download_to_file(self, file_url, copy_file_path):
+        """
+        _download_to_file: download url content to file
+
+        params:
+        file_url: direct download URL
+        copy_file_path: output file saving path
+
+        """
+
+        self.log('Connecting and downloading web source: {}'.format(
+                                                                file_url))
+        try:
+            online_file = urllib2.urlopen(file_url)
+        except urllib2.HTTPError as e:
+            raise ValueError(
+                "The server error\nURL: {}\nError code: {}".format(
+                                                        file_url, e.code))
+        except urllib2.URLError as e:
+            raise ValueError(
+                "Failed to reach URL: {}\nReason: {}".format(
+                                                      file_url, e.reason))
+        else:
+            total_size = int(online_file.info().getheader('Content-Length').strip())
+            CHUNK = 128 * 1024 * 1024
+            downloaded = 0
+            with closing(online_file):
+                with open(copy_file_path, 'wb') as output:
+                    start_time = time.time()
+                    while True:
+                      chunk = online_file.read(CHUNK)
+                      if not chunk: break
+                      output.write(chunk)
+                      downloaded += len(chunk)
+                      process = float(downloaded) / total_size * 100
+                      used_time = time.time() - start_time
+                      self.log('downloaded: {:.2f}%, '.format(process) + 
+                                        'used: {:.2f}s'.format(used_time))
+
+            self.log('Downloaded file to {}'.format(copy_file_path))
+
+    def _download_direct_download_link(self, file_url):
+        """
+        _download_direct_download_link: direct download link handler
+
+        params:
+        file_url: direct download URL
+        copy_file_path: output file saving path
+
+        """
+
+        copy_file_path = self._retrieve_filepath(file_url, 'Direct Download')
+        self._download_to_file(
+            file_url, copy_file_path)
+
+        copy_file_path = self._unpack(copy_file_path, True)
+
+        return copy_file_path
+
+    def _download_dropbox_link(self, file_url):
+        """
+        _download_dropbox_link: dropbox download link handler
+                                file needs to be shared publicly
+
+        params:
+        file_url: dropbox download link
+
+        """
+        if not file_url.startswith('https://www.dropbox.com/'):
+            raise ValueError('Invalid DropBox Link: {}'.format(file_url))
+
+        self.log('Connecting DropBox link: {}'.format(file_url))
+        # translate dropbox URL for direct download
+        if "?" not in file_url:
+            force_download_link = file_url + '?raw=1'
+        else:
+            force_download_link = file_url.partition('?')[0] + '?raw=1'
+
+        self.log('Generating DropBox direct download link\n' +
+                    ' from: {}\n to: {}'.format(file_url, force_download_link))
+        copy_file_path = self._retrieve_filepath(force_download_link, 'DropBox')
+        self._download_to_file(
+            force_download_link, copy_file_path)
+
+        copy_file_path = self._unpack(copy_file_path, True)
+
+        return copy_file_path
+
+    def _download_google_drive_link(self, file_url):
+        """
+        _download_google_drive_link: Google Drive download link handler
+                                     file needs to be shared publicly
+
+        params:
+        file_url: Google Drive download link
+
+        """
+        if not file_url.startswith('https://drive.google.com/'):
+            raise ValueError('Invalid Google Drive Link: {}'.format(file_url))
+
+        self.log('Connecting Google Drive link: {}'.format(file_url))
+        # translate Google Drive URL for direct download
+        force_download_link_prefix = 'https://drive.google.com/uc?export=download&id='
+        if file_url.find('drive.google.com/file/d/') != -1:
+            file_id = file_url.partition('/d/')[-1].partition('/')[0]
+        elif file_url.find('drive.google.com/open?id=') != -1:
+            file_id = file_url.partition('id=')[-1]
+        else:
+            error_msg = 'Unexpected Google Drive share link.\n'
+            error_msg += 'URL: {}'.format(file_url)
+            raise ValueError(error_msg)
+        force_download_link = force_download_link_prefix + file_id
+
+        self.log('Generating Google Drive direct download link\n'+
+                    ' from: {}\n to: {}'.format(file_url, force_download_link))
+        copy_file_path = self._retrieve_filepath(force_download_link, 'Google Drive')
+        self._download_to_file(
+            force_download_link, copy_file_path)
+
+        copy_file_path = self._unpack(copy_file_path, True)
+
+        return copy_file_path
+
+    def _download_ftp_link(self, file_url):
+        """
+        _download_ftp_link: FTP download link handler
+                            URL fomat: ftp://anonymous:email@ftp_link
+                                    or ftp://ftp_link
+                            defualt user_name: 'anonymous'
+                                    password: 'anonymous@domain.com'
+
+                            Note: Currenlty we only support anonymous FTP due to securty reasons.
+
+        params:
+        file_url: FTP download link
+
+        """
+        if not file_url.startswith('ftp://'):
+            raise ValueError('Invalid FTP Link: {}'.format(file_url))
+
+        self.log('Connecting FTP link: {}'.format(file_url))
+        ftp_url_format = re.match(r'ftp://.*:.*@.*/.*', file_url)
+        # process ftp credentials
+        if ftp_url_format:
+            ftp_user_name = re.search('ftp://(.+?):', file_url).group(1)
+            if ftp_user_name.lower() != 'anonymous':
+                raise ValueError("Currently we only support anonymous FTP")
+            ftp_password = file_url.rpartition('@')[0].rpartition(':')[-1]
+            ftp_domain = re.search(
+                'ftp://.*:.*@(.+?)/', file_url).group(1)
+            ftp_file_path = file_url.partition(
+                'ftp://')[-1].partition('/')[-1].rpartition('/')[0]
+            ftp_file_name = re.search(
+                'ftp://.*:.*@.*/(.+$)', file_url).group(1)
+        else:
+            self.log('Setting anonymous FTP user_name and password')
+            ftp_user_name = 'anonymous'
+            ftp_password = 'anonymous@domain.com'
+            ftp_domain = re.search('ftp://(.+?)/', file_url).group(1)
+            ftp_file_path = file_url.partition(
+                'ftp://')[-1].partition('/')[-1].rpartition('/')[0]
+            ftp_file_name = re.search('ftp://.*/(.+$)', file_url).group(1)
+
+        self._check_ftp_connection(ftp_user_name, ftp_password,
+                                   ftp_domain, ftp_file_path, ftp_file_name)
+
+        ftp_connection = ftplib.FTP(ftp_domain)
+        ftp_connection.login(ftp_user_name, ftp_password)
+        ftp_connection.cwd(ftp_file_path)
+
+        copy_file_path = os.path.join(self.tmp, ftp_file_name)
+
+        with open(copy_file_path, 'wb') as output:
+            ftp_connection.retrbinary('RETR {}'.format(ftp_file_name), 
+                                        output.write)
+        self.log('Copied FTP file to: {}'.format(copy_file_path))
+
+        copy_file_path = self._unpack(copy_file_path, True)
+
+        return copy_file_path
+
+    def _check_ftp_connection(self, user_name, password, domain, file_path, file_name):
+        """
+        _check_ftp_connection: ftp connection checker
+
+        params:
+        user_name: FTP user name
+        password: FTP user password
+        domain: FTP domain
+        file_path: target file directory
+        file_name: target file name
+
+        """
+
+        try:
+            ftp = ftplib.FTP(domain)
+        except ftplib.all_errors, error:
+            raise ValueError("Cannot connect: {}".format(error))
+        else:
+            try:
+                ftp.login(user_name, password)
+            except ftplib.all_errors, error:
+                raise ValueError("Cannot login: {}".format(error))
+            else:
+                ftp.cwd(file_path)
+                if file_name in ftp.nlst():
+                    pass
+                else:
+                    raise ValueError(
+                      "File {} does NOT exist in FTP path: {}".format(
+                                    file_name, domain + '/' + file_path))
+
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -266,6 +535,7 @@ archiving.
         self.mkdir_p(self.tmp)
         #END_CONSTRUCTOR
         pass
+
 
     def shock_to_file(self, ctx, params):
         """
@@ -1082,6 +1352,107 @@ archiving.
         # return the results
         return [wsver, shockver]
 
+    def download_staging_file(self, ctx, params):
+        """
+        Download a staging area file to scratch area
+        :param params: instance of type "DownloadStagingFileParams" (Input
+           parameters for the "download_staging_file" function. Required
+           parameters: staging_file_subdir_path: subdirectory file path e.g.
+           for file: /data/bulk/user_name/file_name staging_file_subdir_path
+           is file_name for file:
+           /data/bulk/user_name/subdir_1/subdir_2/file_name
+           staging_file_subdir_path is subdir_1/subdir_2/file_name) ->
+           structure: parameter "staging_file_subdir_path" of String
+        :returns: instance of type "DownloadStagingFileOutput" (Results from
+           the download_staging_file function. copy_file_path: copied file
+           scratch area path) -> structure: parameter "copy_file_path" of
+           String
+        """
+        # ctx is the context object
+        # return variables are: results
+        #BEGIN download_staging_file
+        if not params.get('staging_file_subdir_path'):
+          error_msg = "missing 'staging_file_subdir_path' parameter"
+          raise ValueError(error_msg)
+        
+        staging_file_subdir_path = params.get('staging_file_subdir_path')
+        staging_file_name = os.path.basename(staging_file_subdir_path)
+        token_user = ctx['user_id']
+        staging_file_path = self._get_staging_file_path(
+            token_user, staging_file_subdir_path)
+
+        self.log('Start downloading staging file: %s' % staging_file_path)
+        dstdir = os.path.join(self.scratch, 'tmp')
+        if not os.path.exists(dstdir):
+            os.makedirs(dstdir)
+        shutil.copy2(staging_file_path, dstdir)
+        copy_file_path = os.path.join(dstdir, staging_file_name)
+        self.log('Copied staging file from %s to %s' %
+                 (staging_file_path, copy_file_path))
+
+        copy_file_path = self._unpack(copy_file_path, True)
+
+        results = {'copy_file_path': copy_file_path}
+        #END download_staging_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(results, dict):
+            raise ValueError('Method download_staging_file return value ' +
+                             'results is not type dict as required.')
+        # return the results
+        return [results]
+
+    def download_web_file(self, ctx, params):
+        """
+        Download a web file to scratch area
+        :param params: instance of type "DownloadWebFileParams" (Input
+           parameters for the "download_web_file" function. Required
+           parameters: file_url: file URL download_type: one of ['Direct
+           Download', 'FTP', 'DropBox', 'Google Drive']) -> structure:
+           parameter "file_url" of String, parameter "download_type" of String
+        :returns: instance of type "DownloadWebFileOutput" (Results from the
+           download_web_file function. copy_file_path: copied file scratch
+           area path) -> structure: parameter "copy_file_path" of String
+        """
+        # ctx is the context object
+        # return variables are: results
+        #BEGIN download_web_file
+        
+        # check for required parameters
+        for p in ['file_url', 'download_type']:
+          if p not in params:
+            raise ValueError("missing '{}' parameter".format(p)) 
+
+        file_url = params.get('file_url')
+        download_type = params.get('download_type')
+
+        valid_download_types = ['Direct Download', 'FTP', 
+                                'DropBox', 'Google Drive']
+        if download_type not in valid_download_types:
+          error_msg = "[{}] download_type is invalid.\n".format(download_type)
+          error_msg += "Please use one of {}".format(valid_download_types)
+          raise ValueError(error_msg)
+
+        if download_type != 'FTP':
+          try:
+            response = requests.get(file_url)
+          except:
+            raise ValueError('Cannot connect to URL: {}'.format(file_url))
+          else:
+            response.close()
+
+        self.log('Start downloading web file from: {}'.format(file_url))
+        copy_file_path = self._download_file(download_type, file_url)
+
+        results = {'copy_file_path': copy_file_path}
+        #END download_web_file
+
+        # At some point might do deeper type checking...
+        if not isinstance(results, dict):
+            raise ValueError('Method download_web_file return value ' +
+                             'results is not type dict as required.')
+        # return the results
+        return [results]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': 'OK',

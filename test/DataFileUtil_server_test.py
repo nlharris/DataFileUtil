@@ -11,6 +11,8 @@ import shutil
 import filecmp
 import tarfile
 import zipfile
+from mock import patch 
+import ftplib
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
 except:
@@ -1116,3 +1118,305 @@ class DataFileUtilTest(unittest.TestCase):
         with self.assertRaises(exception) as context:
             self.impl.get_objects(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
+
+    def fail_download_staging_file(self, params, error, exception=ValueError):
+        with self.assertRaises(exception) as context:
+            self.impl.download_staging_file(self.ctx, params)
+        self.assertEqual(error, str(context.exception.message))
+
+    def test_fail_download_staging_file(self):
+        invalid_input_params = {'test_params': 'test_params_str'}
+        error_msg = "missing 'staging_file_subdir_path' parameter"
+        self.fail_download_staging_file(invalid_input_params, error_msg)
+
+    @patch.object(DataFileUtil, "STAGING_FILE_PREFIX", new='/kb/module/work/tmp/')
+    def test_download_staging_file(self):
+        tmp_dir = self.cfg['scratch']
+        test_file = "file1.txt"
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        test_file_path = os.path.join(unpack_dir, test_file)
+        if not os.path.exists(unpack_dir):
+            os.makedirs(unpack_dir)
+        shutil.copy('data/'+test_file, test_file_path)
+
+        params = {
+            'staging_file_subdir_path': 'test_download_staging_file/file1.txt'
+        }
+
+        ret1 = self.impl.download_staging_file(
+                self.ctx,
+                params
+            )[0]
+        self.assertEqual(ret1['copy_file_path'],
+                         str(os.path.join(tmp_dir, 'tmp', 'file1.txt')))
+
+    @patch.object(DataFileUtil, "STAGING_FILE_PREFIX", new='/kb/module/work/tmp/')
+    def test_download_staging_file_compressed_file(self):
+        tmp_dir = self.cfg['scratch']
+        test_file = "file1.txt.gz"
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        test_file_path = os.path.join(unpack_dir, test_file)
+        if not os.path.exists(unpack_dir):
+            os.makedirs(unpack_dir)
+        shutil.copy('data/'+test_file, test_file_path)
+
+        params = {
+            'staging_file_subdir_path': 'test_download_staging_file/file1.txt.gz'
+        }
+
+        ret1 = self.impl.download_staging_file(
+                self.ctx,
+                params
+            )[0]
+        self.assertEqual(ret1['copy_file_path'],
+                         str(os.path.join(tmp_dir, 'tmp', 'file1.txt')))
+
+    def fail_download_web_file(self, params, error, 
+                                        exception=ValueError, startswith=False):
+        with self.assertRaises(exception) as context:
+            self.impl.download_web_file(self.ctx, params)
+        if startswith:
+            self.assertTrue(str(context.exception.message).startswith(error),
+                            "Error message {} does not start with {}".format(
+                                str(context.exception.message),
+                                error))
+        else:    
+            self.assertEqual(error, str(context.exception.message))
+
+    def test_fail_download_web_file(self):
+        invalid_input_params = {'file_url': 'file_url_str'}
+        error_msg = "missing 'download_type' parameter"
+        self.fail_download_web_file(invalid_input_params, error_msg)
+
+        invalid_input_params = {'download_type': 'download_type_str'}
+        error_msg = "missing 'file_url' parameter"
+        self.fail_download_web_file(invalid_input_params, error_msg)   
+
+        invalid_input_params = {
+                        'download_type': 'invalid_download_type',
+                        'file_url': 'file_url_str'}
+        error_msg = "[invalid_download_type] download_type is invalid.\n"
+        error_msg += "Please use one of ['Direct Download', 'FTP', 'DropBox', 'Google Drive']"
+        self.fail_download_web_file(invalid_input_params, error_msg) 
+
+        invalid_input_params = {
+                        'download_type': 'Direct Download',
+                        'file_url': 'invalid_URL'}
+        error_msg = "Cannot connect to URL: invalid_URL"
+        self.fail_download_web_file(invalid_input_params, error_msg)
+
+    def test_fail_download_web_file_google_drive(self):
+        # invalid Google Drive params
+        invalid_input_params = {
+                        'download_type': 'Google Drive',
+                        'file_url': 'http://www.google.com'}
+        error_msg = "Invalid Google Drive Link: http://www.google.com"
+        self.fail_download_web_file(invalid_input_params, error_msg)
+
+    def test_fail_download_web_file_dropbox(self):
+        # invalid DropBox params
+        invalid_input_params = {
+                        'download_type': 'DropBox',
+                        'file_url': 'http://www.dropbox.com'}
+        error_msg = "Invalid DropBox Link: http://www.dropbox.com"
+        self.fail_download_web_file(invalid_input_params, error_msg) 
+
+    def test_fail_download_web_file_ftp(self):
+        # invalid FTP params
+        invalid_input_params = {
+                        'download_type': 'FTP',
+                        'file_url': 'http://www.google.com'}
+        error_msg = "Invalid FTP Link: http://www.google.com"
+        self.fail_download_web_file(invalid_input_params, error_msg)  
+
+        fake_ftp_url = 'ftp://FAKE_USER:FAKE_PASSWORD'
+        fake_ftp_url += '@ftp.com/Sample1.fastq'
+        invalid_input_params = {
+                        'download_type': 'FTP',
+                        'file_url': fake_ftp_url}
+        error_msg = "Currently we only support anonymous FTP"
+        self.fail_download_web_file(invalid_input_params, error_msg)  
+
+        invalid_input_params = {
+                        'download_type': 'FTP',
+                        'file_url': 'ftp://FAKE_SERVER/Sample1.fastq'}
+        error_msg = "Cannot connect:"
+        self.fail_download_web_file(invalid_input_params, error_msg, 
+                                                            startswith=True) 
+
+        fake_ftp_url = 'ftp://anonymous:FAKE_PASSWORD'
+        fake_ftp_url += '@ftp.dlptest.com/24_Hour/Sample1.fastq'
+        invalid_input_params = {
+                        'download_type': 'FTP',
+                        'file_url': fake_ftp_url}
+        error_msg = "Cannot login:"
+        self.fail_download_web_file(invalid_input_params, error_msg, 
+                                                            startswith=True)  
+
+        invalid_input_params = {
+                        'download_type': 'FTP',
+                        'file_url': 'ftp://ftp.uconn.edu/48_hour/nonexist.txt'}
+        error_msg = "File nonexist.txt does NOT exist in FTP path: "
+        error_msg += "ftp.uconn.edu/48_hour"
+        self.fail_download_web_file(invalid_input_params, error_msg) 
+
+    def test_download_direct_link_uncompress_file(self):
+        # Box direct download link of 'file1.txt'
+        file_url = 'https://anl.box.com/shared/static/'
+        file_url += '4ero6ld3322gnfcbssegglbdbpdvpzae.txt'
+        params = {
+            'download_type': 'Direct Download',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_direct_link_with_no_content_disposition(self):
+        # direct download link with no 'content-disposition' header
+        file_url = 'http://molb7621.github.io/workshop/_downloads/SP1.fq'
+        params = {
+            'download_type': 'Direct Download',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'SP1.fq')
+
+    def test_download_direct_link_compress_file(self):
+        # Box direct download link of 'file1.txt.bzip'
+        file_url = 'https://anl.box.com/shared/static/'
+        file_url += '67iny8ew2ee7vnycpculjvpsg74i5dav.bzip'
+        params = {
+            'download_type': 'Direct Download',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size) 
+
+    def test_download_dropbox_link_uncompress_file(self):
+        # dropbox link of 'file1.txt'
+        file_url = 'https://www.dropbox.com/s/'
+        file_url += 'w5ct52rp95cukwq/file1.txt?dl=0'
+        params = {
+            'download_type': 'DropBox',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_dropbox_link_compress_file(self):
+        # dropbox link of 'file1.txt.gz'
+        file_url = 'https://www.dropbox.com/s/'
+        file_url += 'tw0vvif7hpqhi90/file1.txt.gz?dl=0'
+        params = {
+            'download_type': 'DropBox',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_google_drive_link_uncompress_file(self):
+        # google drive link of 'file1.txt'
+        file_url = 'https://drive.google.com/open?'
+        file_url += 'id=0B0exSa7ebQ0qX01mZ3FaRzhuMDQ'
+        params = {
+            'download_type': 'Google Drive',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_google_drive_link_compress_file(self):
+        # google drive link of 'file1.txt.gzip'
+        file_url = 'https://drive.google.com/file/d/'
+        file_url += '0B0exSa7ebQ0qU1U5YmxMRktkbmc/view?usp=sharing'
+        params = {
+            'download_type': 'Google Drive',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_ftp_link_uncompress_file(self):
+
+        fq_filename = "file1.txt"
+
+        ftp_connection = ftplib.FTP('ftp.uconn.edu')
+        ftp_connection.login('anonymous', 'anonymous@domain.com')
+        ftp_connection.cwd("/48_hour/")
+
+        if fq_filename not in ftp_connection.nlst():
+            fh = open(os.path.join("data", fq_filename), 'rb')
+            ftp_connection.storbinary('STOR file1.txt', fh)
+            fh.close()
+
+        params = {
+            'download_type': 'FTP',
+            'file_url': 'ftp://ftp.uconn.edu/48_hour/file1.txt',
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", fq_filename)).st_size,
+                                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_ftp_link_compress_file(self):
+
+        fq_filename = "file1.txt.bz"
+
+        ftp_connection = ftplib.FTP('ftp.uconn.edu')
+        ftp_connection.login('anonymous', 'anonymous@domain.com')
+        ftp_connection.cwd("/48_hour/")
+
+        if fq_filename not in ftp_connection.nlst():
+            fh = open(os.path.join("data", fq_filename), 'rb')
+            ftp_connection.storbinary('STOR file1.txt.bz', fh)
+            fh.close()
+
+        params = {
+            'download_type': 'FTP',
+            'file_url': 'ftp://ftp.uconn.edu/48_hour/file1.txt.bz',
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                            os.stat(ret1['copy_file_path']).st_size)
+
+

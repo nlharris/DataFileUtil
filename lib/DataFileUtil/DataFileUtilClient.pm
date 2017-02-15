@@ -1475,6 +1475,188 @@ Get the versions of the Workspace service and Shock service.
     }
 }
  
+
+
+=head2 download_staging_file
+
+  $results = $obj->download_staging_file($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.DownloadStagingFileParams
+$results is a DataFileUtil.DownloadStagingFileOutput
+DownloadStagingFileParams is a reference to a hash where the following keys are defined:
+	staging_file_subdir_path has a value which is a string
+DownloadStagingFileOutput is a reference to a hash where the following keys are defined:
+	copy_file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.DownloadStagingFileParams
+$results is a DataFileUtil.DownloadStagingFileOutput
+DownloadStagingFileParams is a reference to a hash where the following keys are defined:
+	staging_file_subdir_path has a value which is a string
+DownloadStagingFileOutput is a reference to a hash where the following keys are defined:
+	copy_file_path has a value which is a string
+
+
+=end text
+
+=item Description
+
+Download a staging area file to scratch area
+
+=back
+
+=cut
+
+ sub download_staging_file
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function download_staging_file (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to download_staging_file:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'download_staging_file');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.download_staging_file",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'download_staging_file',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method download_staging_file",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'download_staging_file',
+				       );
+    }
+}
+ 
+
+
+=head2 download_web_file
+
+  $results = $obj->download_web_file($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a DataFileUtil.DownloadWebFileParams
+$results is a DataFileUtil.DownloadWebFileOutput
+DownloadWebFileParams is a reference to a hash where the following keys are defined:
+	file_url has a value which is a string
+	download_type has a value which is a string
+DownloadWebFileOutput is a reference to a hash where the following keys are defined:
+	copy_file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a DataFileUtil.DownloadWebFileParams
+$results is a DataFileUtil.DownloadWebFileOutput
+DownloadWebFileParams is a reference to a hash where the following keys are defined:
+	file_url has a value which is a string
+	download_type has a value which is a string
+DownloadWebFileOutput is a reference to a hash where the following keys are defined:
+	copy_file_path has a value which is a string
+
+
+=end text
+
+=item Description
+
+Download a web file to scratch area
+
+=back
+
+=cut
+
+ sub download_web_file
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function download_web_file (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to download_web_file:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'download_web_file');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "DataFileUtil.download_web_file",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'download_web_file',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method download_web_file",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'download_web_file',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -1518,16 +1700,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'versions',
+                method_name => 'download_web_file',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method versions",
+            error => "Error invoking method download_web_file",
             status_line => $self->{client}->status_line,
-            method_name => 'versions',
+            method_name => 'download_web_file',
         );
     }
 }
@@ -2586,6 +2768,164 @@ data has a value which is a reference to a list where each element is a DataFile
 
 a reference to a hash where the following keys are defined:
 data has a value which is a reference to a list where each element is a DataFileUtil.ObjectData
+
+
+=end text
+
+=back
+
+
+
+=head2 DownloadStagingFileParams
+
+=over 4
+
+
+
+=item Description
+
+Input parameters for the "download_staging_file" function.
+
+      Required parameters:
+      staging_file_subdir_path: subdirectory file path
+      e.g. 
+        for file: /data/bulk/user_name/file_name
+        staging_file_subdir_path is file_name
+        for file: /data/bulk/user_name/subdir_1/subdir_2/file_name
+        staging_file_subdir_path is subdir_1/subdir_2/file_name
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+staging_file_subdir_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+staging_file_subdir_path has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 DownloadStagingFileOutput
+
+=over 4
+
+
+
+=item Description
+
+Results from the download_staging_file function.
+
+      copy_file_path: copied file scratch area path
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+copy_file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+copy_file_path has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 DownloadWebFileParams
+
+=over 4
+
+
+
+=item Description
+
+Input parameters for the "download_web_file" function.
+
+      Required parameters:
+      file_url: file URL
+      download_type: one of ['Direct Download', 'FTP', 'DropBox', 'Google Drive']
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_url has a value which is a string
+download_type has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_url has a value which is a string
+download_type has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 DownloadWebFileOutput
+
+=over 4
+
+
+
+=item Description
+
+Results from the download_web_file function.
+
+      copy_file_path: copied file scratch area path
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+copy_file_path has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+copy_file_path has a value which is a string
 
 
 =end text
