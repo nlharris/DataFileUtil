@@ -1203,7 +1203,7 @@ class DataFileUtilTest(unittest.TestCase):
                         'download_type': 'Direct Download',
                         'file_url': 'invalid_URL'}
         error_msg = "Cannot connect to URL: invalid_URL"
-        self.fail_download_web_file(invalid_input_params, error_msg)
+        self.fail_download_web_file(invalid_input_params, error_msg, startswith=True)
 
     def test_fail_download_web_file_google_drive(self):
         # invalid Google Drive params
