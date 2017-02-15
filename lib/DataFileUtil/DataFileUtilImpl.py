@@ -1435,7 +1435,7 @@ archiving.
 
         if download_type != 'FTP':
           try:
-            response = requests.get(file_url)
+            response = requests.get(file_url, stream=True)
           except:
             raise ValueError('Cannot connect to URL: {}'.format(file_url))
           else:
