@@ -1147,8 +1147,7 @@ class DataFileUtilTest(unittest.TestCase):
                 self.ctx,
                 params
             )[0]
-        self.assertEqual(ret1['copy_file_path'],
-                         str(os.path.join(tmp_dir, 'tmp', 'file1.txt')))
+        self.assertRegexpMatches(ret1['copy_file_path'], tmp_dir + '/.*/' + 'file1.txt')
 
     @patch.object(DataFileUtil, "STAGING_FILE_PREFIX", new='/kb/module/work/tmp/')
     def test_download_staging_file_compressed_file(self):
@@ -1168,8 +1167,31 @@ class DataFileUtilTest(unittest.TestCase):
                 self.ctx,
                 params
             )[0]
-        self.assertEqual(ret1['copy_file_path'],
-                         str(os.path.join(tmp_dir, 'tmp', 'file1.txt')))
+        self.assertRegexpMatches(ret1['copy_file_path'], tmp_dir + '/.*/' + 'file1.txt')
+
+    @patch.object(DataFileUtil, "STAGING_FILE_PREFIX", new='/kb/module/work/tmp/')
+    def test_download_staging_file_archive_file(self):
+        tmp_dir = self.cfg['scratch']
+        test_file = "zip1.zip"
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        test_file_path = os.path.join(unpack_dir, test_file)
+        if not os.path.exists(unpack_dir):
+            os.makedirs(unpack_dir)
+        shutil.copy('data/'+test_file, test_file_path)
+
+        params = {
+            'staging_file_subdir_path': 'test_download_staging_file/zip1.zip'
+        }
+
+        ret1 = self.impl.download_staging_file(
+                self.ctx,
+                params
+            )[0]
+        self.assertRegexpMatches(ret1['copy_file_path'], tmp_dir + '/.*/' + 'zip1.zip')
+        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
+                ['tar1', 'zip1.zip'])
+        self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
+                            os.stat(ret1['copy_file_path']).st_size)
 
     def fail_download_web_file(self, params, error, 
                                         exception=ValueError, startswith=False):
@@ -1194,7 +1216,7 @@ class DataFileUtilTest(unittest.TestCase):
 
         invalid_input_params = {
                         'download_type': 'invalid_download_type',
-                        'file_url': 'file_url_str'}
+                        'file_url': 'http://www.google.com'}
         error_msg = "[invalid_download_type] download_type is invalid.\n"
         error_msg += "Please use one of ['Direct Download', 'FTP', 'DropBox', 'Google Drive']"
         self.fail_download_web_file(invalid_input_params, error_msg) 
@@ -1211,6 +1233,14 @@ class DataFileUtilTest(unittest.TestCase):
                         'download_type': 'Google Drive',
                         'file_url': 'http://www.google.com'}
         error_msg = "Invalid Google Drive Link: http://www.google.com"
+        self.fail_download_web_file(invalid_input_params, error_msg)
+
+
+        invalid_input_params = {
+                        'download_type': 'Google Drive',
+                        'file_url': 'https://drive.google.com/invalid_link'}
+        error_msg = 'Unexpected Google Drive share link.\n'
+        error_msg += 'URL: https://drive.google.com/invalid_link'
         self.fail_download_web_file(invalid_input_params, error_msg)
 
     def test_fail_download_web_file_dropbox(self):
@@ -1305,10 +1335,44 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
                     os.stat(ret1['copy_file_path']).st_size) 
 
+    def test_download_direct_link_compress_file(self):
+        # Box direct download link of 'zip1.zip'
+        file_url = 'https://anl.box.com/shared/static/'
+        file_url += 'ra6utd1qd9fdr6f0dgoqi6jhe4uy2xe8.zip'
+        params = {
+            'download_type': 'Direct Download',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'zip1.zip')
+        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
+                ['tar1', 'zip1.zip'])
+        self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size) 
+
     def test_download_dropbox_link_uncompress_file(self):
         # dropbox link of 'file1.txt'
         file_url = 'https://www.dropbox.com/s/'
         file_url += 'w5ct52rp95cukwq/file1.txt?dl=0'
+        params = {
+            'download_type': 'DropBox',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'file1.txt')
+        self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_dropbox_link_missing_question_mark(self):
+        # dropbox link missing question mark of 'file1.txt'
+        file_url = 'https://www.dropbox.com/s/'
+        file_url += 'w5ct52rp95cukwq/file1.txt'
         params = {
             'download_type': 'DropBox',
             'file_url': file_url
@@ -1335,6 +1399,24 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'file1.txt')
         self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_dropbox_link_archive_file(self):
+        # dropbox link of 'zip1.zip'
+        file_url = 'https://www.dropbox.com/s/'
+        file_url += 'l95ynq1vswfjdn9/zip1.zip'
+        params = {
+            'download_type': 'DropBox',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'zip1.zip')
+        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
+                ['tar1', 'zip1.zip'])
+        self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                     os.stat(ret1['copy_file_path']).st_size)
 
     def test_download_google_drive_link_uncompress_file(self):
@@ -1367,6 +1449,24 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'file1.txt')
         self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                    os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_google_drive_link_archive_file(self):
+        # google drive link of 'zip1.zip'
+        file_url = 'https://drive.google.com/open?'
+        file_url += 'id=0B0exSa7ebQ0qcEhRaDJoVDJSTkk'
+        params = {
+            'download_type': 'Google Drive',
+            'file_url': file_url
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'zip1.zip')
+        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
+                ['tar1', 'zip1.zip'])
+        self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                     os.stat(ret1['copy_file_path']).st_size)
 
     def test_download_ftp_link_uncompress_file(self):
@@ -1417,6 +1517,33 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'file1.txt')
         self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
+                            os.stat(ret1['copy_file_path']).st_size)
+
+    def test_download_ftp_link_archive_file(self):
+
+        fq_filename = "zip1.zip"
+
+        ftp_connection = ftplib.FTP('ftp.uconn.edu')
+        ftp_connection.login('anonymous', 'anonymous@domain.com')
+        ftp_connection.cwd("/48_hour/")
+
+        if fq_filename not in ftp_connection.nlst():
+            fh = open(os.path.join("data", fq_filename), 'rb')
+            ftp_connection.storbinary('STOR zip1.zip', fh)
+            fh.close()
+
+        params = {
+            'download_type': 'FTP',
+            'file_url': 'ftp://ftp.uconn.edu/48_hour/zip1.zip',
+        }
+
+        ret1 = self.impl.download_web_file(self.ctx, params)[0]
+        self.assertIsNotNone(ret1['copy_file_path'])
+        self.assertEqual(os.path.basename(ret1['copy_file_path']),
+                         'zip1.zip')
+        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
+                ['tar1', 'zip1.zip'])
+        self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                             os.stat(ret1['copy_file_path']).st_size)
 
 

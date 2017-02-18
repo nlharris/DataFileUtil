@@ -279,7 +279,11 @@ archiving.
         elif download_type == 'Google Drive':
             copy_file_path = self._download_google_drive_link(file_url)
         else:
-            raise ValueError('Invalid download type: {}'.format(download_type))
+            valid_download_types = ['Direct Download', 'FTP', 
+                                'DropBox', 'Google Drive']
+            error_msg = "[{}] download_type is invalid.\n".format(download_type)
+            error_msg += "Please use one of {}".format(valid_download_types)
+            raise ValueError(error_msg)
 
         return copy_file_path
 
@@ -1379,16 +1383,12 @@ archiving.
         
         staging_file_subdir_path = params.get('staging_file_subdir_path')
         staging_file_name = os.path.basename(staging_file_subdir_path)
-        token_user = ctx['user_id']
         staging_file_path = self._get_staging_file_path(
-            token_user, staging_file_subdir_path)
+                                    ctx['user_id'], staging_file_subdir_path)
 
         self.log('Start downloading staging file: %s' % staging_file_path)
-        dstdir = os.path.join(self.scratch, 'tmp')
-        if not os.path.exists(dstdir):
-            os.makedirs(dstdir)
-        shutil.copy2(staging_file_path, dstdir)
-        copy_file_path = os.path.join(dstdir, staging_file_name)
+        shutil.copy2(staging_file_path, self.tmp)
+        copy_file_path = os.path.join(self.tmp, staging_file_name)
         self.log('Copied staging file from %s to %s' %
                  (staging_file_path, copy_file_path))
 
@@ -1427,13 +1427,6 @@ archiving.
 
         file_url = params.get('file_url')
         download_type = params.get('download_type')
-
-        valid_download_types = ['Direct Download', 'FTP', 
-                                'DropBox', 'Google Drive']
-        if download_type not in valid_download_types:
-          error_msg = "[{}] download_type is invalid.\n".format(download_type)
-          error_msg += "Please use one of {}".format(valid_download_types)
-          raise ValueError(error_msg)
 
         if download_type != 'FTP':
           try:
