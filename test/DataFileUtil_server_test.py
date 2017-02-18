@@ -1133,7 +1133,8 @@ class DataFileUtilTest(unittest.TestCase):
     def test_download_staging_file(self):
         tmp_dir = self.cfg['scratch']
         test_file = "file1.txt"
-        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 
+                                            'test_download_staging_file')
         test_file_path = os.path.join(unpack_dir, test_file)
         if not os.path.exists(unpack_dir):
             os.makedirs(unpack_dir)
@@ -1153,7 +1154,8 @@ class DataFileUtilTest(unittest.TestCase):
     def test_download_staging_file_compressed_file(self):
         tmp_dir = self.cfg['scratch']
         test_file = "file1.txt.gz"
-        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 
+                                        'test_download_compressed_staging_file')
         test_file_path = os.path.join(unpack_dir, test_file)
         if not os.path.exists(unpack_dir):
             os.makedirs(unpack_dir)
@@ -1173,7 +1175,8 @@ class DataFileUtilTest(unittest.TestCase):
     def test_download_staging_file_archive_file(self):
         tmp_dir = self.cfg['scratch']
         test_file = "zip1.zip"
-        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 'test_download_staging_file')
+        unpack_dir = os.path.join(tmp_dir, self.ctx['user_id'], 
+                                                'test_download_archive_staging_file')
         test_file_path = os.path.join(unpack_dir, test_file)
         if not os.path.exists(unpack_dir):
             os.makedirs(unpack_dir)
@@ -1188,8 +1191,8 @@ class DataFileUtilTest(unittest.TestCase):
                 params
             )[0]
         self.assertRegexpMatches(ret1['copy_file_path'], tmp_dir + '/.*/' + 'zip1.zip')
-        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
-                ['tar1', 'zip1.zip'])
+        self.assertTrue(set(['tar1', 'zip1.zip']) <= 
+                    set(os.listdir(os.path.dirname(ret1['copy_file_path']))))
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                             os.stat(ret1['copy_file_path']).st_size)
 
@@ -1335,7 +1338,7 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.stat(os.path.join("data", "file1.txt")).st_size,
                     os.stat(ret1['copy_file_path']).st_size) 
 
-    def test_download_direct_link_compress_file(self):
+    def test_download_direct_link_archive_file(self):
         # Box direct download link of 'zip1.zip'
         file_url = 'https://anl.box.com/shared/static/'
         file_url += 'ra6utd1qd9fdr6f0dgoqi6jhe4uy2xe8.zip'
@@ -1348,8 +1351,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertIsNotNone(ret1['copy_file_path'])
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'zip1.zip')
-        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
-                ['tar1', 'zip1.zip'])
+        self.assertTrue(set(['tar1', 'zip1.zip']) <= 
+                    set(os.listdir(os.path.dirname(ret1['copy_file_path']))))
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                     os.stat(ret1['copy_file_path']).st_size) 
 
@@ -1414,8 +1417,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertIsNotNone(ret1['copy_file_path'])
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'zip1.zip')
-        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
-                ['tar1', 'zip1.zip'])
+        self.assertTrue(set(['tar1', 'zip1.zip']) <= 
+                    set(os.listdir(os.path.dirname(ret1['copy_file_path']))))
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                     os.stat(ret1['copy_file_path']).st_size)
 
@@ -1464,8 +1467,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertIsNotNone(ret1['copy_file_path'])
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'zip1.zip')
-        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
-                ['tar1', 'zip1.zip'])
+        self.assertTrue(set(['tar1', 'zip1.zip']) <= 
+                    set(os.listdir(os.path.dirname(ret1['copy_file_path']))))
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                     os.stat(ret1['copy_file_path']).st_size)
 
@@ -1541,8 +1544,8 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertIsNotNone(ret1['copy_file_path'])
         self.assertEqual(os.path.basename(ret1['copy_file_path']),
                          'zip1.zip')
-        self.assertItemsEqual(os.listdir(os.path.dirname(ret1['copy_file_path'])),
-                ['tar1', 'zip1.zip'])
+        self.assertTrue(set(['tar1', 'zip1.zip']) <= 
+                    set(os.listdir(os.path.dirname(ret1['copy_file_path']))))
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                             os.stat(ret1['copy_file_path']).st_size)
 
