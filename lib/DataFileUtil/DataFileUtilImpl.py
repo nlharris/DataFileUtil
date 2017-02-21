@@ -292,16 +292,21 @@ archiving.
         _retrieve_filepath: retrieve file name from download URL and return local file path
 
         """
+
         try:
             response = requests.get(file_url, stream=True)
-            content_disposition = response.headers['content-disposition']
-        except KeyError:
-            self.log('Parsing file name directly from URL')
-            file_name = file_url.split('/')[-1]
+        except BaseException as error:
+            error_msg = 'Cannot connect to URL: {}\n'.format(file_url)
+            error_msg += 'Exception: {}'.format(error)
+            raise ValueError(error_msg)
         else:
-            file_name = content_disposition.split('filename="')[-1].split('";')[0]
-        finally:
-            response.close()
+            try:
+                content_disposition = response.headers['content-disposition']
+            except KeyError:
+                self.log('Parsing file name directly from URL')
+                file_name = file_url.split('/')[-1]
+            else:
+                file_name = content_disposition.split('filename="')[-1].split('";')[0]
             
         self.log('Retrieving file name from url: {}'.format(file_name))
         copy_file_path = os.path.join(self.tmp, file_name)
@@ -1421,16 +1426,6 @@ archiving.
 
         file_url = params.get('file_url')
         download_type = params.get('download_type')
-
-        if download_type != 'FTP':
-          try:
-            response = requests.get(file_url, stream=True)
-          except BaseException as error:
-            error_msg = 'Cannot connect to URL: {}\n'.format(file_url)
-            error_msg += 'Exception: {}'.format(error)
-            raise ValueError(error_msg)
-          else:
-            response.close()
 
         self.log('Start downloading web file from: {}'.format(file_url))
         copy_file_path = self._download_file(download_type, file_url)
