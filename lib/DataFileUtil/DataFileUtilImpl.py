@@ -287,7 +287,7 @@ archiving.
 
         return copy_file_path
 
-    def _retrieve_filepath(self, file_url, download_type):
+    def _retrieve_filepath(self, file_url):
         """
         _retrieve_filepath: retrieve file name from download URL and return local file path
 
@@ -308,15 +308,15 @@ archiving.
 
         return copy_file_path
 
-    def _download_to_file(self, file_url, copy_file_path):
+    def _download_to_file(self, file_url):
         """
         _download_to_file: download url content to file
 
         params:
         file_url: direct download URL
-        copy_file_path: output file saving path
 
         """
+        copy_file_path = self._retrieve_filepath(file_url)
 
         self.log('Connecting and downloading web source: {}'.format(
                                                                 file_url))
@@ -324,7 +324,7 @@ archiving.
             online_file = urllib2.urlopen(file_url)
         except urllib2.HTTPError as e:
             raise ValueError(
-                "The server error\nURL: {}\nError code: {}".format(
+                "Having a server error\nURL: {}\nError code: {}".format(
                                                         file_url, e.code))
         except urllib2.URLError as e:
             raise ValueError(
@@ -349,6 +349,8 @@ archiving.
 
             self.log('Downloaded file to {}'.format(copy_file_path))
 
+        return copy_file_path
+
     def _download_direct_download_link(self, file_url):
         """
         _download_direct_download_link: direct download link handler
@@ -358,11 +360,7 @@ archiving.
         copy_file_path: output file saving path
 
         """
-
-        copy_file_path = self._retrieve_filepath(file_url, 'Direct Download')
-        self._download_to_file(
-            file_url, copy_file_path)
-
+        copy_file_path = self._download_to_file(file_url)
         copy_file_path = self._unpack(copy_file_path, True)
 
         return copy_file_path
@@ -388,10 +386,8 @@ archiving.
 
         self.log('Generating DropBox direct download link\n' +
                     ' from: {}\n to: {}'.format(file_url, force_download_link))
-        copy_file_path = self._retrieve_filepath(force_download_link, 'DropBox')
-        self._download_to_file(
-            force_download_link, copy_file_path)
 
+        copy_file_path = self._download_to_file(force_download_link)
         copy_file_path = self._unpack(copy_file_path, True)
 
         return copy_file_path
@@ -423,10 +419,8 @@ archiving.
 
         self.log('Generating Google Drive direct download link\n'+
                     ' from: {}\n to: {}'.format(file_url, force_download_link))
-        copy_file_path = self._retrieve_filepath(force_download_link, 'Google Drive')
-        self._download_to_file(
-            force_download_link, copy_file_path)
 
+        copy_file_path = self._download_to_file(force_download_link)
         copy_file_path = self._unpack(copy_file_path, True)
 
         return copy_file_path
