@@ -328,13 +328,15 @@ archiving.
         try:
             online_file = urllib2.urlopen(file_url)
         except urllib2.HTTPError as e:
-            raise ValueError(
-                "Having a server error\nURL: {}\nError code: {}".format(
-                                                        file_url, e.code))
+            self.log('Server error on file retrieval:')
+            self.log(str(e))
+            raise ValueError('Error contacting server at {}. Code: {} Reason: {}'.format(
+                                                                  file_url, e.code, e.reason))
         except urllib2.URLError as e:
-            raise ValueError(
-                "Failed to reach URL: {}\nReason: {}".format(
-                                                      file_url, e.reason))
+            self.log('Server error on file retrieval:')
+            self.log(str(e))
+            raise ValueError('Error contacting server at {}. Reason: {}'.format(
+                                                                  file_url,e.reason))
         else:
             total_size = int(online_file.info().getheader('Content-Length').strip())
             CHUNK = 128 * 1024 * 1024
