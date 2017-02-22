@@ -1549,4 +1549,28 @@ class DataFileUtilTest(unittest.TestCase):
         self.assertEqual(os.stat(os.path.join("data", "zip1.zip")).st_size,
                             os.stat(ret1['copy_file_path']).st_size)
 
+    def mock_retrieve_filepath(file_url):
+        print 'Mocking _retrieve_filepath'
+        print "Mocking connecting file_url: {}".format(file_url)
+        copy_file_path = 'test_file_path'
+        return copy_file_path
+
+    @patch.object(DataFileUtil, "_retrieve_filepath", side_effect=mock_retrieve_filepath)
+    def test_download_to_file_HTTPError(self, _retrieve_filepath):
+        fake_http_url = 'http://www.google.com/fake'
+        invalid_input_params = {
+                        'download_type': 'Direct Download',
+                        'file_url': fake_http_url}
+        error_msg = "Error contacting server at {}. Code: ".format(fake_http_url)
+        self.fail_download_web_file(invalid_input_params, error_msg, startswith=True)
+
+    @patch.object(DataFileUtil, "_retrieve_filepath", side_effect=mock_retrieve_filepath)
+    def test_download_to_file_URLError(self, _retrieve_filepath):
+        fake_url = 'http://fake'
+        invalid_input_params = {
+                        'download_type': 'Direct Download',
+                        'file_url': fake_url}
+        error_msg = "Error contacting server at {}. Reason: ".format(fake_url)
+        self.fail_download_web_file(invalid_input_params, error_msg, startswith=True)
+
 
