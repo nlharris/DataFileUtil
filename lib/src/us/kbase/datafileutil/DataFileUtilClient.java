@@ -414,6 +414,42 @@ public class DataFileUtilClient {
         return res;
     }
 
+    /**
+     * <p>Original spec-file function name: download_staging_file</p>
+     * <pre>
+     * Download a staging area file to scratch area
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.DownloadStagingFileParams DownloadStagingFileParams}
+     * @return   parameter "results" of type {@link us.kbase.datafileutil.DownloadStagingFileOutput DownloadStagingFileOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public DownloadStagingFileOutput downloadStagingFile(DownloadStagingFileParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<DownloadStagingFileOutput>> retType = new TypeReference<List<DownloadStagingFileOutput>>() {};
+        List<DownloadStagingFileOutput> res = caller.jsonrpcCall("DataFileUtil.download_staging_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: download_web_file</p>
+     * <pre>
+     * Download a web file to scratch area
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.datafileutil.DownloadWebFileParams DownloadWebFileParams}
+     * @return   parameter "results" of type {@link us.kbase.datafileutil.DownloadWebFileOutput DownloadWebFileOutput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public DownloadWebFileOutput downloadWebFile(DownloadWebFileParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<DownloadWebFileOutput>> retType = new TypeReference<List<DownloadWebFileOutput>>() {};
+        List<DownloadWebFileOutput> res = caller.jsonrpcCall("DataFileUtil.download_web_file", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
     public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<Map<String, Object>>> retType = new TypeReference<List<Map<String, Object>>>() {};
