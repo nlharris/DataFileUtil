@@ -26,6 +26,7 @@ compile:
 		--javasrc src \
 		--java \
 		--pyimplname $(SERVICE_CAPS).$(SERVICE_CAPS)Impl;
+		# this is commented out until https://github.com/kbase/kb_sdk/pull/227 is available in all catalog instances
 		#--pysrvname $(SERVICE_CAPS).$(SERVICE_CAPS)Server # add slash when restore
 	kb-sdk compile --html $(SPEC_FILE)
 

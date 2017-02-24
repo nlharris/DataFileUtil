@@ -385,6 +385,14 @@ class Application(object):
                              name='DataFileUtil.versions',
                              types=[])
         self.method_authentication['DataFileUtil.versions'] = 'required'  # noqa
+        self.rpc_service.add(impl_DataFileUtil.download_staging_file,
+                             name='DataFileUtil.download_staging_file',
+                             types=[dict])
+        self.method_authentication['DataFileUtil.download_staging_file'] = 'required'  # noqa
+        self.rpc_service.add(impl_DataFileUtil.download_web_file,
+                             name='DataFileUtil.download_web_file',
+                             types=[dict])
+        self.method_authentication['DataFileUtil.download_web_file'] = 'required'  # noqa
         self.rpc_service.add(impl_DataFileUtil.status,
                              name='DataFileUtil.status',
                              types=[dict])
