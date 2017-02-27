@@ -54,9 +54,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.13"
-    GIT_URL = "https://github.com/Tianhao-Gu/DataFileUtil.git"
-    GIT_COMMIT_HASH = "b64604bb196ffbbdc19171ee732a55b55816c2ed"
+    VERSION = "0.0.15"
+    GIT_URL = "https://github.com/rsutormin/DataFileUtil"
+    GIT_COMMIT_HASH = "e53b1ff134211d3a4ac9b53f3cd91fd767e1b499"
 
     #BEGIN_CLASS_HEADER
 
@@ -128,19 +128,19 @@ archiving.
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
         if pack == 'targz':
-          ctf = shutil.make_archive(tf, 'gztar', d)
-          suffix = ctf.replace(tf, '', 1)
-          shutil.move(ctf, file_path + suffix)
+            ctf = shutil.make_archive(tf, 'gztar', d)
+            suffix = ctf.replace(tf, '', 1)
+            shutil.move(ctf, file_path + suffix)
         else:
-          suffix  = '.zip'
-          with zipfile.ZipFile(tf + suffix, 'w',
+            suffix  = '.zip'
+            with zipfile.ZipFile(tf + suffix, 'w',
                         zipfile.ZIP_DEFLATED,
                         allowZip64=True) as zip_file:
-              for root, dirs, files in os.walk(d):
-                for file in files:
-                  zip_file.write(os.path.join(root, file), file)
+                for root, dirs, files in os.walk(d):
+                    for file in files:
+                        zip_file.write(os.path.join(root, file), file)
 
-          shutil.move(tf + suffix, file_path + suffix)
+            shutil.move(tf + suffix, file_path + suffix)
 
         os.remove(tf)
 
@@ -345,13 +345,13 @@ archiving.
                 with open(copy_file_path, 'wb') as output:
                     start_time = time.time()
                     while True:
-                      chunk = online_file.read(CHUNK)
-                      if not chunk: break
-                      output.write(chunk)
-                      downloaded += len(chunk)
-                      process = float(downloaded) / total_size * 100
-                      used_time = time.time() - start_time
-                      self.log('downloaded: {:.2f}%, '.format(process) + 
+                        chunk = online_file.read(CHUNK)
+                        if not chunk: break
+                        output.write(chunk)
+                        downloaded += len(chunk)
+                        process = float(downloaded) / total_size * 100
+                        used_time = time.time() - start_time
+                        self.log('downloaded: {:.2f}%, '.format(process) + 
                                         'used: {:.2f}s'.format(used_time))
 
             self.log('Downloaded file to {}'.format(copy_file_path))
@@ -1379,8 +1379,8 @@ archiving.
         # return variables are: results
         #BEGIN download_staging_file
         if not params.get('staging_file_subdir_path'):
-          error_msg = "missing 'staging_file_subdir_path' parameter"
-          raise ValueError(error_msg)
+            error_msg = "missing 'staging_file_subdir_path' parameter"
+            raise ValueError(error_msg)
         
         staging_file_subdir_path = params.get('staging_file_subdir_path')
         staging_file_name = os.path.basename(staging_file_subdir_path)
@@ -1423,8 +1423,8 @@ archiving.
         
         # check for required parameters
         for p in ['file_url', 'download_type']:
-          if p not in params:
-            raise ValueError("missing '{}' parameter".format(p)) 
+            if p not in params:
+                raise ValueError("missing '{}' parameter".format(p)) 
 
         file_url = params.get('file_url')
         download_type = params.get('download_type')
