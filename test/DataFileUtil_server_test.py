@@ -38,7 +38,8 @@ class DataFileUtilTest(unittest.TestCase):
         config.read(config_file)
         for nameval in config.items('DataFileUtil'):
             cls.cfg[nameval[0]] = nameval[1]
-        authServiceUrl = cls.cfg['auth-service-url']
+        authServiceUrl = cls.cfg.get('auth-service-url',
+                "https://kbase.us/services/authorization/Sessions/Login")
         auth_client = _KBaseAuth(authServiceUrl)
         cls.user_id = auth_client.get_user(cls.token)
         # WARNING: don't call any logging methods on the context object,
