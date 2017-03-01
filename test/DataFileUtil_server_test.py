@@ -1578,4 +1578,26 @@ class DataFileUtilTest(unittest.TestCase):
         error_msg = "Error contacting server at {}. Reason: ".format(fake_url)
         self.fail_download_web_file(invalid_input_params, error_msg, startswith=True)
 
+    def test_pack_zip_with_subdirs(self):
+        tmp_dir = os.path.join(self.cfg['scratch'], 'packzipsubdirtest')
+        innerdir = os.path.join(tmp_dir, 'inner')
+        second_innerdir = os.path.join(innerdir, 'sec_inner')
+        os.makedirs(second_innerdir)
+        self.write_file(os.path.join(tmp_dir, 'inzip1.txt'), 'zip1')
+        self.write_file(os.path.join(tmp_dir, 'inzip2.txt'), 'zip2')
+        self.write_file(os.path.join(innerdir, 'innerzip.txt'), 'zipinner')
+        self.write_file(os.path.join(second_innerdir, 'sec_innerzip.txt'), 
+                                                            'sec_zipinner')
+        new_file_path = self.impl.pack_file(
+            self.ctx, {'file_path': tmp_dir + '/target',
+                       'pack': 'zip'})[0]['file_path']
+        self.assertEqual(
+            new_file_path,
+            '/kb/module/work/tmp/packzipsubdirtest/target.zip')
+        with zipfile.ZipFile(new_file_path) as z:
+            self.assertEqual(set(z.namelist()),
+                             set(['inzip1.txt', 'inzip2.txt', 
+                                'inner/innerzip.txt', 
+                                'inner/sec_inner/sec_innerzip.txt']))
+
 
