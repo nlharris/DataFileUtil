@@ -138,7 +138,8 @@ archiving.
                         allowZip64=True) as zip_file:
                 for root, dirs, files in os.walk(d):
                     for file in files:
-                        zip_file.write(os.path.join(root, file), file)
+                        filepath = os.path.join(root, file).replace(d, '')
+                        zip_file.write(os.path.join(root, file), filepath)
 
             shutil.move(tf + suffix, file_path + suffix)
 
