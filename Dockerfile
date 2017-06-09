@@ -19,7 +19,7 @@ RUN pip install requests --upgrade \
     && ( [ $(pip show filemagic|grep -c filemagic) -eq 0 ] || pip uninstall -y filemagic ) \
     && pip install python-magic \
     && pip install ftputil \
-    && pip install ipython \
+    && pip install ipython==5.3.0 \
     && sudo apt-get install nano
 # -----------------------------------------
 
