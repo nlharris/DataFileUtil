@@ -1043,8 +1043,8 @@ class DataFileUtilTest(unittest.TestCase):
                  ]
         self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs2})
         self.ws.delete_objects([{'ref': ref}])
-        ret = self.ws.get_objects2(
-            {'objects': [{'ref': str(ws) + '/ref;' + ref}]})['data']
+        ret = self.impl.get_objects(
+            self.ctx, {'object_refs': [str(ws) + '/ref;' + ref]})[0]['data']
         self.assertEquals(ret[0]['data'], objs1[0]['data'], 'incorrect object data')
 
     def test_get_objects_ws_exception(self):
