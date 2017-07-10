@@ -38,8 +38,8 @@ class DataFileUtilTest(unittest.TestCase):
         config.read(config_file)
         for nameval in config.items('DataFileUtil'):
             cls.cfg[nameval[0]] = nameval[1]
-        authServiceUrl = cls.cfg.get('auth-service-url',
-                "https://kbase.us/services/authorization/Sessions/Login")
+        authServiceUrl = cls.cfg.get(
+            'auth-service-url', "https://kbase.us/services/authorization/Sessions/Login")
         auth_client = _KBaseAuth(authServiceUrl)
         cls.user_id = auth_client.get_user(cls.token)
         # WARNING: don't call any logging methods on the context object,
@@ -54,8 +54,6 @@ class DataFileUtilTest(unittest.TestCase):
                              }],
                         'authenticated': 1})
 
-        
-        
         cls.shockURL = cls.cfg['shock-url']
         cls.ws = Workspace(cls.cfg['workspace-url'], token=cls.token)
         cls.hs = HandleService(url=cls.cfg['handle-service-url'],
@@ -238,14 +236,14 @@ class DataFileUtilTest(unittest.TestCase):
             output.write('0')
 
         print ('--- generating a 3GB zipfile ---\n' +
-            '--- to speed up your local test, ' +
-            'please comment out test_unpack_large_zip ---')
+               '--- to speed up your local test, ' +
+               'please comment out test_unpack_large_zip ---')
 
         compress_size = 0
         count = 0
         while compress_size < size_3GB:
             with zipfile.ZipFile(zip_file_path, 'a', zipfile.ZIP_STORED,
-                    allowZip64=True) as output:
+                                 allowZip64=True) as output:
                 output.write(txt_file_path, str(count) + '.zip')
             count += 1
             compress_size = os.stat(zip_file_path).st_size
@@ -1027,6 +1025,27 @@ class DataFileUtilTest(unittest.TestCase):
                                 },
                                'Object 1, foo, has no data',
                                exception=WorkspaceError)
+
+    def test_get_objects_with_references(self):
+        print('**** test_get_objects_with_references ****')
+        ws = self.ws_info[0]
+        objs1 = [{'name': 'del',
+                  'type': 'Empty.AType-0.1',
+                  'data': {'thingy': 1}
+                  }
+                 ]
+        delobj = self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs1})[0][0]
+        ref = str(delobj[6]) + '/' + str(delobj[0]) + '/' + str(delobj[4])
+        objs2 = [{'name': 'ref',
+                  'type': 'Empty.ARef-0.1',
+                  'data': {'ref': ref}
+                  }
+                 ]
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs2})
+        self.ws.delete_objects([{'ref': ref}])
+        ret = self.impl.get_objects(
+            self.ctx, {'object_refs': [str(ws) + '/ref;' + ref]})[0]['data']
+        self.assertEquals(ret[0]['data'], objs1[0]['data'], 'incorrect object data')
 
     def test_get_objects_ws_exception(self):
         self.fail_get_objects(
