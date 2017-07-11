@@ -1,0 +1,133 @@
+import unittest
+import os.path
+import time
+
+from os import environ
+import gzip
+import shutil
+try:
+    from ConfigParser import ConfigParser  # py2 @UnusedImport
+except:
+    from configparser import ConfigParser  # py3 @UnresolvedImport @Reimport
+
+from DataFileUtil.DataFileUtilImpl import DataFileUtil
+
+
+import random
+import hashlib
+import subprocess
+
+
+class DataFileUtilTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.token = environ.get('KB_AUTH_TOKEN', None)
+        config_file = environ.get('KB_DEPLOYMENT_CONFIG', None)
+        cls.cfg = {}
+        config = ConfigParser()
+        config.read(config_file)
+        for nameval in config.items('DataFileUtil'):
+            cls.cfg[nameval[0]] = nameval[1]
+        cls.scratch = cls.cfg['scratch']
+        shutil.rmtree(cls.scratch)
+        os.mkdir(cls.scratch)
+
+        cls.CHARS = ' abcdefghijklmnopqrstuvwxyz'
+
+        cls.impl = DataFileUtil(cls.cfg)
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+
+    def fstats(self, fname):
+        hash_md5 = hashlib.md5()
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        md5 = hash_md5.hexdigest()
+        size = str(round(os.path.getsize(fname) * 0.000001, 3)) + 'MB'
+        return md5, size
+
+    # for testing compression, this sorta gives something that looks more realistic, but
+    # takes a while to generate larger files
+    # lines= 100100 creates ~21MB file
+    # lines=1100100 creates ~233MB file
+    def create_rand_text_file(self, filepath, lines=100):
+        with open('/kb/module/test/data/words.txt') as f:
+            content = f.readlines()
+        # you may also want to remove whitespace characters like `\n` at the end of each line
+        words = [x.strip() for x in content]
+
+        f = open(filepath, 'w')
+        for l in range(0, lines):
+            for k in range(0, 20):
+                f.write(words[random.SystemRandom().randint(0, len(words) - 1)] + ' ')
+            f.write('\n')
+        f.close()
+
+    # http://www.skorks.com/2010/03/how-to-quickly-generate-a-large-file-on-the-command-line-with-linux/
+    # file size in bytes = count*bs
+    # file is filled with nulls, so super compressible
+    def create_zeros_file(self, filepath, count=1024, bs=1024):
+        cmd = ['dd', 'if=/dev/zero', 'of=' + filepath, 'count=' + str(count), 'bs=' + str(bs)]
+        p = subprocess.Popen(cmd, shell=False)
+        p.wait()
+
+    # random bytes, but this can't be compressed at all
+    def create_rand_bytes_file(self, filepath, count=1024, bs=1024):
+        cmd = ['dd', 'if=/dev/urandom', 'of=' + filepath, 'bs=' + str(bs), 'count=' + str(count)]
+        p = subprocess.Popen(cmd, shell=False)
+        p.wait()
+
+
+    def test(self):
+
+        print('creating large test file...')
+        filename = 'text.txt'
+        filepath = os.path.join(self.scratch, filename)
+
+        # your choice of file creation:
+        # self.create_rand_text_file(filepath, lines=2100100)    # creates ~460mb file
+        # self.create_zeros_file(filepath, bs=1024 * 1024, count=1024)  # creates ~1.1gb file
+        self.create_rand_bytes_file(filepath, bs=1024 * 1024, count=1024)    # creates ~1.1gb file
+
+        md5Original, sizeOriginal = self.fstats(filepath)
+
+
+        start = time.time()
+        comp_file = self.impl.gzip(filepath)
+        md5GZIP, sizeGZIP = self.fstats(comp_file)
+        timeGZIP = str(round(time.time() - start, 3))
+
+        start = time.time()
+        comp_file = self.impl._pigz_compress(filepath)
+        md5PIGZ, sizePIGZ = self.fstats(comp_file)
+        timePIGZ = str(round(time.time() - start, 3))
+
+        start = time.time()
+        uncomp_file = self.impl._decompress(gzip.open, comp_file, False)
+        md5UnGZIP, sizeUnGZIP = self.fstats(uncomp_file)
+        timeUnGZIP = str(round(time.time() - start, 3))
+
+        start = time.time()
+        uncomp_file = self.impl._pigz_decompress(comp_file, False)
+        md5UnPIGZ, sizeUnPIGZ = self.fstats(uncomp_file)
+        timeUnPIGZ = str(round(time.time() - start, 3))
+
+        print('')
+        print('Original File MD5:   ' + md5Original + ' - ' + sizeOriginal)
+        print('    GZIPed File MD5:   ' + md5GZIP + ' - ' + sizeGZIP)
+        print('    PIGZed File MD5:   ' + md5PIGZ + ' - ' + sizePIGZ)
+        print('')
+        print('  unGZIPed File MD5:   ' + md5UnGZIP + ' - ' + sizeUnGZIP)
+        print('  unPIGZed File MD5:   ' + md5UnPIGZ + ' - ' + sizeUnPIGZ)
+
+        print('')
+        print('  compression times: (GZIP vs PIGZ):')
+        print('      ' + timeGZIP + 's vs ' + timePIGZ + 's')
+
+        print('  decompression times: (GZIP vs PIGZ):')
+        print('      ' + timeUnGZIP + 's vs ' + timeUnPIGZ + 's')

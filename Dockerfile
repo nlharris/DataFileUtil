@@ -23,6 +23,8 @@ RUN pip install requests --upgrade \
     && sudo apt-get install nano
 # -----------------------------------------
 
+RUN sudo apt-get install pigz
+
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work
 RUN chmod -R a+rw /kb/module

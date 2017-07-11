@@ -24,7 +24,7 @@ import uuid
 import urllib2
 from contextlib import closing
 import ftplib
-
+import subprocess
 
 class ShockException(Exception):
     pass
@@ -76,6 +76,9 @@ archiving.
 
     ROOT = re.compile(r'^[\\' + os.sep + ']+$')
 
+    # Number of processors used by PIGZ
+    PIGZ_N_PROC = 2
+
     # staging file prefix
     STAGING_FILE_PREFIX = '/data/bulk/'
 
@@ -102,11 +105,40 @@ archiving.
             shutil.copyfileobj(s, t)
         return newfile
 
+    # alternate drop-in replacement for the above gzip function using
+    # the pigz parallel compression program
+    def _pigz_compress(self, oldfile, n_proc=None):
+        if self.endswith(oldfile, [self.GZ, self.GZIP, self.TGZ]):
+            self.log('File {} is already gzipped, skipping'.format(oldfile))
+            return oldfile
+        newfile = oldfile + self.GZ
+        self.log('gzipping (with pigz) {} to {}'.format(oldfile, newfile))
+
+        # -f to force overwrite
+        # --keep to retain the original file
+        # --fast optimizes speed over compression level (we lose a few % in compression size apparantly)
+        # --processes to limit the number of processes
+        # --stdout to print compressed file to stdout (necessary to select specific filename)
+        if not n_proc:
+            n_proc = self.PIGZ_N_PROC
+        command = ['pigz', '-f', '--keep', '--fast', '--processes', str(n_proc), '--stdout', oldfile]
+
+        newfile_handle = open(newfile, "w")
+        p = subprocess.Popen(command, shell=False, stdout=newfile_handle)
+        exitCode = p.wait()
+        newfile_handle.close()
+
+        if (exitCode != 0):
+            raise ValueError('Error running command: ' + ' '.join(command) + '\n' +
+                             'Exit Code: ' + str(exitCode))
+        return newfile
+
     def _pack(self, file_path, pack):
         if pack not in ['gzip', 'targz', 'zip']:
             raise ValueError('Invalid pack value: ' + pack)
         if pack == 'gzip':
-            return self.gzip(file_path)
+            return self._pigz_compress(file_path)
+            # return self.gzip(file_path)
         if os.path.isdir(file_path):
             file_path = file_path + os.sep  # double seps ok here
         d, f = os.path.split(file_path)  # will return dir as f if no / at end
@@ -167,6 +199,42 @@ archiving.
         self._unarchive(new_file, unpack, t)
         return new_file
 
+    # almost drop-in replacement for _decompress which always uses pigz instead
+    # of the passed in file open function
+    def _pigz_decompress(self, file_path, unpack, n_proc=None):
+        new_file = self._decompress_file_name(file_path)
+        self.log('decompressing (with pigz) {} to {} ...'.format(file_path, new_file))
+
+        # --keep to retain the original file
+        # --processes to limit the number of processes
+        # --stdout to print compressed file to stdout (necessary to select specific filename)
+        if not n_proc:
+            n_proc = self.PIGZ_N_PROC
+        command = ['pigz', '--decompress', '--keep', '--processes', str(n_proc), '--stdout', file_path]
+
+        # seems like an odd case, but the decompressed file name, if it can't be mapped
+        # is the same name as the original file. We can't do this when piping stdout from
+        # pigz, so instead we pipe to a temporary file, then move it to overwrite the original
+        output_file = new_file
+        if new_file == file_path:
+            output_file = new_file + '.temp'
+
+        newfile_handle = open(output_file, "w")
+        p = subprocess.Popen(command, shell=False, stdout=newfile_handle)
+        exitCode = p.wait()
+        newfile_handle.close()
+
+        if (exitCode != 0):
+            raise ValueError('Error running command: ' + ' '.join(command) + '\n' +
+                             'Exit Code: ' + str(exitCode))
+
+        if new_file != output_file:
+            shutil.move(output_file, new_file)
+
+        t = magic.from_file(new_file, mime=True)
+        self._unarchive(new_file, unpack, t)
+        return new_file
+
     def _unarchive(self, file_path, unpack, file_type):
         file_dir = os.path.dirname(file_path)
         if file_type in ['application/' + x for x in 'x-tar', 'tar', 'x-gtar']:
@@ -204,7 +272,8 @@ archiving.
     def _unpack(self, file_path, unpack):
         t = magic.from_file(file_path, mime=True)
         if t in ['application/' + x for x in 'x-gzip', 'gzip']:
-            return self._decompress(gzip.open, file_path, unpack)
+            return self._pigz_decompress(file_path, unpack)
+            # return self._decompress(gzip.open, file_path, unpack)
         # probably most of these aren't needed, but hard to find a definite
         # source
         if t in ['application/' + x for x in
@@ -280,8 +349,8 @@ archiving.
         elif download_type == 'Google Drive':
             copy_file_path = self._download_google_drive_link(file_url)
         else:
-            valid_download_types = ['Direct Download', 'FTP', 
-                                'DropBox', 'Google Drive']
+            valid_download_types = ['Direct Download', 'FTP',
+                                    'DropBox', 'Google Drive']
             error_msg = "[{}] download_type is invalid.\n".format(download_type)
             error_msg += "Please use one of {}".format(valid_download_types)
             raise ValueError(error_msg)
@@ -308,7 +377,7 @@ archiving.
                 file_name = file_url.split('/')[-1]
             else:
                 file_name = content_disposition.split('filename="')[-1].split('";')[0]
-            
+
         self.log('Retrieving file name from url: {}'.format(file_name))
         copy_file_path = os.path.join(self.tmp, file_name)
 
