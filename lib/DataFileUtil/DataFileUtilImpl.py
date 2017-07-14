@@ -295,7 +295,7 @@ archiving.
         """
 
         try:
-            response = requests.get(file_url, stream=True, verify=False)
+            response = requests.get(file_url, stream=True)
         except BaseException as error:
             error_msg = 'Cannot connect to URL: {}\n'.format(file_url)
             error_msg += 'Exception: {}'.format(error)
