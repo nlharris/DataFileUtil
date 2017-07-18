@@ -54,9 +54,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.15"
-    GIT_URL = "https://github.com/rsutormin/DataFileUtil"
-    GIT_COMMIT_HASH = "e53b1ff134211d3a4ac9b53f3cd91fd767e1b499"
+    VERSION = "0.0.18"
+    GIT_URL = "https://github.com/Tianhao-Gu/DataFileUtil.git"
+    GIT_COMMIT_HASH = "f2c8a0f36d1282765dffcceadcf96f583518d74f"
 
     #BEGIN_CLASS_HEADER
 

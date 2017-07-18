@@ -20,8 +20,11 @@ RUN pip install requests --upgrade \
     && pip install python-magic \
     && pip install ftputil \
     && pip install ipython==5.3.0 \
-    && sudo apt-get install nano
+    && sudo apt-get install nano 
 # -----------------------------------------
+
+RUN sudo apt-get update \
+    && yes '' | sudo apt-get -y upgrade openssl
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work
