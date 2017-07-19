@@ -23,6 +23,9 @@ RUN pip install requests --upgrade \
     && sudo apt-get install nano
 # -----------------------------------------
 
+RUN sudo apt-get update \
+    && yes '' | sudo apt-get -y upgrade openssl
+
 RUN sudo apt-get install pigz
 
 COPY ./ /kb/module
