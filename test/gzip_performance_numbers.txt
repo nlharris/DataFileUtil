@@ -135,3 +135,61 @@ Original File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
   decompression times: (GZIP vs PIGZ):
       27.128s vs 5.759s
 
+
+7/19/2017
+COMPRESSION LEVEL TESTS:
+
+===========================
+Test 1: FASTQ COMPRESSION LEVEL = 9
+pigz processor flag = 2 with -7 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 238.654MB
+
+    compression time   = 33.217s
+    decompression time = 6.341s
+
+===========================
+Test 2: FASTQ COMPRESSION LEVEL = 7
+pigz processor flag = 2 with -7 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 239.252MB
+
+    compression time   = 25.566s
+    decompression time = 7.567s
+
+===========================
+Test 3: FASTQ COMPRESSION LEVEL = 5
+pigz processor flag = 2 with -5 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 258.378MB
+
+    compression time   = 11.839s
+    decompression time = 4.977s
+
+===========================
+Test 4: FASTQ COMPRESSION LEVEL = 3
+pigz processor flag = 2 with -3 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 272.079MB
+
+    compression time   = 8.492s
+    decompression time = 5.046s
+
+===========================
+Test 5: FASTQ COMPRESSION LEVEL = 1
+pigz processor flag = 2 with -1 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 294.396MB
+
+    compression time   = 5.881s
+    decompression time = 5.97s
