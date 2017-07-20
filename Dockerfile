@@ -27,6 +27,7 @@ RUN sudo apt-get update \
     && yes '' | sudo apt-get -y upgrade openssl
 
 RUN sudo apt-get install pigz
+RUN pip install bz2file
 
 COPY ./ /kb/module
 RUN mkdir -p /kb/module/work

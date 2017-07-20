@@ -14,7 +14,7 @@ from Workspace.baseclient import ServerError as WorkspaceError
 import semver
 import magic
 import tempfile
-import bz2  # @UnresolvedImport no idea why PyDev is complaining about this
+import bz2file  # @UnresolvedImport no idea why PyDev is complaining about this
 import tarfile
 import zipfile
 import errno
@@ -279,7 +279,7 @@ archiving.
         # source
         if t in ['application/' + x for x in
                  'x-bzip', 'x-bzip2', 'bzip', 'bzip2']:
-            return self._decompress(bz2.BZ2File, file_path, unpack)
+            return self._decompress(bz2file.BZ2File, file_path, unpack)
 
         self._unarchive(file_path, unpack, t)
         return file_path
