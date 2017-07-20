@@ -1,0 +1,195 @@
+
+7/11/17
+All tests run on a macbook pro quadcore 2.8ghz in docker for mac (allocated 4 cpus and
+8gb memory) with an ssd
+
+===========================
+TEST 1:
+pigz processor flag = 4, null file
+
+Original File MD5:   cd573cfaace07e7949bc0c46028904ff - 1073.742MB
+    GZIPed File MD5:   ba735714db9bc27f4c55352b9d3e1d75 - 1.044MB
+    PIGZed File MD5:   c2f88b94dabc0be49106659ba82a90c9 - 1.171MB
+
+  unGZIPed File MD5:   cd573cfaace07e7949bc0c46028904ff - 1073.742MB
+  unPIGZed File MD5:   cd573cfaace07e7949bc0c46028904ff - 1073.742MB
+
+  compression times: (GZIP vs PIGZ):
+      6.934s vs 4.307s
+  decompression times: (GZIP vs PIGZ):
+      31.935s vs 13.29s
+
+
+===========================
+TEST 2:
+pigz processor flag = 4, rand bytes file
+
+Original File MD5:   72b2c3270b96ddd045092d69752ff24f - 1073.742MB
+    GZIPed File MD5:   58ec9de0f91e126e99e2e3080db5d165 - 1074.069MB
+    PIGZed File MD5:   986fe60bc082e217d226dfdcc2409828 - 1074.07MB
+
+  unGZIPed File MD5:   72b2c3270b96ddd045092d69752ff24f - 1073.742MB
+  unPIGZed File MD5:   72b2c3270b96ddd045092d69752ff24f - 1073.742MB
+
+  compression times: (GZIP vs PIGZ):
+      55.107s vs 15.225s
+  decompression times: (GZIP vs PIGZ):
+      33.043s vs 13.283s
+
+
+===========================
+TEST 3:
+pigz processor flag = 4, rand text file
+
+Original File MD5:   c583d205698dfdef917f2f181c46685c - 445.985MB
+    GZIPed File MD5:   4ab8832885ecc137bf5bcf0981a023ab - 205.727MB
+    PIGZed File MD5:   2e8f9a285fdedfaf4ace17c1a5a99f0b - 205.926MB
+
+  unGZIPed File MD5:   c583d205698dfdef917f2f181c46685c - 445.985MB
+  unPIGZed File MD5:   c583d205698dfdef917f2f181c46685c - 445.985MB
+
+  compression times: (GZIP vs PIGZ):
+      31.001s vs 9.528s
+  decompression times: (GZIP vs PIGZ):
+      14.704s vs 5.851s
+
+
+===========================
+TEST 4:
+pigz processor flag = 2, rand text file
+Original File MD5:   3b97fda2376a33346813f5bb800fe3db - 446.006MB
+    GZIPed File MD5:   3ae4adb74b5f50827f9c3e839402e700 - 205.728MB
+    PIGZed File MD5:   ecc2bfb2a54dc089152ccd19ca76b33d - 205.928MB
+
+  unGZIPed File MD5:   3b97fda2376a33346813f5bb800fe3db - 446.006MB
+  unPIGZed File MD5:   3b97fda2376a33346813f5bb800fe3db - 446.006MB
+
+  compression times: (GZIP vs PIGZ):
+      31.131s vs 13.963s
+  decompression times: (GZIP vs PIGZ):
+      15.526s vs 6.173s
+
+
+===========================
+Test 5:
+pigz processor flag = 4, a fastq file
+
+Original File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+    GZIPed File MD5:   8f08c28668488d29cc06ad86c66d796a - 238.555MB
+    PIGZed File MD5:   3fa5a644248a25f579cbaefe54702f1f - 244.887MB
+
+  unGZIPed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+  unPIGZed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+
+  compression times: (GZIP vs PIGZ):.
+      61.25s vs 11.337s
+  decompression times: (GZIP vs PIGZ):
+      26.201s vs 5.306s
+
+
+===========================
+Test 6:
+pigz processor flag = 2, a fastq file
+
+Original File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+    GZIPed File MD5:   6fd05023a63b682bddc1c40f48dad335 - 238.555MB
+    PIGZed File MD5:   3fa5a644248a25f579cbaefe54702f1f - 244.887MB
+
+  unGZIPed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+  unPIGZed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+
+  compression times: (GZIP vs PIGZ):
+      62.141s vs 20.488s
+  decompression times: (GZIP vs PIGZ):
+      27.6s vs 5.743s
+
+
+===========================
+Test 7:
+pigz processor flag = 4 with --fast option, a fastq file
+Original File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+    GZIPed File MD5:   9f7eb371257ae0027a0852107f977ec0 - 238.555MB
+    PIGZed File MD5:   666ec62e651633d8b8b251b0973ba514 - 294.396MB
+
+  unGZIPed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+  unPIGZed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+
+  compression times: (GZIP vs PIGZ):
+      61.058s vs 4.887s
+  decompression times: (GZIP vs PIGZ):
+      29.89s vs 5.895s
+
+
+===========================
+Test 8:
+pigz processor flag = 2 with --fast option, a fastq file
+Original File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+    GZIPed File MD5:   98c263594dd1eef32941d14456e0e97f - 238.555MB
+    PIGZed File MD5:   666ec62e651633d8b8b251b0973ba514 - 294.396MB
+
+  unGZIPed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+  unPIGZed File MD5:   d000cba76eab0088e4d61d7bdd70af44 - 771.372MB
+
+  compression times: (GZIP vs PIGZ):
+      60.783s vs 5.908s
+  decompression times: (GZIP vs PIGZ):
+      27.128s vs 5.759s
+
+
+7/19/2017
+COMPRESSION LEVEL TESTS:
+
+===========================
+Test 1: FASTQ COMPRESSION LEVEL = 9
+pigz processor flag = 2 with -7 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 238.654MB
+
+    compression time   = 33.217s
+    decompression time = 6.341s
+
+===========================
+Test 2: FASTQ COMPRESSION LEVEL = 7
+pigz processor flag = 2 with -7 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 239.252MB
+
+    compression time   = 25.566s
+    decompression time = 7.567s
+
+===========================
+Test 3: FASTQ COMPRESSION LEVEL = 5
+pigz processor flag = 2 with -5 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 258.378MB
+
+    compression time   = 11.839s
+    decompression time = 4.977s
+
+===========================
+Test 4: FASTQ COMPRESSION LEVEL = 3
+pigz processor flag = 2 with -3 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 272.079MB
+
+    compression time   = 8.492s
+    decompression time = 5.046s
+
+===========================
+Test 5: FASTQ COMPRESSION LEVEL = 1
+pigz processor flag = 2 with -1 option, a fastq file
+
+    orig file size = 771.372MB
+    gzip file size = 238.555MB
+    pigz file size = 294.396MB
+
+    compression time   = 5.881s
+    decompression time = 5.97s

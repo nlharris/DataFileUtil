@@ -24,7 +24,7 @@ import uuid
 import urllib2
 from contextlib import closing
 import ftplib
-
+import subprocess
 
 class ShockException(Exception):
     pass
@@ -102,11 +102,44 @@ archiving.
             shutil.copyfileobj(s, t)
         return newfile
 
+    # alternate drop-in replacement for the above gzip function using
+    # the pigz parallel compression program
+    def _pigz_compress(self, oldfile, n_proc=None, compression_level=None):
+        if self.endswith(oldfile, [self.GZ, self.GZIP, self.TGZ]):
+            self.log('File {} is already gzipped, skipping'.format(oldfile))
+            return oldfile
+        newfile = oldfile + self.GZ
+        self.log('gzipping (with pigz) {} to {}'.format(oldfile, newfile))
+
+        # -f to force overwrite
+        # --keep to retain the original file
+        # --fast optimizes speed over compression level (we lose a few % in compression size apparantly)
+        # --processes to limit the number of processes
+        # --stdout to print compressed file to stdout (necessary to select specific filename)
+        if not n_proc:
+            n_proc = self.PIGZ_N_PROCESSES
+        if not compression_level:
+            compression_level = self.PIGZ_COMPRESSION_LEVEL
+
+        command = ['pigz', '-f', '--keep', '-' + str(compression_level), '--processes', str(n_proc),
+                   '--stdout', oldfile]
+
+        newfile_handle = open(newfile, "w")
+        p = subprocess.Popen(command, shell=False, stdout=newfile_handle)
+        exitCode = p.wait()
+        newfile_handle.close()
+
+        if (exitCode != 0):
+            raise ValueError('Error running command: ' + ' '.join(command) + '\n' +
+                             'Exit Code: ' + str(exitCode))
+        return newfile
+
     def _pack(self, file_path, pack):
         if pack not in ['gzip', 'targz', 'zip']:
             raise ValueError('Invalid pack value: ' + pack)
         if pack == 'gzip':
-            return self.gzip(file_path)
+            return self._pigz_compress(file_path)
+            # return self.gzip(file_path)
         if os.path.isdir(file_path):
             file_path = file_path + os.sep  # double seps ok here
         d, f = os.path.split(file_path)  # will return dir as f if no / at end
@@ -167,6 +200,42 @@ archiving.
         self._unarchive(new_file, unpack, t)
         return new_file
 
+    # almost drop-in replacement for _decompress which always uses pigz instead
+    # of the passed in file open function
+    def _pigz_decompress(self, file_path, unpack, n_proc=None):
+        new_file = self._decompress_file_name(file_path)
+        self.log('decompressing (with pigz) {} to {} ...'.format(file_path, new_file))
+
+        # --keep to retain the original file
+        # --processes to limit the number of processes
+        # --stdout to print compressed file to stdout (necessary to select specific filename)
+        if not n_proc:
+            n_proc = self.PIGZ_N_PROCESSES
+        command = ['pigz', '--decompress', '--keep', '--processes', str(n_proc), '--stdout', file_path]
+
+        # seems like an odd case, but the decompressed file name, if it can't be mapped
+        # is the same name as the original file. We can't do this when piping stdout from
+        # pigz, so instead we pipe to a temporary file, then move it to overwrite the original
+        output_file = new_file
+        if new_file == file_path:
+            output_file = new_file + '.temp'
+
+        newfile_handle = open(output_file, "w")
+        p = subprocess.Popen(command, shell=False, stdout=newfile_handle)
+        exitCode = p.wait()
+        newfile_handle.close()
+
+        if (exitCode != 0):
+            raise ValueError('Error running command: ' + ' '.join(command) + '\n' +
+                             'Exit Code: ' + str(exitCode))
+
+        if new_file != output_file:
+            shutil.move(output_file, new_file)
+
+        t = magic.from_file(new_file, mime=True)
+        self._unarchive(new_file, unpack, t)
+        return new_file
+
     def _unarchive(self, file_path, unpack, file_type):
         file_dir = os.path.dirname(file_path)
         if file_type in ['application/' + x for x in 'x-tar', 'tar', 'x-gtar']:
@@ -204,7 +273,8 @@ archiving.
     def _unpack(self, file_path, unpack):
         t = magic.from_file(file_path, mime=True)
         if t in ['application/' + x for x in 'x-gzip', 'gzip']:
-            return self._decompress(gzip.open, file_path, unpack)
+            return self._pigz_decompress(file_path, unpack)
+            # return self._decompress(gzip.open, file_path, unpack)
         # probably most of these aren't needed, but hard to find a definite
         # source
         if t in ['application/' + x for x in
@@ -280,8 +350,8 @@ archiving.
         elif download_type == 'Google Drive':
             copy_file_path = self._download_google_drive_link(file_url)
         else:
-            valid_download_types = ['Direct Download', 'FTP', 
-                                'DropBox', 'Google Drive']
+            valid_download_types = ['Direct Download', 'FTP',
+                                    'DropBox', 'Google Drive']
             error_msg = "[{}] download_type is invalid.\n".format(download_type)
             error_msg += "Please use one of {}".format(valid_download_types)
             raise ValueError(error_msg)
@@ -308,7 +378,7 @@ archiving.
                 file_name = file_url.split('/')[-1]
             else:
                 file_name = content_disposition.split('filename="')[-1].split('";')[0]
-            
+
         self.log('Retrieving file name from url: {}'.format(file_name))
         copy_file_path = os.path.join(self.tmp, file_name)
 
@@ -352,7 +422,7 @@ archiving.
                         downloaded += len(chunk)
                         process = float(downloaded) / total_size * 100
                         used_time = time.time() - start_time
-                        self.log('downloaded: {:.2f}%, '.format(process) + 
+                        self.log('downloaded: {:.2f}%, '.format(process) +
                                         'used: {:.2f}s'.format(used_time))
 
             self.log('Downloaded file to {}'.format(copy_file_path))
@@ -483,7 +553,7 @@ archiving.
         copy_file_path = os.path.join(self.tmp, ftp_file_name)
 
         with open(copy_file_path, 'wb') as output:
-            ftp_connection.retrbinary('RETR {}'.format(ftp_file_name), 
+            ftp_connection.retrbinary('RETR {}'.format(ftp_file_name),
                                         output.write)
         self.log('Copied FTP file to: {}'.format(copy_file_path))
 
@@ -528,6 +598,8 @@ archiving.
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
+        import pprint
+        pprint.pprint(config)
         self.shock_url = config['shock-url']
         self.log('Shock url: ' + self.shock_url)
         self.shock_effective = self.shock_url
@@ -541,6 +613,10 @@ archiving.
         self.scratch = config['scratch']
         self.tmp = os.path.join(self.scratch, str(uuid.uuid4()))
         self.mkdir_p(self.tmp)
+
+        # Number of processors used by PIGZ, and a compression level (1=fastest, 9=best)
+        self.PIGZ_N_PROCESSES = config['pigz_n_processes']
+        self.PIGZ_COMPRESSION_LEVEL = config['pigz_compression_level']
         #END_CONSTRUCTOR
         pass
 
@@ -797,8 +873,8 @@ archiving.
         """
         Using the same logic as unpacking a Shock file, this method will cause
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
-        archive files (uncompressing gzipped or bzipped archive files if 
-        necessary). If the file is an archive, it will be unbundled into the 
+        archive files (uncompressing gzipped or bzipped archive files if
+        necessary). If the file is an archive, it will be unbundled into the
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
@@ -1382,7 +1458,7 @@ archiving.
         if not params.get('staging_file_subdir_path'):
             error_msg = "missing 'staging_file_subdir_path' parameter"
             raise ValueError(error_msg)
-        
+
         staging_file_subdir_path = params.get('staging_file_subdir_path')
         staging_file_name = os.path.basename(staging_file_subdir_path)
         staging_file_path = self._get_staging_file_path(
@@ -1421,11 +1497,11 @@ archiving.
         # ctx is the context object
         # return variables are: results
         #BEGIN download_web_file
-        
+
         # check for required parameters
         for p in ['file_url', 'download_type']:
             if p not in params:
-                raise ValueError("missing '{}' parameter".format(p)) 
+                raise ValueError("missing '{}' parameter".format(p))
 
         file_url = params.get('file_url')
         download_type = params.get('download_type')
