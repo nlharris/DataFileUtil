@@ -598,8 +598,6 @@ archiving.
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
-        import pprint
-        pprint.pprint(config)
         self.shock_url = config['shock-url']
         self.log('Shock url: ' + self.shock_url)
         self.shock_effective = self.shock_url
