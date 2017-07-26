@@ -25,6 +25,7 @@ import urllib2
 from contextlib import closing
 import ftplib
 import subprocess
+import copy
 
 class ShockException(Exception):
     pass
@@ -54,9 +55,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.18"
-    GIT_URL = "https://github.com/Tianhao-Gu/DataFileUtil.git"
-    GIT_COMMIT_HASH = "f2c8a0f36d1282765dffcceadcf96f583518d74f"
+    VERSION = "0.0.20"
+    GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
+    GIT_COMMIT_HASH = "99999dfee083143589367c589548bd13ff79753c"
 
     #BEGIN_CLASS_HEADER
 
@@ -871,8 +872,8 @@ archiving.
         """
         Using the same logic as unpacking a Shock file, this method will cause
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
-        archive files (uncompressing gzipped or bzipped archive files if
-        necessary). If the file is an archive, it will be unbundled into the
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
@@ -1276,11 +1277,24 @@ archiving.
            metadata extraction with the 'meta ws' annotation, and your
            metadata name conflicts, then your metadata will be silently
            overwritten. hidden - true if this object should not be listed
-           when listing workspace objects.) -> structure: parameter "type" of
+           when listing workspace objects. extra_provenance_input_refs -
+           (optional) if set, these refs will be appended to the primary
+           ProveanceAction input_ws_objects reference list. In general, if
+           the input WS object ref was passed in from a narrative App, this
+           will be set for you. However, there are cases where the object ref
+           passed to the App is a container, and you are operating on a
+           member or subobject of the container, in which case to maintain
+           that direct mapping to those subobjects in the provenance of new
+           objects, you can provide additional object refs here. For example,
+           if the input is a ReadsSet, and your App creates a new WS object
+           for each read library in the set, you may want a direct reference
+           from each new WS object not only to the set, but also to the
+           individual read library.) -> structure: parameter "type" of
            String, parameter "data" of unspecified object, parameter "name"
            of String, parameter "objid" of Long, parameter "meta" of mapping
            from String to String, parameter "hidden" of type "boolean" (A
-           boolean - 0 for false, 1 for true. @range (0, 1))
+           boolean - 0 for false, 1 for true. @range (0, 1)), parameter
+           "extra_provenance_input_refs" of list of String
         :returns: instance of list of type "object_info" (Information about
            an object, including user provided metadata. objid - the numerical
            id of the object. name - the name of the object. type - the type
@@ -1307,11 +1321,34 @@ archiving.
         wsid = params.get('id')
         if not wsid:
             raise ValueError('Required parameter id missing')
+        objs_to_save = []
         for o in objs:
-            o['provenance'] = prov
+            obj_to_save = {}
+
+            prov_to_save = prov
+            if 'extra_provenance_input_refs' in o:
+                prov_to_save = copy.deepcopy(prov)  # need to make a copy so we don't clobber other objects
+                extra_input_refs = o['extra_provenance_input_refs']
+                if extra_input_refs:
+                    if len(prov) > 0:
+                        if 'input_ws_objects' in prov[0]:
+                            prov_to_save[0]['input_ws_objects'].extend(extra_input_refs)
+                        else:
+                            prov_to_save[0]['input_ws_objects'] = extra_input_refs
+                    else:
+                        prov_to_save = [{'input_ws_objects': extra_input_refs}]
+
+            keys = ['type', 'data', 'name', 'objid', 'meta', 'hidden']
+            for k in keys:
+                if k in o:
+                    obj_to_save[k] = o[k]
+
+            obj_to_save['provenance'] = prov_to_save
+            objs_to_save.append(obj_to_save)
+
         ws = Workspace(self.ws_url, token=ctx['token'])
         try:
-            info = ws.save_objects({'id': wsid, 'objects': objs})
+            info = ws.save_objects({'id': wsid, 'objects': objs_to_save})
         except WorkspaceError as e:
             self.log('Logging workspace error on save_objects: {}\n{}'.format(
                 e.message, e.data))
@@ -1333,12 +1370,18 @@ archiving.
            a list of object references in the form X/Y/Z, where X is the
            workspace name or id, Y is the object name or id, and Z is the
            (optional) object version. In general, always use ids rather than
-           names if possible to avoid race conditions. Optional parameters:
-           ignore_errors - ignore any errors that occur when fetching an
-           object and instead insert a null into the returned list.) ->
-           structure: parameter "object_refs" of list of String, parameter
-           "ignore_errors" of type "boolean" (A boolean - 0 for false, 1 for
-           true. @range (0, 1))
+           names if possible to avoid race conditions. A reference path may
+           be specified by separating references by a semicolon, e.g.
+           4/5/6;5/7/2;8/9/4 specifies that the user wishes to retrieve the
+           fourth version of the object with id 9 in workspace 8, and that
+           there exists a reference path from the sixth version of the object
+           with id 5 in workspace 4, to which the user has access. The user
+           may or may not have access to workspaces 5 and 8. Optional
+           parameters: ignore_errors - ignore any errors that occur when
+           fetching an object and instead insert a null into the returned
+           list.) -> structure: parameter "object_refs" of list of String,
+           parameter "ignore_errors" of type "boolean" (A boolean - 0 for
+           false, 1 for true. @range (0, 1))
         :returns: instance of type "GetObjectsResults" (Results from the
            get_objects function. list<ObjectData> data - the returned
            objects.) -> structure: parameter "data" of list of type

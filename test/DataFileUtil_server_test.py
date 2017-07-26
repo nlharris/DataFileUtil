@@ -11,7 +11,7 @@ import shutil
 import filecmp
 import tarfile
 import zipfile
-from mock import patch 
+from mock import patch
 import ftplib
 try:
     from ConfigParser import ConfigParser  # py2 @UnusedImport
@@ -1025,6 +1025,91 @@ class DataFileUtilTest(unittest.TestCase):
                                 },
                                'Object 1, foo, has no data',
                                exception=WorkspaceError)
+
+    def test_save_objects_with_extra_prov_refs(self):
+        # first save some objects we can reference
+        ws = self.ws_info[0]
+        objs1 = [{'name': 'whee1', 'type': 'Empty.AType-0.1', 'data': {'thingy': 1}},
+                 {'name': 'whee2', 'type': 'Empty.AType-0.1', 'data': {'thingy': 2}},
+                 {'name': 'whee3', 'type': 'Empty.AType-0.1', 'data': {'thingy': 3}}
+                 ]
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs1})
+
+        # a sample object that adds extra provenance refs
+        ref1 = str(ws) + '/whee2'
+        ref2 = str(ws) + '/whee3'
+        objs2 = [{'name': 'zee', 'type': 'Empty.AType-1.0', 'data': {'thingy': 99},
+                  'extra_provenance_input_refs': [ref1, ref2]
+                  },
+                 {'name': 'zee2', 'type': 'Empty.AType-1.0', 'data': {'thingy': 99}}]
+
+        # setup various provenances in the context
+        base_ctx = {'token': self.token, 'user_id': self.user_id, 'authenticated': 1}
+
+        class EmptyProv(MethodContext):
+            def provenance(self): return []
+
+        class ProvWithNoRefs1(MethodContext):
+            def provenance(self): return [{}]
+
+        class ProvWithNoRefs2(MethodContext):
+            def provenance(self): return [{'input_ws_objects': []}]
+
+        class ProvWithRefs(MethodContext):
+            def provenance(self): return [{'input_ws_objects': [str(ws) + '/whee1']}]
+
+        # attempt with built in provenance from tests
+        self.impl.save_objects(self.ctx, {'id': ws, 'objects': objs2})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 2)
+        self.assertEqual(len(p['resolved_ws_objects']), 2)
+        self.assertIn(ref1, p['input_ws_objects'])
+        self.assertIn(ref2, p['input_ws_objects'])
+
+        self.impl.save_objects(EmptyProv(base_ctx), {'id': ws, 'objects': objs2})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 2)
+        self.assertEqual(len(p['resolved_ws_objects']), 2)
+        self.assertIn(ref1, p['input_ws_objects'])
+        self.assertIn(ref2, p['input_ws_objects'])
+
+        self.impl.save_objects(ProvWithNoRefs1(base_ctx), {'id': ws, 'objects': objs2})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 2)
+        self.assertEqual(len(p['resolved_ws_objects']), 2)
+        self.assertIn(ref1, p['input_ws_objects'])
+        self.assertIn(ref2, p['input_ws_objects'])
+
+        self.impl.save_objects(ProvWithNoRefs2(base_ctx), {'id': ws, 'objects': objs2})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 2)
+        self.assertEqual(len(p['resolved_ws_objects']), 2)
+        self.assertIn(ref1, p['input_ws_objects'])
+        self.assertIn(ref2, p['input_ws_objects'])
+
+        self.impl.save_objects(ProvWithRefs(base_ctx), {'id': ws, 'objects': objs2})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 3)
+        self.assertEqual(len(p['resolved_ws_objects']), 3)
+        self.assertIn(ref1, p['input_ws_objects'])
+        self.assertIn(ref2, p['input_ws_objects'])
+
+        # make sure when we save objects without extra refs, we don't clobber anything
+        objs3 = [{'name': 'zee', 'type': 'Empty.AType-1.0', 'data': {'thingy': 99},
+                  'extra_provenance_input_refs': []
+                  }]
+        objs4 = [{'name': 'zee', 'type': 'Empty.AType-1.0', 'data': {'thingy': 99},
+                  'extra_provenance_input_refs': None
+                  }]
+        self.impl.save_objects(ProvWithRefs(base_ctx), {'id': ws, 'objects': objs3})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 1)
+        self.assertEqual(len(p['resolved_ws_objects']), 1)
+
+        self.impl.save_objects(ProvWithRefs(base_ctx), {'id': ws, 'objects': objs4})
+        p = self.ws.get_objects2({'objects': [{'ref': str(ws) + '/zee'}]})['data'][0]['provenance'][0]
+        self.assertEqual(len(p['input_ws_objects']), 1)
+        self.assertEqual(len(p['resolved_ws_objects']), 1)
 
     def test_get_objects_with_references(self):
         print('**** test_get_objects_with_references ****')
