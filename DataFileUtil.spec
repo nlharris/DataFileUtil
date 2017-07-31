@@ -362,7 +362,20 @@ module DataFileUtil {
             overwritten.
         hidden - true if this object should not be listed when listing
             workspace objects.
-    
+        extra_provenance_input_refs - (optional) if set, these refs will
+            be appended to the primary ProveanceAction input_ws_objects
+            reference list. In general, if the input WS object ref was
+            passed in from a narrative App, this will be set for you.
+            However, there are cases where the object ref passed to
+            the App is a container, and you are operating on a member
+            or subobject of the container, in which case to maintain
+            that direct mapping to those subobjects in the provenance
+            of new objects, you can provide additional object refs
+            here. For example, if the input is a ReadsSet, and your
+            App creates a new WS object for each read library in the
+            set, you may want a direct reference from each new WS
+            object not only to the set, but also to the individual
+            read library.
     */
     typedef structure {
         string type;
@@ -371,6 +384,7 @@ module DataFileUtil {
         int objid;
         mapping<string, string> meta;
         boolean hidden;
+        list <string> extra_provenance_input_refs;
     } ObjectSaveData;
     
     /* Input parameters for the "save_objects" function.

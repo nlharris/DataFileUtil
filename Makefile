@@ -20,15 +20,11 @@ all: compile build build-startup-script build-executable-script build-test-scrip
 compile:
 	kb-sdk compile $(SPEC_FILE) \
 		--out $(LIB_DIR) \
-		--plclname $(SERVICE_CAPS)::$(SERVICE_CAPS)Client \
-		--jsclname javascript/Client \
+		--clasyncver \
+		--html \
 		--pyclname $(SERVICE_CAPS).$(SERVICE_CAPS)Client \
-		--javasrc src \
-		--java \
-		--pyimplname $(SERVICE_CAPS).$(SERVICE_CAPS)Impl;
-		# this is commented out until https://github.com/kbase/kb_sdk/pull/227 is available in all catalog instances
-		#--pysrvname $(SERVICE_CAPS).$(SERVICE_CAPS)Server # add slash when restore
-	kb-sdk compile --html $(SPEC_FILE)
+		--pyimplname $(SERVICE_CAPS).$(SERVICE_CAPS)Impl \
+		--pysrvname $(SERVICE_CAPS).$(SERVICE_CAPS)Server
 
 build:
 	chmod +x $(SCRIPTS_DIR)/entrypoint.sh
