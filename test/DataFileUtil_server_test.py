@@ -712,6 +712,12 @@ class DataFileUtilTest(unittest.TestCase):
              'pack': 'zip'},
             'Packing root is not allowed')
 
+    def test_pack_scratch(self):
+        self.fail_pack(
+            {'file_path': self.cfg['scratch'],
+             'pack': 'zip'},
+            'Direcotry to zip [{}] is parent of result archive file'.format(self.cfg['scratch']))
+
     def test_download_existing_dir(self):
         ret1 = self.impl.file_to_shock(self.ctx,
                                        {'file_path': 'data/file1.txt'})[0]
