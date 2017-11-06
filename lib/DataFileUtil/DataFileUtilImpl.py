@@ -168,7 +168,7 @@ archiving.
             shutil.move(ctf, file_path + suffix)
         else:
             if os.path.commonprefix([d, self.tmp]) == d:
-                error_msg = 'Direcotry to zip [{}] is parent of result archive file'.format(d)
+                error_msg = 'Directory to zip [{}] is parent of result archive file'.format(d)
                 raise ValueError(error_msg)
             suffix = '.zip'
             with zipfile.ZipFile(tf + suffix, 'w',
