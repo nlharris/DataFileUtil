@@ -597,6 +597,9 @@ archiving.
                       "File {} does NOT exist in FTP path: {}".format(
                                     file_name, domain + '/' + file_path))
 
+    def _gen_tmp_path(self):
+        return os.path.join(self.scratch, str(uuid.uuid4()))
+
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -614,7 +617,7 @@ archiving.
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
         self.scratch = config['scratch']
-        self.tmp = os.path.join(self.scratch, str(uuid.uuid4()))
+        self.tmp = self._gen_tmp_path()
         self.mkdir_p(self.tmp)
 
         # Number of processors used by PIGZ, and a compression level (1=fastest, 9=best)
