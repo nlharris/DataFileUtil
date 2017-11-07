@@ -55,9 +55,9 @@ archiving.
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.20"
-    GIT_URL = "git@github.com:kbaseapps/DataFileUtil"
-    GIT_COMMIT_HASH = "99999dfee083143589367c589548bd13ff79753c"
+    VERSION = "0.0.22"
+    GIT_URL = "https://github.com/Tianhao-Gu/DataFileUtil.git"
+    GIT_COMMIT_HASH = "c4733f9c81bcc8228c63ceeb2c0540df9e61153e"
 
     #BEGIN_CLASS_HEADER
 
@@ -159,6 +159,7 @@ archiving.
         self.log('Packing {} to {}'.format(d, pack))
         # tar is smart enough to not pack its own archive file into the new archive, zip isn't.
         # TODO is there a designated temp files dir in the scratch space? Nope.
+        # check dir to archive is not self.tmp or its parent dir for zip
         (fd, tf) = tempfile.mkstemp(dir=self.tmp)
         os.close(fd)
         if pack == 'targz':
@@ -166,10 +167,13 @@ archiving.
             suffix = ctf.replace(tf, '', 1)
             shutil.move(ctf, file_path + suffix)
         else:
-            suffix  = '.zip'
+            if os.path.commonprefix([d, self.tmp]) == d:
+                error_msg = 'Directory to zip [{}] is parent of result archive file'.format(d)
+                raise ValueError(error_msg)
+            suffix = '.zip'
             with zipfile.ZipFile(tf + suffix, 'w',
-                        zipfile.ZIP_DEFLATED,
-                        allowZip64=True) as zip_file:
+                                 zipfile.ZIP_DEFLATED,
+                                 allowZip64=True) as zip_file:
                 for root, dirs, files in os.walk(d):
                     for file in files:
                         filepath = os.path.join(root, file).replace(d, '')
@@ -593,6 +597,9 @@ archiving.
                       "File {} does NOT exist in FTP path: {}".format(
                                     file_name, domain + '/' + file_path))
 
+    def _gen_tmp_path(self):
+        return os.path.join(self.scratch, str(uuid.uuid4()))
+
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -610,7 +617,7 @@ archiving.
         self.handle_url = config['handle-service-url']
         self.ws_url = config['workspace-url']
         self.scratch = config['scratch']
-        self.tmp = os.path.join(self.scratch, str(uuid.uuid4()))
+        self.tmp = self._gen_tmp_path()
         self.mkdir_p(self.tmp)
 
         # Number of processors used by PIGZ, and a compression level (1=fastest, 9=best)

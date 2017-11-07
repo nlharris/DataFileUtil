@@ -712,6 +712,28 @@ class DataFileUtilTest(unittest.TestCase):
              'pack': 'zip'},
             'Packing root is not allowed')
 
+    def test_pack_scratch(self):
+        self.fail_pack(
+            {'file_path': self.cfg['scratch'],
+             'pack': 'zip'},
+            'Directory to zip [{}] is parent of result archive file'.format(self.cfg['scratch']))
+
+    def mock_gen_tmp_path():
+        return '/kb/module/work/tmp/06878f1e_fake_uuid'
+
+    @patch.object(DataFileUtil, "_gen_tmp_path", side_effect=mock_gen_tmp_path)
+    def test_pack_tmp(self, _gen_tmp_paths):
+        mock_impl = DataFileUtil(self.cfg)
+        tmp_dir = os.path.join(self.cfg['scratch'], '06878f1e_fake_uuid')
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
+        os.close(os.open(os.path.join(tmp_dir, 'testfile.txt'), os.O_CREAT))
+
+        with self.assertRaises(ValueError) as context:
+            mock_impl.pack_file(self.ctx, {'file_path': tmp_dir, 'pack': 'zip'})
+        error_msg = 'Directory to zip [{}] is parent of result archive file'.format(tmp_dir)
+        self.assertEqual(error_msg, str(context.exception.message))
+
     def test_download_existing_dir(self):
         ret1 = self.impl.file_to_shock(self.ctx,
                                        {'file_path': 'data/file1.txt'})[0]
