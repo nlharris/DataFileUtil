@@ -8,7 +8,7 @@
 
 DataFileUtil is the lowest level wrapper around the KBase data stores, including the workspace, shock, and handle services. It thus handles operations on files, including file transfer and compression, as well as operations on KBase data objects.
 
-Assuming DFU is being called as part of an app chain, all file operations occur in the KBase job execution environment.
+Assuming DataFileUtil is being called in the context of a set of local SDK modules calling each other, all file operations occur in the KBase job execution environment.
 
 For any given type of data, the developer should use the appropriate existing SDK module for that data type regardless of whether the data is an object or a file. This appropriate data type module should also contain the logic for deciding how the data is stored, including which KIDL type specification is used as well as which data store.
 
