@@ -3,4 +3,31 @@
 # DataFileUtil
 ---
 
-Utility functions for communicating with KBase data stores like Shock and the Workspace service.
+Utility functions for operating on files and data objects in KBase data stores like Shock and the Workspace
+
+
+DataFileUtil is the lowest level wrapper around the KBase data stores, including the workspace, shock, and handle services. It thus handles operations on files, including file transfer and compression, as well as operations on KBase data objects.
+
+Assuming DFU is being called as part of an app chain, all file operations occur in the KBase job execution environment.
+
+For any given type of data, the developer should use the appropriate existing SDK module for that data type regardless of whether the data is an object or a file. This appropriate data type module should also contain the logic for deciding how the data is stored, including which KIDL type specification is used as well as which data store.
+
+Some examples of methods available in DataFileUtil:
+Download from external URL
+File un/compression (gzip, tar, zip)
+Upload to shock
+Download from shock
+Download from staging area to scratch space in SDK Docker container
+Upload/download from WS
+Copy shock node and gain permissions, files and their metadata
+
+All methods can be browsed in the DataFileUtil KIDL type spec:
+https://github.com/kbaseapps/DataFileUtil/blob/master/DataFileUtil.spec
+
+There may be limits on the size of data, number of files, and time of data transfer as well as requirements for network speed.
+
+Regarding KBase module development design patterns, data that will be used frequently should be stored in a workspace object, if you can retrieve and parse it faster than the entire raw data file. Even better if there is a standard format for the data file, which can serve as the de facto data storage structure, stored in shock and as a reference in an appropriate workspace object. If the data is too large you may need to split it into multiple workspace objects.
+
+
+Documentation dependencies: SDK, SDK module, docker container, execution environment, narrative, code cell, shock, shock node, shock service, app chain, workspace, workspace object, workspace service, reference, handle service, scratch space.
+
