@@ -3,7 +3,7 @@
 # DataFileUtil
 ---
 
-Utility functions for operating on files and data objects in KBase data stores like Shock and the Workspace
+## Utility functions for operating on files and data objects in KBase data stores like Shock and the Workspace
 
 
 DataFileUtil is the lowest level wrapper around the KBase data stores, including the workspace, shock, and handle services. It thus handles operations on files, including file transfer and compression, as well as operations on KBase data objects.
