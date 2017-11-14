@@ -3,10 +3,10 @@
 # DataFileUtil
 ---
 
-## Utility functions for operating on files and data objects in KBase data stores like Shock and the Workspace
+## Utility functions for operating on files and data objects in KBase data stores such as Shock and the Workspace
 
 
-DataFileUtil is the lowest level wrapper around the KBase data stores, including the workspace, shock, and handle services. It thus handles operations on files, including file transfer and compression, as well as operations on KBase data objects.
+DataFileUtil is the lowest level wrapper around the KBase data stores, including the workspace, Shock, and handle services. It thus handles operations on files, including file transfer and compression, as well as operations on KBase data objects.
 
 Assuming DataFileUtil is being called in the context of a set of local SDK modules calling each other, all file operations occur in the KBase job execution environment.
 
@@ -15,11 +15,11 @@ For any given type of data, the developer should use the appropriate existing SD
 Some examples of methods available in DataFileUtil:
 - Download from external URL
 - File un/compression (gzip, tar, zip)
-- Upload to shock
-- Download from shock
+- Upload to Shock
+- Download from Shock
 - Download from staging area to scratch space in SDK Docker container
 - Upload/download from WS
-- Copy shock node and gain permissions, files and their metadata
+- Copy Shock node and gain permissions, files and their metadata
 
 All methods can be browsed in the DataFileUtil KIDL type spec:
 https://github.com/kbaseapps/DataFileUtil/blob/master/DataFileUtil.spec
@@ -27,7 +27,7 @@ https://github.com/kbaseapps/DataFileUtil/blob/master/DataFileUtil.spec
 
 ### KBase module development design pattern notes
 
-Data that will be used frequently should be stored in a workspace object, if you can retrieve and parse it faster than the entire raw data file. Even better if there is a standard format for the data type, which can serve as the de facto data storage structure stored as a file shock and as a reference in an appropriate workspace object. If the data is too large you may need to split it into multiple workspace objects.
+Data that will be used frequently should be stored in a workspace object, if you can retrieve and parse it faster than the entire raw data file. Even better if there is a standard format for the data type, which can serve as the de facto data storage structure stored as a file in Shock and as a reference in an appropriate workspace object. If the data is too large you may need to split it into multiple workspace objects.
 
 Note that there may be limits on the size of data, number of files, and time of data transfer as well as requirements for network speed.
 
@@ -44,7 +44,7 @@ dfu = DataFileUtil(self.callback_url)
       self.log('translation done')
 ```
 
-Download a file from shock:
+Download a file from Shock:
 ```python
 params = {'shock_id': handle['id'],
                   'unpack': 'uncompress',
@@ -74,5 +74,3 @@ revpath = dfu.download_web_file(
 #### Documentation dependencies
 
 SDK, SDK module, docker container, execution environment, narrative, code cell, shock, shock node, shock service, app chain, workspace, workspace object, workspace service, reference, handle service, scratch space.
-
-
